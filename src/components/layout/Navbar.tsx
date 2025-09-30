@@ -1,7 +1,7 @@
 import React from "react";
 import { NavLink } from "react-router-dom";
 import Wrapper from "./Wrapper";
-import SearchInput from "../landing/SearchInput";
+import SearchInput from "../landing/SectionComponents/SearchInput";
 import PrimaryButton from "@/reuseableComponents/PrimaryButton";
 
 const Navbar = () => {

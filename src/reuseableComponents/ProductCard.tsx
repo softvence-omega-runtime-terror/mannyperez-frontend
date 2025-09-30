@@ -1,5 +1,5 @@
-import CountdownTimer from '@/components/landing/CountdownTimer'
-import TierBadge from '@/components/landing/TierBadge'
+import CountdownTimer from '@/components/landing/SectionComponents/CountdownTimer'
+import TierBadge from '@/components/landing/SectionComponents/TierBadge'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
