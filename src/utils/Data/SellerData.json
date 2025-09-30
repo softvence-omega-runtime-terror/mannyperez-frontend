@@ -1,0 +1,44 @@
+[
+  {
+    "id": "1",
+    "username": "CraftyCrafty",
+    "avatar": "https://randomuser.me/api/portraits/women/44.jpg",
+    "tier": "Gold",
+    "listingCount": 120
+  },
+  {
+    "id": "2",
+    "username": "PrintMaster",
+    "avatar": "https://randomuser.me/api/portraits/men/32.jpg",
+    "tier": "Platinum",
+    "listingCount": 120
+  },
+  {
+    "id": "3",
+    "username": "SewingQueen",
+    "avatar": "https://randomuser.me/api/portraits/women/65.jpg",
+    "tier": "Diamond",
+    "listingCount": 120
+  },
+  {
+    "id": "4",
+    "username": "VinylMaster",
+    "avatar": "https://randomuser.me/api/portraits/men/76.jpg",
+    "tier": "Platinum",
+    "listingCount": 120
+  },
+  {
+    "id": "5",
+    "username": "SewingQueen",
+    "avatar": "https://randomuser.me/api/portraits/women/21.jpg",
+    "tier": "Diamond",
+    "listingCount": 120
+  },
+  {
+    "id": "6",
+    "username": "PrintMaster",
+    "avatar": "https://randomuser.me/api/portraits/men/15.jpg",
+    "tier": "Gold",
+    "listingCount": 120
+  }
+]

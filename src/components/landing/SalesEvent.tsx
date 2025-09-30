@@ -9,7 +9,7 @@ const SalesEvent = () => {
     <div className=" py-10">
     <Wrapper>
         <div className="space-y-12">
-        <div className="border-b-[#D9E5E9] flex items-center justify-between">
+        <div className="border-b border-b-[#D9E5E9] flex items-center justify-between">
             <div className="">
       <h2><span className='text-accent'>Live</span> Sales Event</h2>
       <p className='py-4'>Join live shopping events with exclusive deals</p>

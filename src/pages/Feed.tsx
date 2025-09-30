@@ -14,6 +14,7 @@ import BuyerInformation from "@/components/CheckoutComponent/BuyerInformation";
 import ShippingAddress from "@/components/CheckoutComponent/ShippingAdress";
 import ShippingMethod from "@/components/CheckoutComponent/ShippingMethod";
 import PaymentMethod from "@/components/CheckoutComponent/PaymentMethod";
+import UserNavbar from "@/components/layout/UserNavbar";
 
 // --- Placeholder Components ---
 const MessageListSidebar: React.FC = () => (
@@ -76,6 +77,7 @@ function Feed() {
   if (checkoutProduct) {
     return (
       <div className="container mx-auto px-4 py-6 min-h-screen">
+        
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
           <div className="lg:col-span-9 space-y-6">
             <OrderSummary product={checkoutProduct} />
@@ -94,6 +96,8 @@ function Feed() {
 
   // --- Feed / Messages Layout ---
   return (
+    <>
+    <UserNavbar></UserNavbar>
     <div className="container mx-auto px-4 py-6">
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-12">
         {isMessagesRoute ? (
@@ -133,6 +137,7 @@ function Feed() {
         )}
       </div>
     </div>
+    </>
   );
 }
 
