@@ -1,5 +1,6 @@
 // src/components/FeedComponents/FeaturedPost.tsx
 import React from "react";
+import { useNavigate } from "react-router-dom"; // <-- for navigation
 import { BsThreeDots } from "react-icons/bs";
 import { FaRegHeart, FaRegComment, FaRegBookmark, FaCrown } from "react-icons/fa";
 import { IoShareOutline, IoSend } from "react-icons/io5";
@@ -24,7 +25,10 @@ interface FeaturedPostProps {
 }
 
 const FeaturedPost: React.FC<FeaturedPostProps> = ({ onBuyNow }) => {
+  const navigate = useNavigate(); // initialize navigate
+
   const postData = {
+    id: "featured-01", // <-- unique ID added
     sellerName: "VinylMaster",
     profileImageUrl: userA,
     timePosted: "4h ago",
@@ -129,9 +133,15 @@ const FeaturedPost: React.FC<FeaturedPostProps> = ({ onBuyNow }) => {
               <FiShoppingCart className="w-5 h-5" />
               <span className="font-semibold text-sm">Cart</span>
             </button>
-            <button className="px-4 py-2 border border-pink-600 text-pink-600 font-semibold rounded-lg hover:bg-pink-50 transition duration-150">
+
+            {/* Message Button with navigation */}
+            <button
+              onClick={() =>navigate(`/feed/messages/${postData.id}`)}
+              className="px-4 py-2 border border-pink-600 text-pink-600 font-semibold rounded-lg hover:bg-pink-50 transition duration-150"
+            >
               Message
             </button>
+
             <button
               onClick={() =>
                 onBuyNow?.({

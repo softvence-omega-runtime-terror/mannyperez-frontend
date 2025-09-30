@@ -1,3 +1,4 @@
+// src/components/FeedComponents/GoldPost.tsx
 import React from "react";
 import { BsThreeDots } from "react-icons/bs";
 import {
@@ -14,9 +15,11 @@ import userA from "../../assets/feedImg/usermale1.jpg";
 import productA from "../../assets/feedImg/diamond1.png";
 import productB from "../../assets/feedImg/diamond2.png";
 import commenterA from "../../assets/feedImg/userFeed.jpg";
+import { useNavigate } from "react-router-dom";
 
 // --- Mock Data ---
 const postData = {
+  id: "gold-01",
   sellerName: "VinylMaster",
   profileImageUrl: userA,
   timePosted: "4h ago",
@@ -51,7 +54,25 @@ const postData = {
   ],
 };
 
-const GoldPost: React.FC = () => {
+// --- Props for Buy Now ---
+interface GoldPostProps {
+  onBuyNow?: (product: {
+    title: string;
+    price: string;
+    imageUrls: string[];
+    description: string;
+  }) => void;
+}
+
+const GoldPost: React.FC<GoldPostProps> = ({ onBuyNow }) => {
+
+  const navigate = useNavigate();
+
+  const handleMessageClick = () => {
+    navigate(`/feed/messages/${postData.id}`);
+  };
+
+
   return (
     <div className="max-w-6xl mx-auto p-4 sm:p-6">
       <div className="bg-white rounded-2xl shadow-md border border-gray-100 p-6">
@@ -68,7 +89,7 @@ const GoldPost: React.FC = () => {
                 <span className="text-base font-semibold text-gray-900">
                   {postData.sellerName}
                 </span>
-                <span className="flex items-center gap-1 px-2 py-1.5 text-xs font-semibold  bg-yellow-400 rounded-sm">
+                <span className="flex items-center gap-1 px-2 py-1.5 text-xs font-semibold bg-yellow-400 rounded-sm">
                   <AiFillStar size={16} /> {postData.status}
                 </span>
                 <button className="text-sm font-medium text-pink-600 hover:text-pink-700 transition-colors">
@@ -121,18 +142,26 @@ const GoldPost: React.FC = () => {
 
         {/* Price + Actions */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 py-3 border-t border-gray-100">
-          <span className="text-xl font-bold text-gray-900">
-            {postData.price}
-          </span>
+          <span className="text-xl font-bold text-gray-900">{postData.price}</span>
           <div className="flex items-center gap-2">
             <button className="flex items-center px-3 py-2 border border-gray-200 rounded-lg text-pink-600 hover:bg-gray-50 transition duration-150 gap-2">
               <FiShoppingCart className="w-5 h-5" />
               <span className="font-semibold text-sm">Cart</span>
             </button>
-            <button className="px-3 py-2 border border-gray-200 rounded-lg text-gray-700 font-semibold hover:bg-gray-50 transition duration-150">
+            <button  onClick={handleMessageClick} className="px-3 py-2 border border-gray-200 rounded-lg text-gray-700 font-semibold hover:bg-gray-50 transition duration-150">
               Message
             </button>
-            <button className="px-4 py-2 bg-pink-600 text-white font-semibold rounded-lg shadow hover:bg-pink-700 transition duration-150">
+            <button
+              onClick={() =>
+                onBuyNow?.({
+                  title: postData.title,
+                  price: postData.price,
+                  imageUrls: postData.imageUrls,
+                  description: postData.description,
+                })
+              }
+              className="px-4 py-2 bg-pink-600 text-white font-semibold rounded-lg shadow hover:bg-pink-700 transition duration-150"
+            >
               Buy Now
             </button>
           </div>
@@ -194,12 +223,8 @@ const GoldPost: React.FC = () => {
                 </div>
                 <div className="flex items-center gap-4 mt-1 ml-2 text-xs text-gray-500">
                   <span>{comment.time}</span>
-                  <button className="hover:text-pink-600 font-medium">
-                    Like
-                  </button>
-                  <button className="hover:text-pink-600 font-medium">
-                    Reply
-                  </button>
+                  <button className="hover:text-pink-600 font-medium">Like</button>
+                  <button className="hover:text-pink-600 font-medium">Reply</button>
                 </div>
               </div>
               <BsThreeDots className="w-4 h-4 text-gray-400 cursor-pointer hover:text-gray-600" />

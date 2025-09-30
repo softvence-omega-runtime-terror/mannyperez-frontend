@@ -6,6 +6,7 @@ import Login from "@/pages/Auth/Login";
 import SignUp from "@/pages/Auth/SignUp";
 import Feed from "@/pages/Feed";
 import FeedHome from "@/pages/FeedHome";
+import MessagingPage from "@/pages/MessagePage";
 import Live from "@/pages/Live";
 
 const routes = createBrowserRouter([
@@ -20,6 +21,7 @@ const routes = createBrowserRouter([
         element: <Feed />, // Feed layout with left & right columns
         children: [
           { path: "", element: <FeedHome/> }, // default content for left column
+          {path: "messages/:postId", element: <MessagingPage/>},
           { path: "post/:id", element: <div>Feed Posts.</div> }, // example nested route
         ]
       },
