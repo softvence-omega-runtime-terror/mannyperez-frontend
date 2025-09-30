@@ -1,3 +1,4 @@
+import Hero from '@/components/landing/Hero'
 import Navbar from '@/components/layout/Navbar'
 import Wrapper from '@/components/layout/Wrapper'
 import React from 'react'
@@ -7,6 +8,8 @@ function Landing() {
    <Wrapper>
      <div>
         <Navbar/>
+
+        <Hero/>
     </div>
    </Wrapper>
   )
