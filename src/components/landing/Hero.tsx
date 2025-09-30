@@ -31,7 +31,7 @@ function Hero() {
             <PrimaryButton
               type="Outline"
               title="Browse Products"
-              className="rounded-full px-6 bg-transparent"
+              className="rounded-full px-6 bg-transparent hover:text-accent-foreground"
             />
             <PrimaryButton
               type="Primary"
