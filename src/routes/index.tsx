@@ -4,6 +4,7 @@ import Landing from "@/pages/Landing";
 import Seller from "@/pages/Seller";
 import Login from "@/pages/Auth/Login";
 import SignUp from "@/pages/Auth/SignUp";
+import Live from "@/pages/Live";
 
 const routes = createBrowserRouter([
   {
@@ -12,6 +13,7 @@ const routes = createBrowserRouter([
     children: [
       { path: "/", element: <Landing /> },          
       { path: "/seller", element: <Seller/> }, 
+      { path: "/live", element: <Live/> }, 
       { path: "/login", element: <Login/> }, 
       { path: "/sign-up", element: <SignUp/> }, 
     ],

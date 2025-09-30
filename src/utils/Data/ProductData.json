@@ -1,0 +1,48 @@
+
+[
+  {
+    "id": "1",
+    "title": "DTF Vinyl Sale - 50+ Designs Available!",
+    "imageUrl": "/public/LiveSalesEvent/DTF Vinyl Sale - 50+ Designs Available!.jpg",
+    "status": "upcoming",
+    "startsIn": 2,
+    "duration": 45,
+    "expectedUsers": "1.1k",
+    "productCount": 52,
+    "seller": {
+      "name": "CraftyCarly",
+      "avatar": "https://example.com/avatars/craftycarly.png",
+      "tier": "gold"
+    }
+  },
+  {
+    "id": "2",
+    "title": "Custom T-Shirt Printing Sale",
+    "imageUrl": "/public/LiveSalesEvent/Custom T-Shirt Printing Sale.jpg",
+    "status": "upcoming",
+    "startsIn": 3,
+    "duration": 45,
+    "expectedUsers": "950",
+    "productCount": 34,
+    "seller": {
+      "name": "PrintMaster",
+      "avatar": "https://example.com/avatars/printmaster.png",
+      "tier": "platinum"
+    }
+  },
+  {
+    "id": "3",
+    "title": "Destash Live Premium Materials",
+    "imageUrl": "/public/LiveSalesEvent/DTF Vinyl Sale - 50+ Designs Available!.jpg",
+    "status": "live",
+    "startsIn": 1,
+    "duration": 60,
+    "expectedUsers": "1.3k",
+    "productCount": 78,
+    "seller": {
+      "name": "SewingQueen",
+      "avatar": "https://example.com/avatars/sewingqueen.png",
+      "tier": "diamond"
+    }
+  }
+]
