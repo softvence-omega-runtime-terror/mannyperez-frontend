@@ -6,6 +6,7 @@ import Login from "@/pages/Auth/Login";
 import SignUp from "@/pages/Auth/SignUp";
 import Feed from "@/pages/Feed";
 import FeedHome from "@/pages/FeedHome";
+import Live from "@/pages/Live";
 
 const routes = createBrowserRouter([
   {
@@ -24,6 +25,11 @@ const routes = createBrowserRouter([
       },
       { path: "/login", element: <Login /> },
       { path: "/sign-up", element: <SignUp /> },
+      { path: "/", element: <Landing /> },          
+      { path: "/seller", element: <Seller/> }, 
+      { path: "/live", element: <Live/> }, 
+      { path: "/login", element: <Login/> }, 
+      { path: "/sign-up", element: <SignUp/> }, 
     ],
   },
 ]);

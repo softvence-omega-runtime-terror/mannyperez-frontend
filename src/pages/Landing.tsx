@@ -1,17 +1,24 @@
 import Hero from '@/components/landing/Hero'
+import SalesEvent from '@/components/landing/SalesEvent'
+import ShopByCategory from '@/components/landing/ShopByCategory'
+import StayUpdated from '@/components/landing/StayUpdated'
+import TrendingListing from '@/components/landing/TrendingListing'
 import Navbar from '@/components/layout/Navbar'
-import Wrapper from '@/components/layout/Wrapper'
+
 import React from 'react'
 
 function Landing() {
   return (
-   <Wrapper>
-     <div>
-        <Navbar/>
 
+     <div className=''>
+        <Navbar/>
         <Hero/>
+        <SalesEvent/>
+        <TrendingListing/>
+        <ShopByCategory/> 
+        <StayUpdated/>
     </div>
-   </Wrapper>
+
   )
 }
 

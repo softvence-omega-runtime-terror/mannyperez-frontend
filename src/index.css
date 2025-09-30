@@ -1,5 +1,7 @@
 @import "tailwindcss";
 @import "tw-animate-css";
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap');
 
 @custom-variant dark (&:is(.dark *));
 
@@ -9,6 +11,7 @@
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) + 4px);
   --color-background: var(--background);
+   --color-background-secondary: var(--background-secondary);
   --color-foreground: var(--foreground);
   --color-card: var(--card);
   --color-card-foreground: var(--card-foreground);
@@ -53,7 +56,8 @@
   --popover: #FFFFFF;
   --popover-foreground: #1A1A1A;
   
-  --primary: #D82479;              /* your primary color */
+  --primary: #D82479;
+  --background-secondary: #F9ECF3;              /* your primary color */
   --primary-foreground: #FFFFFF;   /* text on primary */
   
   --secondary: #F2F4F8;            /* your secondary color */
@@ -95,6 +99,7 @@
 
 .dark {
   --background: oklch(0.145 0 0);
+  --background-secondary: oklch(0.2 0 0);
   --foreground: oklch(0.985 0 0);
   --card: oklch(0.205 0 0);
   --card-foreground: oklch(0.985 0 0);
@@ -134,4 +139,27 @@
   body {
     @apply bg-background text-foreground;
   }
+  html{
+    font-family: 'Montserrat' , sans-serif;
+  }
+  h1 {
+    @apply text-[3.5rem] font-semibold;
+  }
+  h2 {
+    @apply text-[2.5rem] font-semibold;
+  }
+  h3 {
+    @apply text-3xl font-semibold;
+  }
+  h4 {
+    @apply text-2xl font-medium;
+  }
+  h5 {
+    @apply text-[1.375] font-normal; 
+  }
+  p {
+    @apply text-xl leading-relaxed;
+    font-family: 'DM Sans' , sans-serif;
+  } 
+
 }
