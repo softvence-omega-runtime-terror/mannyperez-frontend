@@ -1,0 +1,38 @@
+[
+  {
+    "id": "1",
+    "title": "Glitter DTF Transfers A4 Sheets",
+    "seller": "CraftyCarly",
+    "badge": "gold",
+    "price": 15,
+    "unit": "sheet",
+    "imageUrl": "/public/Trending List/a4sheets.png"
+  },
+  {
+    "id": "2",
+    "title": "Custom Logo T-shirt – 3 Colors",
+    "seller": "Inkking",
+    "badge": "platinum",
+    "price": 25,
+    "unit": "sheet",
+    "imageUrl": "/public/Trending List/tshirt.png"
+  },
+  {
+    "id": "3",
+    "title": "Premium Cotton Fabric — 1 Yard",
+    "seller": "SewingQueen",
+    "badge": "diamond",
+    "price": 12,
+    "unit": "sheet",
+    "imageUrl": "/public/Trending List/fabric.png"
+  },
+  {
+    "id": "4",
+    "title": "Heat Transfer Vinyl Pack",
+    "seller": "CraftyCarly",
+    "badge": "gold",
+    "price": 15,
+    "unit": "sheet",
+    "imageUrl": "/public/Trending List/pack.png"
+  }
+]

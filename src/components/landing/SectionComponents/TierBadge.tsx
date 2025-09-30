@@ -1,5 +1,5 @@
 import { UserTier } from "@/types/LiveSaleCardProps"
-import { Badge } from "../ui/badge"
+import { Badge } from "../../ui/badge"
 
 
 
