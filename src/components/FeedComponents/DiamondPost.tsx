@@ -1,5 +1,6 @@
 // src/components/FeedComponents/DiamondPost.tsx
 import React from "react";
+import { useNavigate } from "react-router-dom";
 import { BsThreeDots } from "react-icons/bs";
 import {
   FaRegHeart,
@@ -17,6 +18,7 @@ import commenterA from "../../assets/feedImg/userFeed.jpg";
 
 // --- Mock Data ---
 const postData = {
+  id: "diamond-01", // <-- add unique post id for navigation
   sellerName: "VinylMaster",
   profileImageUrl: userA,
   timePosted: "4h ago",
@@ -62,6 +64,12 @@ interface DiamondPostProps {
 }
 
 const DiamondPost: React.FC<DiamondPostProps> = ({ onBuyNow }) => {
+  const navigate = useNavigate();
+
+  const handleMessageClick = () => {
+    navigate(`/feed/messages/${postData.id}`);
+  };
+
   return (
     <div className="max-w-6xl mx-auto p-4 sm:p-6">
       <div className="bg-white rounded-2xl shadow-md border border-gray-100 p-6">
@@ -137,7 +145,10 @@ const DiamondPost: React.FC<DiamondPostProps> = ({ onBuyNow }) => {
               <FiShoppingCart className="w-5 h-5" />
               <span className="font-semibold text-sm">Cart</span>
             </button>
-            <button className="px-3 py-2 border border-gray-200 rounded-lg text-gray-700 font-semibold hover:bg-gray-50 transition duration-150">
+            <button
+              onClick={handleMessageClick}
+              className="px-3 py-2 border border-gray-200 rounded-lg text-gray-700 font-semibold hover:bg-gray-50 transition duration-150"
+            >
               Message
             </button>
             <button
