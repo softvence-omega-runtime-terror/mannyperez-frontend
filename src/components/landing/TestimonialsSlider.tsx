@@ -1,6 +1,7 @@
 import { Card } from "@/components/ui/card"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Star } from "lucide-react"
+import Marquee from "react-fast-marquee"
 
 interface Testimonial {
   id: string
@@ -76,14 +77,14 @@ export function TestimonialsSlider() {
   const duplicatedTestimonials = [...testimonials, ...testimonials, ...testimonials]
 
   return (
-    <section className="py-16 bg-gray-50">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <section className="py-10 xl:py-20 bg-gray-50">
+      <div className="">
         {/* Header */}
         <div className="text-center mb-12">
-          <h2 className="text-3xl sm:text-4xl font-bold text-gray-900">
-            Join Our <span className="text-pink-600">Community</span>
+          <h2 className="">
+            Join Our <span className="text-accent">Community</span>
           </h2>
-          <p className="mt-3 text-gray-600 text-sm sm:text-base">
+          <p className="mt-3 text-sm sm:text-base">
             Connect with fellow crafters and sellers in our vibrant community.
           </p>
         </div>
@@ -91,22 +92,26 @@ export function TestimonialsSlider() {
         {/* Testimonials Container */}
         <div className="space-y-6 overflow-hidden">
           {/* Top Row - Scrolls Left to Right */}
+        <Marquee direction="right">
           <div className="relative">
-            <div className="flex gap-6 animate-scroll-left">
+            <div className="flex gap-4 md:gap-6 animate-scroll-left">
               {duplicatedTestimonials.map((testimonial, index) => (
                 <TestimonialCard key={`top-${testimonial.id}-${index}`} testimonial={testimonial} />
               ))}
             </div>
           </div>
+        </Marquee>
 
           {/* Bottom Row - Scrolls Right to Left */}
+          <Marquee>
           <div className="relative">
-            <div className="flex gap-6 animate-scroll-right">
+            <div className="flex gap-4 md:gap-6 animate-scroll-right">
               {duplicatedTestimonials.map((testimonial, index) => (
                 <TestimonialCard key={`bottom-${testimonial.id}-${index}`} testimonial={testimonial} />
               ))}
             </div>
           </div>
+          </Marquee>
         </div>
       </div>
     </section>

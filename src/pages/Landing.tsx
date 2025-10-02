@@ -6,6 +6,7 @@ import StayUpdated from '@/components/landing/StayUpdated'
 import { TestimonialsSlider } from '@/components/landing/TestimonialsSlider'
 import TrendingListing from '@/components/landing/TrendingListing'
 import VerifiedTopSellers from '@/components/landing/VerifiedTopSellers'
+import Footer from '@/components/layout/Footer'
 
 import Navbar from '@/components/layout/Navbar'
 
@@ -25,6 +26,7 @@ function Landing() {
         <ProcessOfWork/>
         <TestimonialsSlider/>
         <StayUpdated/>
+        <Footer/>
     </div>
 
   )

@@ -1,4 +1,5 @@
 
+import Wrapper from "@/components/layout/Wrapper";
 import { Card } from "@/components/ui/card";
 
 
@@ -29,7 +30,7 @@ export default function WorkSteps() {
 
   return (
     <div className="min-h-screen px-4">
-      <div className="max-w-6xl mx-auto">
+      <Wrapper>
         {/* Timeline */}
         <div className="relative">
           {/* Vertical Line - Hidden on mobile, visible on md+ */}
@@ -40,24 +41,24 @@ export default function WorkSteps() {
           </div>
 
           {/* Steps */}
-          <div className="space-y-12 md:space-y-24">
+          <div className="space-y-10 md:space-y-14">
             {steps.map((step) => (
               <div
                 key={step.number}
                 className="relative"
               >
-                <div className={`flex flex-col md:flex-row items-center gap-8 ${
+                <div className={`flex flex-col-reverse md:flex-row items-center gap-8 ${
                   step.position === "right" ? "md:flex-row-reverse" : ""
                 }`}>
                   {/* Card */}
                   <div className={`w-full md:w-[calc(50%-3rem)] ${
-                    step.position === "left" ? "md:text-right" : "md:text-left"
+                    step.position === "left" ? "text-center md:text-right" : "text-center md:text-left"
                   }`}>
                     <Card className="p-8 bg-white/80 backdrop-blur-sm border-gray-200 shadow-lg hover:shadow-xl transition-all duration-300">
-                      <h3 className="text-2xl font-bold text-gray-900 mb-3">
+                      <h3 className=" text-gray-900 ">
                         {step.title}
                       </h3>
-                      <p className="text-gray-600 leading-relaxed">
+                      <p className=" leading-relaxed">
                         {step.description}
                       </p>
                     </Card>
@@ -76,7 +77,7 @@ export default function WorkSteps() {
             ))}
           </div>
         </div>
-      </div>
+      </Wrapper>
     </div>
   );
 }

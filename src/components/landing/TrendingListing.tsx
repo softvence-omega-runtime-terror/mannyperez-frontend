@@ -5,9 +5,9 @@ import TrendingProducts from "@/utils/Data/TrendingProducts.json";
 const TrendingListing = () => {
 
   return (
-    <div className="py-20 bg-accent-foreground">
+    <div className="py-10 xl:py-20 bg-accent-foreground">
       <Wrapper>
-        <div className="space-y-12">
+        <div className="space-y-6 xl:space-y-12">
           <div className="border-b border-b-[#D9E5E9]">
             <div className="flex items-center gap-1">
               <img src="/public/FireSVG.svg" alt="" />
@@ -20,8 +20,7 @@ const TrendingListing = () => {
               Most popular items right now from verified sellers.
             </p>
           </div>
-
-          <div className="grid grid-cols-4 gap-6">
+          <div className="grid sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4 xl:gap-6">
             {TrendingProducts.map((product) => (
               <TrendingProductCard item={product} />
             ))}
