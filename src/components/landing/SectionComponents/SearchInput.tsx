@@ -15,13 +15,13 @@ const SearchInput: React.FC<SearchInputProps> = ({ placeholder = "Search...", on
   };
 
   return (
-    <form onSubmit={handleSubmit} className="relative w-full max-w-md">
+    <form onSubmit={handleSubmit} className="relative w-full ">
       <input
         type="text"
         value={query}
         onChange={(e) => setQuery(e.target.value)}
         placeholder={placeholder}
-        className="w-96 rounded-2xl border border-border bg-primary-foreground py-3 pl-10 pr-4 focus:border-accent  focus:outline-none"
+        className="w-full rounded-2xl border border-border bg-primary-foreground py-3 pl-10 pr-4 focus:border-accent  focus:outline-none"
       />
       <button
         type="submit"

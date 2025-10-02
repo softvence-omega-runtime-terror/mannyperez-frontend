@@ -29,7 +29,7 @@ export default function WorkSteps() {
   ];
 
   return (
-    <div className="min-h-screen px-4">
+    <div className=" px-4">
       <Wrapper>
         {/* Timeline */}
         <div className="relative">
