@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { NavLink } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
 import Wrapper from "./Wrapper";
 import SearchInput from "../landing/SectionComponents/SearchInput";
 import PrimaryButton from "@/reuseableComponents/PrimaryButton";
@@ -7,6 +7,7 @@ import { HiMenu, HiX } from "react-icons/hi";
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
+  const navigate = useNavigate();
 
   const navLinks = [
     { name: "Home", path: "/" },
@@ -48,7 +49,7 @@ const Navbar = () => {
           </div>
 
           {/* Right Section */}
-          <div className="hidden lg:flex items-center gap-5">
+          <div className="hidden md:flex items-center gap-5">
             <SearchInput
               placeholder="Search listings, sellers..."
               onSearch={(e) => console.log(e)}
@@ -56,9 +57,13 @@ const Navbar = () => {
             <PrimaryButton
               type="Outline"
               title="Log In"
-              className="hover:text-primary-foreground"
+              onClick={() => navigate("/login")}
             />
-            <PrimaryButton type="Primary" title="Sign Up" />
+            <PrimaryButton
+              type="Primary"
+              title="Sign Up"
+              onClick={() => navigate("/sign-up")}
+            />
           </div>
 
           {/* Mobile Hamburger */}
@@ -85,7 +90,7 @@ const Navbar = () => {
                   ? "block text-accent font-semibold"
                   : "block text-gray-700 hover:text-accent transition"
               }
-              onClick={() => setIsOpen(false)} // close menu on click
+              onClick={() => setIsOpen(false)}
             >
               {link.name}
             </NavLink>
@@ -100,9 +105,19 @@ const Navbar = () => {
             <PrimaryButton
               type="Outline"
               title="Log In"
-              className="hover:text-primary-foreground w-full"
+              onClick={() => {
+                navigate("/login");
+                setIsOpen(false);
+              }}
             />
-            <PrimaryButton type="Primary" title="Sign Up" className="w-full" />
+            <PrimaryButton
+              type="Primary"
+              title="Sign Up"
+              onClick={() => {
+                navigate("/sign-up");
+                setIsOpen(false);
+              }}
+            />
           </div>
         </div>
       )}

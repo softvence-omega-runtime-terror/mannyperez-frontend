@@ -1,0 +1,8 @@
+import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
+// src/components/CheckoutComponent/PaymentMethod.tsx
+import { useState } from "react";
+const PaymentMethod = () => {
+    const [selectedOption, setSelectedOption] = useState("card");
+    return (_jsxs("div", { className: "bg-white p-6 rounded-xl shadow border border-gray-100", children: [_jsx("h3", { className: "text-xl font-bold mb-4", children: "Payment Method" }), _jsxs("div", { className: "space-y-4", children: [_jsxs("label", { className: `flex items-center border p-4 rounded-lg cursor-pointer transition ${selectedOption === "card" ? "border-pink-500" : "border-gray-200"}`, children: [_jsx("input", { type: "radio", name: "paymentMethod", checked: selectedOption === "card", onChange: () => setSelectedOption("card"), className: "w-4 h-4 text-pink-600 border-gray-300 focus:ring-pink-500 mr-4" }), _jsxs("div", { children: [_jsx("p", { className: "text-md font-semibold", children: "Credit / Debit Card" }), _jsx("p", { className: "text-sm text-gray-500", children: "Visa, MasterCard, Amex" })] })] }), _jsxs("label", { className: `flex items-center border p-4 rounded-lg cursor-pointer transition ${selectedOption === "paypal" ? "border-pink-500" : "border-gray-200"}`, children: [_jsx("input", { type: "radio", name: "paymentMethod", checked: selectedOption === "paypal", onChange: () => setSelectedOption("paypal"), className: "w-4 h-4 text-pink-600 border-gray-300 focus:ring-pink-500 mr-4" }), _jsxs("div", { children: [_jsx("p", { className: "text-md font-semibold", children: "PayPal" }), _jsx("p", { className: "text-sm text-gray-500", children: "Use your PayPal account" })] })] })] })] }));
+};
+export default PaymentMethod;
