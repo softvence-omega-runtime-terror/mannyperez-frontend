@@ -20,7 +20,7 @@ const Navbar = () => {
       <Wrapper>
         <div className="flex items-center justify-between py-4">
           {/* Logo + Desktop Links */}
-          <div className="flex items-center gap-5">
+          <div className="flex items-center gap-10">
             <NavLink to="/" className="flex items-center">
               <img
                 src="/public/logoDestash.png"
