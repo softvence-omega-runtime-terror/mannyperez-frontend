@@ -16,22 +16,22 @@ const routes = createBrowserRouter([
     children: [
       { path: "/", element: <Landing /> },
       { path: "/seller", element: <Seller /> },
-      { 
+      {
         path: "/feed",
         element: <Feed />, // Feed layout with left & right columns
         children: [
-          { path: "", element: <FeedHome/> }, // default content for left column
-          {path: "messages/:postId", element: <MessagingPage/>},
+          { path: "", element: <FeedHome /> }, // default content for left column
+          { path: "messages/:postId", element: <MessagingPage /> },
           { path: "post/:id", element: <div>Feed Posts.</div> }, // example nested route
-        ]
+        ],
       },
       { path: "/login", element: <Login /> },
       { path: "/sign-up", element: <SignUp /> },
-      { path: "/", element: <Landing /> },          
-      { path: "/seller", element: <Seller/> }, 
-      { path: "/live", element: <Live/> }, 
-      { path: "/login", element: <Login/> }, 
-      { path: "/sign-up", element: <SignUp/> }, 
+      { path: "/", element: <Landing /> },
+      { path: "/seller", element: <Seller /> },
+      { path: "/live", element: <Live /> },
+      { path: "/login", element: <Login /> },
+      { path: "/sign-up", element: <SignUp /> },
     ],
   },
 ]);

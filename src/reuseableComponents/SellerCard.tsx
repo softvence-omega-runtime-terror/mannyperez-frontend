@@ -35,7 +35,7 @@ const SellerCard : React.FC<SellerCardProps> = (props) => {
   return (
     <Card className="flex items-center justify-between p-4 bg-white border border-gray-200 hover:shadow-md transition-shadow ">
         <div className="flex items-center justify-between w-full">
-      <div className="flex items-center gap-3 flex-1 ">
+      <div className="flex items-center gap-3 flex-1">
         <Avatar className="h-12 w-12 rounded-2xl">
           <AvatarImage src={avatar || "/placeholder.svg"} alt={username} />
           <AvatarFallback>{username.slice(0, 2).toUpperCase()}</AvatarFallback>
