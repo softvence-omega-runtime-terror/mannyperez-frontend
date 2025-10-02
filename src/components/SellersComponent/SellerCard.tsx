@@ -60,7 +60,7 @@ export function SellerCard({
         <Button
           variant="ghost"
           size="sm"
-          className="text-[#E91E8C] hover:text-[#E91E8C] hover:bg-pink-50 font-medium text-sm h-auto py-1 px-2 flex-shrink-0"
+          className="text-accent hover:text-accent hover:bg-pink-50 font-medium text-sm h-auto py-1 px-2 flex-shrink-0"
         >
           + Follow
         </Button>
@@ -84,7 +84,7 @@ export function SellerCard({
       {/* View Profile Button */}
       <Button
         variant="outline"
-        className="w-full border-[#E91E8C] text-[#E91E8C] hover:bg-[#E91E8C] hover:text-white font-medium transition-colors bg-transparent"
+        className="w-full border-accent text-accent hover:bg-accent hover:text-white font-medium transition-colors bg-transparent"
       >
         View Profile
       </Button>

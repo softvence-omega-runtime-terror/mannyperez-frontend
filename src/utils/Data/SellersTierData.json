@@ -1,7 +1,7 @@
 [
   {
     "name": "Gold Sellers",
-    "icon_type": "star",
+    "iconType": "star",
     "count": "1,247 Silver Sellers",
     "benefits": [
       "Verified identity & business registration",
@@ -12,7 +12,7 @@
   },
   {
     "name": "Platinum Sellers",
-    "icon_type": "crown",
+    "iconType": "crown",
     "count": "892 Gold Sellers",
     "benefits": [
       "All Silver benefits",
@@ -24,7 +24,7 @@
   },
   {
     "name": "Diamond Sellers",
-    "icon_type": "diamond",
+    "iconType": "diamond",
     "count": "234 Platinum Sellers",
     "benefits": [
       "All Gold benefits",
