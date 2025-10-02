@@ -16,21 +16,21 @@ const Navbar = () => {
   ];
 
   return (
-    <nav className="w-full bg-white shadow-md">
+    <nav className=" bg-white shadow-md">
       <Wrapper>
         <div className="flex items-center justify-between py-4">
           {/* Logo + Desktop Links */}
           <div className="flex items-center gap-5">
             <NavLink to="/" className="flex items-center">
               <img
-                src="/public/DTFdestash.png"
+                src="/public/logoDestash.png"
                 alt="DTFdestash"
-                className="h-10 w-auto"
+                className="size-14 w-auto"
               />
             </NavLink>
 
             {/* Desktop Nav Links */}
-            <div className="hidden md:flex space-x-6">
+            <div className="hidden lg:flex lg:space-x-6">
               {navLinks.map((link) => (
                 <NavLink
                   key={link.path}
@@ -48,7 +48,7 @@ const Navbar = () => {
           </div>
 
           {/* Right Section */}
-          <div className="hidden md:flex items-center gap-5">
+          <div className="hidden lg:flex items-center gap-5">
             <SearchInput
               placeholder="Search listings, sellers..."
               onSearch={(e) => console.log(e)}
@@ -62,7 +62,7 @@ const Navbar = () => {
           </div>
 
           {/* Mobile Hamburger */}
-          <div className="md:hidden flex items-center">
+          <div className="lg:hidden flex items-center ">
             <button
               onClick={() => setIsOpen(!isOpen)}
               className="text-gray-700 focus:outline-none"

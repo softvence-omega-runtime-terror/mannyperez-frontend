@@ -4,9 +4,9 @@ import WorkSteps from "./SectionComponents/WorkSteps";
 
 const ProcessOfWork = () => {
   return (
-    <div className="py-20">
+    <div className="py-10 xl:py-20">
       <Wrapper>
-        <div className="space-y-12">
+        <div className="space-y-6 xl:space-y-12">
           <div className="text-center">
             <div className="flex items-center justify-center gap-1">
               <h2>Process

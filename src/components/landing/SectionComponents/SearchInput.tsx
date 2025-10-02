@@ -21,7 +21,7 @@ const SearchInput: React.FC<SearchInputProps> = ({ placeholder = "Search...", on
         value={query}
         onChange={(e) => setQuery(e.target.value)}
         placeholder={placeholder}
-        className="w-96 rounded-2xl border border-border bg-primary-foreground py-3 pl-10 pr-4 shadow-sm focus:border-accent  focus:outline-none"
+        className="w-96 rounded-2xl border border-border bg-primary-foreground py-3 pl-10 pr-4 focus:border-accent  focus:outline-none"
       />
       <button
         type="submit"

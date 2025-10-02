@@ -6,7 +6,7 @@ interface WrapperProps {
 
 const Wrapper: React.FC<WrapperProps> = ({ children }) => {
   return (
-    <div className="max-w-[1920px] mx-auto lg:px-40">
+    <div className="max-w-[1920px] mx-auto md:px-5 lg:-px-10 xl:px-20 2xl:px-40">
       {children}
     </div>
   );
