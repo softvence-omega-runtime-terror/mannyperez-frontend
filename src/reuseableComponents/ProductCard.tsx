@@ -16,7 +16,7 @@ const ProductCard : React.FC<ProductCardProps> = (props) => {
     const {imageUrl, title, status, startsIn, duration,expectedUsers, productCount, seller} = props.item
   return (
     <div>
-        <Card className="overflow-hidden bg-white border-gray-200 shadow-sm hover:shadow-md transition-shadow py-0">
+        <Card className="overflow-hidden bg-white border-gray-200 shadow-sm hover:shadow-md py-0 transition-transform hover:-translate-y-3 duration-300">
       {/* Image Section */}
       <div className="relative w-full overflow-hidden h-56">
         <img src={imageUrl || "/placeholder.svg"} alt={title} className="object-cover" />

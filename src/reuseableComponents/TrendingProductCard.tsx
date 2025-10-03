@@ -29,9 +29,9 @@ const TrendingProductCard : React.FC<TrendingProductCardProps> = (props) => {
     const {imageUrl,title,price,unit,seller,badge} = props.item
 const badgeInfo = badgeConfig[badge as "gold" | "platinum" | "diamond"]
   return (
-    <div>
-       <Card className="overflow-hidden border  shadow-sm hover:shadow-md transition-shadow py-0 pb-2 ">
-      <div className="relative aspect-[4/3] w-full overflow-hidden bg-muted">
+    <div >
+       <Card className="overflow-hidden border  shadow-sm hover:shadow-md py-0 pb-2 transition-transform hover:-translate-y-3 duration-300">
+      <div className="relative aspect-[4/3] w-full overflow-hidden bg-muted ">
         <img
           src={imageUrl || "/placeholder.svg"}
           alt={title}

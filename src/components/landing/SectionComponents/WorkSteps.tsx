@@ -54,7 +54,7 @@ export default function WorkSteps() {
                   <div className={`w-full md:w-[calc(50%-3rem)] ${
                     step.position === "left" ? "text-center md:text-right" : "text-center md:text-left"
                   }`}>
-                    <Card className="p-8 bg-white/80 backdrop-blur-sm border-gray-200 shadow-lg hover:shadow-xl transition-all duration-300">
+                    <Card className="transition-transform hover:-translate-y-3 p-8 bg-white/80 backdrop-blur-sm border-gray-200 shadow-lg hover:shadow-xl  duration-300">
                       <h3 className=" text-gray-900 ">
                         {step.title}
                       </h3>
