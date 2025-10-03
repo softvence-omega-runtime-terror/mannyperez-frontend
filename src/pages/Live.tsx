@@ -10,7 +10,7 @@ function Live() {
     <div>
       <LiveHeader/>
       <Wrapper>
-      <div className="flex justify-center gap-5 pt-6 pb-10">
+      <div className="flex flex-col lg:flex-row justify-center gap-5 pt-6 pb-10">
         <div className="flex-3 ">
       <VideoPlayer/>
         </div>
