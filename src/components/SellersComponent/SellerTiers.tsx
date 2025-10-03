@@ -86,7 +86,7 @@ const SellerTiers = () => {
             key={tier.name}
             className={`${tier.bgColor} ${tier.borderColor} border-2 transition-all duration-300 hover:shadow-lg hover:-translate-y-1`}
           >
-            <CardContent className="p-6 sm:p-8">
+            <CardContent className="p-6 sm:p-8 h-full flex flex-col">
               {/* Icon */}
               <div className="flex justify-center mb-6">
                 <div
@@ -100,7 +100,7 @@ const SellerTiers = () => {
               <h3 className="text-center text-lg font-semibold text-gray-900 mb-6">{tier.name}</h3>
 
               {/* Benefits */}
-              <ul className="space-y-3 mb-8">
+              <ul className="space-y-3 mb-8 min-h-fit flex-grow">
                 {tier.benefits.map((benefit, index) => (
                   <li key={index} className="flex items-start gap-2">
                     <div className="flex-shrink-0 mt-0.5">
