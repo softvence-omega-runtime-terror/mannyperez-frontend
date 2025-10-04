@@ -1,0 +1,37 @@
+[
+  {
+    "name": "Gold Sellers",
+    "iconType": "star",
+    "count": "1,247 Silver Sellers",
+    "benefits": [
+      "Verified identity & business registration",
+      "4.0+ star average rating",
+      "50+ completed orders",
+      "Basic seller protection"
+    ]
+  },
+  {
+    "name": "Platinum Sellers",
+    "iconType": "crown",
+    "count": "892 Gold Sellers",
+    "benefits": [
+      "All Silver benefits",
+      "4.5+ star average rating",
+      "200+ completed orders",
+      "Priority search placement",
+      "Enhanced seller tools"
+    ]
+  },
+  {
+    "name": "Diamond Sellers",
+    "iconType": "diamond",
+    "count": "234 Platinum Sellers",
+    "benefits": [
+      "All Gold benefits",
+      "4.8+ star average rating",
+      "500+ completed orders",
+      "Featured placement opportunities",
+      "Dedicated account manager"
+    ]
+  }
+]

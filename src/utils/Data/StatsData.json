@@ -1,0 +1,22 @@
+[
+  {
+    "value": "2,340",
+    "label": "Active Listings",
+    "color": "text-blue-600"
+  },
+  {
+    "value": "450+",
+    "label": "Verified Sellers",
+    "color": "text-green-600"
+  },
+  {
+    "value": "12K+",
+    "label": "Happy Buyers",
+    "color": "text-sky-600"
+  },
+  {
+    "value": "Live",
+    "label": "Events Daily",
+    "color": "text-pink-600"
+  }
+]
