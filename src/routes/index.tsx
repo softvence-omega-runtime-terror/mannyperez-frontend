@@ -18,7 +18,7 @@ const routes = createBrowserRouter([
       { path: "/seller", element: <Seller /> },
       {
         path: "/feed",
-        element: <Feed />, // Feed layout with left & right columns
+        element: <Feed />,
         children: [
           { path: "", element: <FeedHome /> }, // default content for left column
           { path: "messages/:postId", element: <MessagingPage /> },
