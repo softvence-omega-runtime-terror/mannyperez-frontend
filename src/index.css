@@ -66,12 +66,12 @@
   --secondary-hover: #E0E3EB;
   
   --muted: #E5E7EB;                /* muted background */
-  --muted-foreground: #6B7280;     /* muted text */
+  --muted-foreground: #6B7280;  
   
   --accent: #D82479;
   --accent-foreground: #FFFFFF;
   
-  --destructive: #EF4444;          /* red for errors/destructive */
+  --destructive: #EF4444;         
   
   --border: #E5E7EB;
   --input: #FFFFFF;
