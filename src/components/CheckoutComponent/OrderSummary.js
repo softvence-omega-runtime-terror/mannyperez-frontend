@@ -1,5 +1,0 @@
-import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
-const OrderSummary = ({ product }) => {
-    return (_jsxs("div", { className: "bg-white p-6 rounded-xl shadow border border-gray-100", children: [_jsx("h3", { className: "text-xl font-bold mb-4", children: "Order Summary" }), _jsxs("div", { className: "flex items-center space-x-4", children: [_jsx("div", { className: "w-16 h-16 bg-gradient-to-tr from-pink-400 to-purple-500 rounded-lg flex-shrink-0" }), _jsxs("div", { className: "flex-grow", children: [_jsx("h4", { className: "text-lg font-semibold", children: product.title }), _jsxs("p", { className: "text-sm text-gray-500", children: ["by CraftyCrafty", _jsx("span", { className: "ml-2 text-xs font-semibold text-yellow-800 bg-yellow-100 px-2 py-0.5 rounded-full", children: "Gold" })] })] }), _jsxs("div", { className: "text-right", children: [_jsxs("p", { className: "text-md font-medium text-gray-600", children: [product.price, " each"] }), _jsx("p", { className: "text-lg font-bold", children: product.price })] })] })] }));
-};
-export default OrderSummary;
