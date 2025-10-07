@@ -1,4 +1,4 @@
-
+import React from "react";
 import { FaFacebook, FaTwitter, FaInstagram, FaLinkedin } from "react-icons/fa";
 import { MdEmail, MdPhone, MdLocationOn } from "react-icons/md";
 
@@ -37,8 +37,14 @@ export default function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-12">
           {/* Brand Section */}
           <div>
-            <div className="flex items-center gap-2 mb-6 ">
-                <img src="/public/logoDestash.png" alt="" className="size-12" />
+            <div className="flex items-center gap-2 mb-6">
+              <div className="w-12 h-12 bg-gradient-to-br from-pink-500 to-pink-600 rounded-lg flex items-center justify-center">
+                <span className="text-white font-bold text-lg">DTF</span>
+              </div>
+              <div>
+                <h3 className="font-bold text-gray-900 text-lg">DTF</h3>
+                <p className="text-xs text-pink-600 font-semibold">SUPERMARKET</p>
+              </div>
             </div>
 
             <p className="text-gray-600 text-sm leading-relaxed mb-6">
@@ -74,11 +80,11 @@ export default function Footer() {
             <ul className="space-y-3">
               <li>
                 <a
-                  href="mailto:info@dtfdestash.com"
+                  href="mailto:info@dtfsuperstash.com"
                   className="flex items-center gap-2 text-gray-600 hover:text-pink-600 transition-colors duration-200 text-sm group"
                 >
                   <MdEmail className="w-4 h-4 text-gray-400 group-hover:text-pink-600" />
-                  <span>info@dtfdestash.com</span>
+                  <span>info@dtfsuperstash.com</span>
                 </a>
               </li>
               <li>
@@ -103,7 +109,7 @@ export default function Footer() {
       <div className="border-t border-gray-200 bg-gray-50">
         <div className="max-w-7xl mx-auto px-6 py-6">
           <div className="flex flex-col md:flex-row justify-between items-center gap-4">
-            <p className="text-gray-600 text-sm">© 2025 DTF<span className="text-accent">DES</span><span className="text-sky-400">TASH</span>. All rights reserved.</p>
+            <p className="text-gray-600 text-sm">© 2025 ABC. All rights reserved.</p>
             <div className="flex flex-wrap gap-6 justify-center">
               {["Privacy & Policy", "Terms of Services", "Help & Support"].map(
                 (text) => (
