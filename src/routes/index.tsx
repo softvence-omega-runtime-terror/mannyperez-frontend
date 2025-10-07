@@ -8,6 +8,7 @@ import Feed from "@/pages/Feed";
 import FeedHome from "@/pages/FeedHome";
 import MessagingPage from "@/pages/MessagePage";
 import Live from "@/pages/Live";
+import Products from "@/pages/Products";
 
 const routes = createBrowserRouter([
   {
@@ -25,6 +26,7 @@ const routes = createBrowserRouter([
           { path: "post/:id", element: <div>Feed Posts.</div> }, // example nested route
         ],
       },
+      { path: "/products", element: <Products /> },
       { path: "/login", element: <Login /> },
       { path: "/sign-up", element: <SignUp /> },
       { path: "/", element: <Landing /> },
