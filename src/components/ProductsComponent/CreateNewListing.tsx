@@ -1,40 +1,41 @@
 import { Calendar, Plus } from "lucide-react";
-
-
+import { NavLink } from "react-router-dom";
 
 const CreateNewListing = () => {
-     const actions = [
+  const actions = [
     {
       id: 1,
       icon: Plus,
-      iconBg: 'bg-[#D82479]',
-      title: 'Create New Listing',
-      description: 'Add products with proof photos',
-      href: '/listing/create'
+      iconBg: "bg-[#D82479]",
+      title: "Create New Listing",
+      description: "Add products with proof photos",
+      href: "/new-listing",
     },
     {
       id: 2,
       icon: Calendar,
-      iconBg: 'bg-[#229ECF]',
-      title: 'Book Live Slot',
-      description: 'Schedule live selling session',
-      href: '/live/book'
-    }
+      iconBg: "bg-[#229ECF]",
+      title: "Book Live Slot",
+      description: "Schedule live selling session",
+      href: "/live/book",
+    },
   ];
 
   return (
     <div className="lg:flex space-y-6 lg:space-y-0 gap-6 w-full">
-      {
-        actions.map((item)=>(
-            <div className="border w-full px-8 py-16 rounded-2xl grid place-content-center place-items-center bg-white">
-                <div className={`size-14 rounded-full mb-8 ${item.iconBg} grid place-items-center`}>
-                {<item.icon className="text-white"/>}
-                </div>
-                <h3>{item.title}</h3>
-                <p>{item.description}</p>
-            </div>
-        ))
-      }
+      {actions.map((item) => (
+        <NavLink to={item.href} key={item.id} className="flex-1">
+        <div className="border w-full px-8 py-16 rounded-2xl grid place-content-center place-items-center bg-white">
+          <div
+            className={`size-14 rounded-full mb-8 ${item.iconBg} grid place-items-center`}
+          >
+            {<item.icon className="text-white" />}
+          </div>
+          <h3>{item.title}</h3>
+          <p>{item.description}</p>
+        </div>
+        </NavLink>
+      ))}
     </div>
   );
 };
