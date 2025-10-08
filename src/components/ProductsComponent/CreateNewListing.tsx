@@ -23,10 +23,10 @@ const CreateNewListing = () => {
   ];
 
   return (
-    <div className="flex gap-6 w-full">
+    <div className="lg:flex space-y-6 lg:space-y-0 gap-6 w-full">
       {
         actions.map((item)=>(
-            <div className="border w-full px-8 py-16 rounded-2xl grid place-content-center place-items-center">
+            <div className="border w-full px-8 py-16 rounded-2xl grid place-content-center place-items-center bg-white">
                 <div className={`size-14 rounded-full mb-8 ${item.iconBg} grid place-items-center`}>
                 {<item.icon className="text-white"/>}
                 </div>
