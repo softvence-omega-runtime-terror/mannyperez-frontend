@@ -10,10 +10,14 @@
     "strict": true,
     "jsx": "react-jsx",
     "moduleResolution": "Node",
+    "resolveJsonModule": true,
     "esModuleInterop": true,
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
-    "types": ["vite/client", "node"]  // ← Add "node" here
+    "types": ["vite/client", "node"],  
+    "noEmit": true,
+    "outDir": "dist",             
+    "rootDir": "src" 
   },
   "include": ["src"]
 }
