@@ -1,4 +1,3 @@
-// src/components/CheckoutComponent/BuyerInformation.tsx
 import React from "react";
 
 const DUMMY_BUYER_EMAIL = "john.smith@email.com";
@@ -11,7 +10,9 @@ const BuyerInformation: React.FC = () => {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {/* Email Address */}
         <div>
-          <label className="block text-sm font-medium text-gray-700">Email Address</label>
+          <label className="block text-sm font-medium text-gray-700">
+            Email Address
+          </label>
           <p className="mt-1 block w-full border rounded-sm px-2 border-gray-300 py-2 text-gray-900 sm:text-sm">
             {DUMMY_BUYER_EMAIL}
           </p>
@@ -19,7 +20,9 @@ const BuyerInformation: React.FC = () => {
 
         {/* Phone Number */}
         <div>
-          <label className="block text-sm font-medium text-gray-700">Phone Number</label>
+          <label className="block text-sm font-medium text-gray-700">
+            Phone Number
+          </label>
           <p className="mt-1 block w-full border rounded-sm px-2 border-gray-300 py-2  text-gray-900 sm:text-sm">
             {DUMMY_BUYER_PHONE}
           </p>
