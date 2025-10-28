@@ -1,11 +1,18 @@
 import { useState } from 'react';
 import { Search, Bell, Package, User, ShoppingBag, Bookmark, MapPin, CreditCard, Settings, LogOut, Menu, X } from 'lucide-react';
 import logo from "../../assets/feedImg/logo.png"
+import { useAppDispatch } from '@/store/hooks';
+import { logout } from '@/store/slices/authSlice';
 
 export default function UserNavbar() {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [isSellerMode, setIsSellerMode] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const dispatch = useAppDispatch();
+
+  const handleLogout = () => {
+    dispatch(logout());
+  }
 
   return (
     <nav className="bg-white border-b border-gray-200 sticky top-0 z-30">
@@ -51,18 +58,18 @@ export default function UserNavbar() {
             <button className="hidden md:block px-3 lg:px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 font-medium text-sm whitespace-nowrap">
               Become A Seller
             </button>
-            
+
             <button className="hidden md:block relative p-2 hover:bg-gray-100 rounded-lg">
               <Bell className="w-5 h-5 text-gray-700" />
             </button>
-            
+
             <button className="hidden md:block relative p-2 hover:bg-gray-100 rounded-lg">
               <Package className="w-5 h-5 text-gray-700" />
             </button>
-            
+
             {/* User Avatar with Dropdown */}
             <div className="relative">
-              <button 
+              <button
                 onClick={() => setIsDropdownOpen(!isDropdownOpen)}
                 className="w-9 h-9 sm:w-10 sm:h-10 rounded-full overflow-hidden border-2 border-gray-200 hover:border-purple-500 transition-colors"
               >
@@ -82,14 +89,12 @@ export default function UserNavbar() {
                       <span className="text-pink-500 font-semibold">Seller Mode</span>
                       <button
                         onClick={() => setIsSellerMode(!isSellerMode)}
-                        className={`relative w-12 h-6 rounded-full transition-colors ${
-                          isSellerMode ? 'bg-green-500' : 'bg-gray-300'
-                        }`}
+                        className={`relative w-12 h-6 rounded-full transition-colors ${isSellerMode ? 'bg-green-500' : 'bg-gray-300'
+                          }`}
                       >
                         <div
-                          className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full transition-transform ${
-                            isSellerMode ? 'translate-x-6' : 'translate-x-0'
-                          }`}
+                          className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full transition-transform ${isSellerMode ? 'translate-x-6' : 'translate-x-0'
+                            }`}
                         />
                       </button>
                     </div>
@@ -126,7 +131,7 @@ export default function UserNavbar() {
                         <span className="text-gray-800">Settings</span>
                       </button>
 
-                      <button className="w-full flex items-center space-x-3 px-3 py-2 hover:bg-gray-50 rounded-lg text-left mt-2 pt-3 border-t border-gray-200">
+                      <button onClick={handleLogout} className="w-full flex items-center space-x-3 px-3 py-2 hover:bg-gray-50 rounded-lg text-left mt-2 pt-3 border-t border-gray-200">
                         <LogOut className="w-5 h-5 text-pink-500" />
                         <span className="text-pink-500 font-medium">Logout</span>
                       </button>
@@ -137,7 +142,7 @@ export default function UserNavbar() {
             </div>
 
             {/* Mobile Menu Button - Only visible on small devices */}
-            <button 
+            <button
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
               className="md:hidden p-2 hover:bg-gray-100 rounded-lg"
             >
@@ -165,16 +170,15 @@ export default function UserNavbar() {
 
       {/* Mobile Menu Overlay */}
       {isMobileMenuOpen && (
-        <div 
+        <div
           className="fixed inset-0  z-40 md:hidden"
           onClick={() => setIsMobileMenuOpen(false)}
         />
       )}
 
       {/* Mobile Menu - Slide from right */}
-      <div className={`fixed top-0 right-0 h-full w-72 bg-white shadow-xl z-50 transform transition-transform duration-300 ease-in-out md:hidden ${
-        isMobileMenuOpen ? 'translate-x-0' : 'translate-x-full'
-      }`}>
+      <div className={`fixed top-0 right-0 h-full w-72 bg-white shadow-xl z-50 transform transition-transform duration-300 ease-in-out md:hidden ${isMobileMenuOpen ? 'translate-x-0' : 'translate-x-full'
+        }`}>
         <div className="p-6">
           {/* Logo in sidebar */}
           <div className="flex items-center mb-8">
@@ -218,8 +222,8 @@ export default function UserNavbar() {
 
       {/* Overlay to close dropdown when clicking outside */}
       {isDropdownOpen && (
-        <div 
-          className="fixed inset-0 z-40" 
+        <div
+          className="fixed inset-0 z-40"
           onClick={() => setIsDropdownOpen(false)}
         />
       )}
