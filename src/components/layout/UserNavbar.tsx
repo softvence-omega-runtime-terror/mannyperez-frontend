@@ -3,15 +3,18 @@ import { Search, Bell, Package, User, ShoppingBag, Bookmark, MapPin, CreditCard,
 import logo from "../../assets/feedImg/logo.png"
 import { useAppDispatch } from '@/store/hooks';
 import { logout } from '@/store/slices/authSlice';
+import { useNavigate } from 'react-router-dom';
 
 export default function UserNavbar() {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [isSellerMode, setIsSellerMode] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const dispatch = useAppDispatch();
+  const navigate = useNavigate();
 
   const handleLogout = () => {
     dispatch(logout());
+    navigate('/login');
   }
 
   return (

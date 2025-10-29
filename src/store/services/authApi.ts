@@ -52,7 +52,7 @@ export interface ResendVerificationRequest {
 
 export interface AuthResponse {
     user: User;
-    token: string;
+    approvalToken: string;
     refreshToken?: string;
 }
 

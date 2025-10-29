@@ -8,16 +8,8 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
 import type { RootState } from '../index';
 
-/**
- * Base URL for API requests
- * TODO: Replace with your actual API URL
- * Consider using environment variables for different environments
- */
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://api.example.com';
 
-/**
- * Base query configuration with authentication
- */
 const baseQuery = fetchBaseQuery({
   baseUrl: API_BASE_URL,
   
@@ -28,12 +20,7 @@ const baseQuery = fetchBaseQuery({
     
     // If we have a token, include it in the headers
     if (token) {
-      headers.set('authorization', `Bearer ${token}`);
-    }
-    
-    // Set default content type
-    if (!headers.has('content-type')) {
-      headers.set('content-type', 'application/json');
+      headers.set('authorization', `${token}`);
     }
     
     return headers;

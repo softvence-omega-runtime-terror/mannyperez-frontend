@@ -1,4 +1,4 @@
-import { createBrowserRouter } from "react-router-dom";
+import { createBrowserRouter, redirect } from "react-router-dom";
 import App from "@/App";
 import Landing from "@/pages/Landing";
 import Seller from "@/pages/Seller";
@@ -11,45 +11,87 @@ import Live from "@/pages/Live";
 import Products from "@/pages/Products";
 import NewListingSteps from "@/components/ProductsComponent/CreateNewListing/NewListingStepsContainer";
 import VerifyEmail from "@/pages/Auth/VerifyEmail";
-import ProtectedRoute from "@/components/auth/ProtectedRoute";
-import PublicRoute from "@/components/auth/PublicRoute";
+import Unauthorized from "@/pages/Auth/Unauthorized";
+import { store } from "@/store";
+
+// Simple auth check function
+const checkAuth = (options?: {
+  requireAuth?: boolean;
+  requireGuest?: boolean;
+  allowedRoles?: string[];
+  requireVerified?: boolean;
+}) => {
+  const { user, isAuthenticated } = store.getState().auth;
+
+  // Check if guest required (login, signup pages)
+  if (options?.requireGuest && isAuthenticated) {
+    return redirect("/");
+  }
+
+  // Check if auth required
+  if (options?.requireAuth && !isAuthenticated) {
+    return redirect("/login");
+  }
+
+  // Check if user is blocked or deleted
+  if (isAuthenticated && user) {
+    if (user.isBlocked || user.isDeleted) {
+      // Clear auth and redirect to login
+      return redirect("/login");
+    }
+
+    // Check roles
+    if (options?.allowedRoles && !options.allowedRoles.includes(user.role)) {
+      return redirect("/unauthorized");
+    }
+
+    // Check verification
+    if (options?.requireVerified && !user.isVerified) {
+      return redirect("/verify-email");
+    }
+  }
+
+  return null;
+};
 
 const routes = createBrowserRouter([
   {
     path: "/",
     element: <App />,
     children: [
-      // Public routes (accessible to everyone)
-      { path: "/", element: <Landing /> },
+      // Public routes
+      { 
+        path: "/", 
+        element: <Landing /> 
+      },
       
-      // Public routes (only accessible when NOT logged in)
+      // Auth routes (guest only)
       { 
         path: "/login", 
-        element: (
-          <PublicRoute>
-            <Login />
-          </PublicRoute>
-        ) 
+        element: <Login />,
+        loader: () => checkAuth({ requireGuest: true })
       },
       { 
         path: "/sign-up", 
-        element: (
-          <PublicRoute>
-            <SignUp />
-          </PublicRoute>
-        ) 
+        element: <SignUp />,
+        loader: () => checkAuth({ requireGuest: true })
       },
-      { path: "/verify-email", element: <VerifyEmail /> },
+      { 
+        path: "/verify-email", 
+        element: <VerifyEmail /> 
+      },
+      
+      // Unauthorized page
+      { 
+        path: "/unauthorized", 
+        element: <Unauthorized /> 
+      },
 
-
-      // Protected routes (requires authentication)
+      // Protected routes
       {
         path: "/feed",
-        element: (
-          <ProtectedRoute allowedRoles={['buyer']}>
-            <Feed />
-          </ProtectedRoute>
-        ),
+        element: <Feed />,
+        loader: () => checkAuth({ requireAuth: false }),
         children: [
           { path: "", element: <FeedHome /> },
           { path: "messages/:postId", element: <MessagingPage /> },
@@ -57,44 +99,28 @@ const routes = createBrowserRouter([
         ],
       },
       
-      // Products page - requires verified account
       { 
         path: "/products", 
-        element: (
-          <ProtectedRoute requireVerified>
-            <Products />
-          </ProtectedRoute>
-        ) 
+        element: <Products />,
+        loader: () => checkAuth({ requireAuth: true, requireVerified: true })
       },
 
-      // Seller routes - only for sellers and admins
       { 
         path: "/seller", 
-        element: (
-          <ProtectedRoute allowedRoles={["seller", "admin"]}>
-            <Seller />
-          </ProtectedRoute>
-        ) 
+        element: <Seller />,
+        loader: () => checkAuth({ requireAuth: false, allowedRoles: ["seller", "admin"] })
       },
 
-      // New listing - only sellers can create listings
       { 
         path: "/new-listing", 
-        element: (
-          <ProtectedRoute allowedRoles={["seller", "admin"]} requireVerified>
-            <NewListingSteps />
-          </ProtectedRoute>
-        ) 
+        element: <NewListingSteps />,
+        loader: () => checkAuth({ requireAuth: true, allowedRoles: ["seller", "admin"], requireVerified: true })
       },
 
-      // Live streams - requires authentication
       { 
         path: "/live", 
-        element: (
-          <ProtectedRoute>
-            <Live />
-          </ProtectedRoute>
-        ) 
+        element: <Live />,
+        loader: () => checkAuth({ requireAuth: true })
       },
     ],
   },

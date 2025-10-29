@@ -101,11 +101,11 @@ const authSlice = createSlice({
             })
             .addMatcher(authApi.endpoints.login.matchFulfilled, (state, action) => {
                 state.user = action.payload.user;
-                state.token = action.payload.token;
+                state.token = action.payload.approvalToken;
                 state.isAuthenticated = true;
                 state.isLoading = false;
 
-                localStorage.setItem('authToken', action.payload.token);
+                localStorage.setItem('authToken', action.payload.approvalToken);
                 localStorage.setItem('user', JSON.stringify(action.payload.user));
             })
             .addMatcher(authApi.endpoints.login.matchRejected, (state) => {
