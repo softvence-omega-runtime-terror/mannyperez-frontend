@@ -1,4 +1,5 @@
-import { useState } from "react";
+// src/components/layout/Navbar.tsx
+import { useEffect, useState } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
 import Wrapper from "./Wrapper";
 import SearchInput from "../landing/SectionComponents/SearchInput";
@@ -16,21 +17,39 @@ const Navbar = () => {
     { name: "Feed", path: "/feed" },
   ];
 
+  // close mobile menu on route change if you navigate programmatically, or when viewport becomes lg+
+  useEffect(() => {
+    const handleResize = () => {
+      // when viewport becomes >= lg (1024px) close the mobile menu
+      if (window.innerWidth >= 1024) {
+        setIsOpen(false);
+      }
+    };
+
+    const handleKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setIsOpen(false);
+    };
+
+    window.addEventListener("resize", handleResize);
+    window.addEventListener("keydown", handleKey);
+    return () => {
+      window.removeEventListener("resize", handleResize);
+      window.removeEventListener("keydown", handleKey);
+    };
+  }, []);
+
   return (
-    <nav className=" bg-white shadow-md">
+    <nav className="bg-white shadow-md z-40">
       <Wrapper>
         <div className="flex items-center justify-between py-4">
-          {/* Logo + Desktop Links */}
-          <div className="flex items-center gap-10">
+          {/* LEFT: Logo + Desktop Links (desktop only at lg+) */}
+          <div className="flex items-center gap-8">
             <NavLink to="/" className="flex items-center">
-              <img
-                src="/public/logoDestash.png"
-                alt="DTFdestash"
-                className="size-14 w-auto"
-              />
+              {/* React serves files from public/ at root path */}
+              <img src="/logoDestash.png" alt="DTFdestash" className="w-14 h-auto" />
             </NavLink>
 
-            {/* Desktop Nav Links */}
+            {/* Desktop Nav Links: show only at lg and above */}
             <div className="hidden lg:flex lg:space-x-6">
               {navLinks.map((link) => (
                 <NavLink
@@ -38,8 +57,8 @@ const Navbar = () => {
                   to={link.path}
                   className={({ isActive }) =>
                     isActive
-                      ? "text-accent font-semibold"
-                      : "text-gray-700 hover:text-accent transition"
+                      ? "text-pink-600 font-semibold"
+                      : "text-gray-700 hover:text-pink-600 transition"
                   }
                 >
                   {link.name}
@@ -48,28 +67,22 @@ const Navbar = () => {
             </div>
           </div>
 
-          {/* Right Section */}
-          <div className="hidden md:flex items-center gap-5">
+          {/* RIGHT: Search + Buttons (desktop only at lg+) */}
+          <div className="hidden lg:flex items-center gap-4">
             <SearchInput
               placeholder="Search listings, sellers..."
               onSearch={(e) => console.log(e)}
             />
-            <PrimaryButton
-              type="Outline"
-              title="Log In"
-              onClick={() => navigate("/login")}
-            />
-            <PrimaryButton
-              type="Primary"
-              title="Sign Up"
-              onClick={() => navigate("/sign-up")}
-            />
+            <PrimaryButton type="Outline" title="Log In" onClick={() => navigate("/login")} />
+            <PrimaryButton type="Primary" title="Sign Up" onClick={() => navigate("/sign-up")} />
           </div>
 
-          {/* Mobile Hamburger */}
-          <div className="lg:hidden flex items-center ">
+          {/* MOBILE / TABLET MENU BUTTON: visible below lg (i.e. up to 1023px) */}
+          <div className="lg:hidden flex items-center">
             <button
-              onClick={() => setIsOpen(!isOpen)}
+              aria-label={isOpen ? "Close menu" : "Open menu"}
+              aria-expanded={isOpen}
+              onClick={() => setIsOpen((s) => !s)}
               className="text-gray-700 focus:outline-none"
             >
               {isOpen ? <HiX size={28} /> : <HiMenu size={28} />}
@@ -78,29 +91,39 @@ const Navbar = () => {
         </div>
       </Wrapper>
 
-      {/* Mobile Menu */}
+      {/* MOBILE / TABLET MENU CONTENT (visible below lg) */}
       {isOpen && (
-        <div className="md:hidden bg-white border-t border-gray-100 p-4 space-y-4">
-          {navLinks.map((link) => (
-            <NavLink
-              key={link.path}
-              to={link.path}
-              className={({ isActive }) =>
-                isActive
-                  ? "block text-accent font-semibold"
-                  : "block text-gray-700 hover:text-accent transition"
-              }
-              onClick={() => setIsOpen(false)}
-            >
-              {link.name}
-            </NavLink>
-          ))}
+        <div
+          className="lg:hidden bg-white border-t border-gray-100 p-4 space-y-4"
+          role="dialog"
+          aria-modal="true"
+        >
+          <div className="flex flex-col gap-2">
+            {navLinks.map((link) => (
+              <NavLink
+                key={link.path}
+                to={link.path}
+                className={({ isActive }) =>
+                  isActive
+                    ? "block text-pink-600 font-semibold py-2"
+                    : "block text-gray-700 hover:text-pink-600 py-2 transition"
+                }
+                onClick={() => setIsOpen(false)}
+              >
+                {link.name}
+              </NavLink>
+            ))}
+          </div>
 
-          <SearchInput
-            placeholder="Search listings, sellers..."
-            onSearch={(e) => console.log(e)}
-          />
+          {/* Mobile Search */}
+          <div>
+            <SearchInput
+              placeholder="Search listings, sellers..."
+              onSearch={(e) => console.log(e)}
+            />
+          </div>
 
+          {/* Mobile Buttons */}
           <div className="flex flex-col gap-3">
             <PrimaryButton
               type="Outline"

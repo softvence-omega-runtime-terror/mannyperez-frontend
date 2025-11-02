@@ -220,7 +220,7 @@ const Login = () => {
 
           <p className="text-center text-gray-800 mt-6">
             Don't have an account?{" "}
-            <Link to="/signup" className="font-bold hover:text-primary transition">
+            <Link to="/sign-up" className="font-bold hover:text-primary transition">
               Sign Up
             </Link>
           </p>
