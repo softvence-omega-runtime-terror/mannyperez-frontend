@@ -1,13 +1,15 @@
+import Footer from '@/components/layout/Footer'
+import UserNavbar from '@/components/layout/UserNavbar'
 import Wrapper from '@/components/layout/Wrapper'
 import FeaturedProducts from '@/components/LiveComponent/FeaturedProducts'
 import LiveChat from '@/components/LiveComponent/LiveChat'
 import LiveHeader from '@/components/LiveComponent/LiveHeader'
 import VideoPlayer from '@/components/LiveComponent/VideoPlayer'
-import React from 'react'
 
 function Live() {
   return (
     <div>
+      <UserNavbar/>
       <LiveHeader/>
       <Wrapper>
       <div className="flex flex-col lg:flex-row justify-center gap-5 pt-6 pb-10">
@@ -20,6 +22,8 @@ function Live() {
       </div>
       </Wrapper>
       <FeaturedProducts/>
+
+      <Footer/>
     </div>
   )
 }
