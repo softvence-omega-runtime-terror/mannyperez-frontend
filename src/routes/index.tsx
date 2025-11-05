@@ -227,7 +227,7 @@ const routes = createBrowserRouter([
       { 
         path: "/products", 
         element: <Products />,
-        loader: () => checkAuth({ requireAuth: true, requireVerified: true })
+        loader: () => checkAuth({ requireAuth: false, requireVerified: false })
       },
 
       { 
@@ -239,7 +239,7 @@ const routes = createBrowserRouter([
       { 
         path: "/new-listing", 
         element: <NewListingSteps />,
-        loader: () => checkAuth({ requireAuth: true, allowedRoles: ["seller", "admin"], requireVerified: true })
+        loader: () => checkAuth({ requireAuth: false, allowedRoles: ["seller", "admin"], requireVerified: false })
       },
 
       { 
