@@ -1,6 +1,6 @@
-import React from "react";
 import { FaFacebook, FaTwitter, FaInstagram, FaLinkedin } from "react-icons/fa";
 import { MdEmail, MdPhone, MdLocationOn } from "react-icons/md";
+import logo from "../../assets/feedImg/logo.png";
 
 type LinkItem = {
   label: string;
@@ -38,13 +38,7 @@ export default function Footer() {
           {/* Brand Section */}
           <div>
             <div className="flex items-center gap-2 mb-6">
-              <div className="w-12 h-12 bg-gradient-to-br from-pink-500 to-pink-600 rounded-lg flex items-center justify-center">
-                <span className="text-white font-bold text-lg">DTF</span>
-              </div>
-              <div>
-                <h3 className="font-bold text-gray-900 text-lg">DTF</h3>
-                <p className="text-xs text-pink-600 font-semibold">SUPERMARKET</p>
-              </div>
+              <img width={80} src={logo} alt="" />
             </div>
 
             <p className="text-gray-600 text-sm leading-relaxed mb-6">

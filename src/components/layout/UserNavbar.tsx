@@ -12,10 +12,7 @@ import {
   Settings,
   LogOut,
   Menu,
-  X,
-  Tag,
-  Percent,
-  Tv
+  X
 } from 'lucide-react';
 import logo from "../../assets/feedImg/logo.png";
 import { useAppDispatch } from '@/store/hooks';
@@ -42,7 +39,7 @@ export default function UserNavbar() {
   ];
 
   const sellerLinks = [
-    { name: "Products", path: "/seller/products" },
+    { name: "Products", path: "/products" },
     { name: "Orders", path: "/seller/orders" },
     { name: "Promotions", path: "/seller/promotions" },
     { name: "Live", path: "/seller/live" },
