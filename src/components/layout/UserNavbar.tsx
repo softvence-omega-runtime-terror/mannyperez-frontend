@@ -139,10 +139,14 @@ export default function UserNavbar() {
 
                     {/* Dropdown Items */}
                     <div className="space-y-1">
-                      <button className="w-full flex items-center space-x-3 px-3 py-2 hover:bg-gray-50 rounded-lg text-left">
-                        <User className="w-5 h-5 text-gray-700" />
-                        <span className="text-gray-800">Profile</span>
-                      </button>
+                    <Link
+                      to={isSellerMode ? "/seller/profile" : "/buyer/profile"}
+                      className="w-full flex items-center space-x-3 px-3 py-2 hover:bg-gray-50 rounded-lg text-left"
+                      onClick={() => setIsDropdownOpen(false)}
+                      >
+                      <User className="w-5 h-5 text-gray-700" />
+                      <span className="text-gray-800">Profile</span>
+                  </Link>
 
                       <button className="w-full flex items-center space-x-3 px-3 py-2 hover:bg-gray-50 rounded-lg text-left">
                         <ShoppingBag className="w-5 h-5 text-gray-700" />
