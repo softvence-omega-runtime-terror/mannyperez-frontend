@@ -18,6 +18,10 @@ import { store } from "@/store";
 import BuyerProfile from "@/pages/profile/BuyerProfile";
 import SellerProfile from "@/pages/profile/SellerProfile";
 import Profile from "@/pages/profile/Profile";
+import Promotions from "@/components/SellersComponent/Promotions";
+import Orders from "@/components/BuyerCompnents/Orders";
+import SavedItems from "@/components/BuyerCompnents/SavedItems";
+import OrdersList from "@/components/SellersComponent/OrdersList";
 
 // Simple auth check function
 const checkAuth = (options?: {
@@ -77,8 +81,19 @@ const routes = createBrowserRouter([
       },
 
       { 
-        path: "/products", 
+        path: "/seller/products", 
         element: <Products />,
+        loader: () => checkAuth({ requireAuth: false, requireVerified: false })
+      },
+     
+      { 
+        path: "/seller/promotions", 
+        element: <Promotions />,
+        loader: () => checkAuth({ requireAuth: false, requireVerified: false })
+      },
+      { 
+        path: "/seller/orders", 
+        element: <OrdersList />,
         loader: () => checkAuth({ requireAuth: false, requireVerified: false })
       },
       { 
@@ -103,6 +118,16 @@ const routes = createBrowserRouter([
         path: "/buyer/profile",
         element: <BuyerProfile />,
         loader: () => checkAuth({ requireAuth: false, allowedRoles: ["buyer"] }),
+      },
+       { 
+        path: "/buyer/orders", 
+        element: <Orders />,
+        loader: () => checkAuth({ requireAuth: false, requireVerified: false })
+      },
+       { 
+        path: "/buyer/saved-items", 
+        element: <SavedItems />,
+        loader: () => checkAuth({ requireAuth: false, requireVerified: false })
       },
       {
         path: "/seller/profile",
