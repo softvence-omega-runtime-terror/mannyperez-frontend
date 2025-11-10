@@ -44,7 +44,7 @@ const defaultPost = {
   id: '1',
   author: 'CraftyBuyer',
   authorAvatar: 'https://images.pexels.com/photos/1239291/pexels-photo-1239291.jpeg?auto=compress&cs=tinysrgb&w=100',
-  timestamp: '2 hours ago',
+  timestamp: '12 hours ago',
   title: 'Holographic Sticker Sheets - Various Designs',
   description: 'High-quality glitter DTF transfers perfect for t-shirts, hoodies, and accessories. Easy to apply with heat press. Vibrant colors and excellent durability. Bulk discounts available for orders over 10 sheets!',
   images: [
