@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/rules-of-hooks */
 import { Button } from "@/components/ui/button";
 import { useEffect, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
@@ -76,7 +77,9 @@ const verifyEmail = () => {
 
             if (result) navigate("/feed");
 
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         } catch (err: any) {
+            // eslint-disable-next-line @typescript-eslint/no-unused-vars
             const errorMessage =
                 err?.data?.message ||
                 err?.message ||

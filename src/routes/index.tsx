@@ -1,3 +1,4 @@
+
 import { createBrowserRouter, redirect } from "react-router-dom";
 import App from "@/App";
 import Landing from "@/pages/Landing";
@@ -12,7 +13,15 @@ import Products from "@/pages/Products";
 import NewListingSteps from "@/components/ProductsComponent/CreateNewListing/NewListingStepsContainer";
 import VerifyEmail from "@/pages/Auth/VerifyEmail";
 import Unauthorized from "@/pages/Auth/Unauthorized";
+import CheckoutPage from "@/pages/CheckoutPage"; 
 import { store } from "@/store";
+import BuyerProfile from "@/pages/profile/BuyerProfile";
+import SellerProfile from "@/pages/profile/SellerProfile";
+import Profile from "@/pages/profile/Profile";
+import Promotions from "@/components/SellersComponent/Promotions";
+import Orders from "@/components/BuyerCompnents/Orders";
+import SavedItems from "@/components/BuyerCompnents/SavedItems";
+import OrdersList from "@/components/SellersComponent/OrdersList";
 
 // Simple auth check function
 const checkAuth = (options?: {
@@ -23,29 +32,23 @@ const checkAuth = (options?: {
 }) => {
   const { user, isAuthenticated } = store.getState().auth;
 
-  // Check if guest required (login, signup pages)
   if (options?.requireGuest && isAuthenticated) {
     return redirect("/");
   }
 
-  // Check if auth required
   if (options?.requireAuth && !isAuthenticated) {
     return redirect("/login");
   }
 
-  // Check if user is blocked or deleted
   if (isAuthenticated && user) {
     if (user.isBlocked || user.isDeleted) {
-      // Clear auth and redirect to login
       return redirect("/login");
     }
 
-    // Check roles
     if (options?.allowedRoles && !options.allowedRoles.includes(user.role)) {
       return redirect("/unauthorized");
     }
 
-    // Check verification
     if (options?.requireVerified && !user.isVerified) {
       return redirect("/verify-email");
     }
@@ -59,35 +62,13 @@ const routes = createBrowserRouter([
     path: "/",
     element: <App />,
     children: [
-      // Public routes
-      { 
-        path: "/", 
-        element: <Landing /> 
-      },
-      
-      // Auth routes (guest only)
-      { 
-        path: "/login", 
-        element: <Login />,
-        loader: () => checkAuth({ requireGuest: true })
-      },
-      { 
-        path: "/sign-up", 
-        element: <SignUp />,
-        loader: () => checkAuth({ requireGuest: true })
-      },
-      { 
-        path: "/verify-email", 
-        element: <VerifyEmail /> 
-      },
-      
-      // Unauthorized page
-      { 
-        path: "/unauthorized", 
-        element: <Unauthorized /> 
-      },
+      { path: "/", element: <Landing /> },
+      { path: "/login", element: <Login />, loader: () => checkAuth({ requireGuest: true }) },
+      { path: "/sign-up", element: <SignUp />, loader: () => checkAuth({ requireGuest: true }) },
+      { path: "/verify-email", element: <VerifyEmail /> },
+      { path: "/unauthorized", element: <Unauthorized /> },
 
-      // Protected routes
+      // Protected sections
       {
         path: "/feed",
         element: <Feed />,
@@ -98,11 +79,27 @@ const routes = createBrowserRouter([
           { path: "post/:id", element: <div>Feed Posts.</div> },
         ],
       },
-      
+
       { 
-        path: "/products", 
+        path: "/seller/products", 
         element: <Products />,
-        loader: () => checkAuth({ requireAuth: true, requireVerified: true })
+        loader: () => checkAuth({ requireAuth: false, requireVerified: false })
+      },
+     
+      { 
+        path: "/seller/promotions", 
+        element: <Promotions />,
+        loader: () => checkAuth({ requireAuth: false, requireVerified: false })
+      },
+      { 
+        path: "/seller/orders", 
+        element: <OrdersList />,
+        loader: () => checkAuth({ requireAuth: false, requireVerified: false })
+      },
+      { 
+        path: "/prfile", 
+        element: <Profile />,
+        loader: () => checkAuth({ requireAuth: false, requireVerified: false })
       },
 
       { 
@@ -114,13 +111,40 @@ const routes = createBrowserRouter([
       { 
         path: "/new-listing", 
         element: <NewListingSteps />,
-        loader: () => checkAuth({ requireAuth: true, allowedRoles: ["seller", "admin"], requireVerified: true })
+        loader: () => checkAuth({ requireAuth: false, allowedRoles: ["seller", "admin"], requireVerified: false })
+      },
+
+      {
+        path: "/buyer/profile",
+        element: <BuyerProfile />,
+        loader: () => checkAuth({ requireAuth: false, allowedRoles: ["buyer"] }),
+      },
+       { 
+        path: "/buyer/orders", 
+        element: <Orders />,
+        loader: () => checkAuth({ requireAuth: false, requireVerified: false })
+      },
+       { 
+        path: "/buyer/saved-items", 
+        element: <SavedItems />,
+        loader: () => checkAuth({ requireAuth: false, requireVerified: false })
+      },
+      {
+        path: "/seller/profile",
+        element: <SellerProfile />,
+        loader: () => checkAuth({ requireAuth: false, allowedRoles: ["seller", "admin"] }),
       },
 
       { 
         path: "/live", 
         element: <Live />,
-        loader: () => checkAuth({ requireAuth: true })
+        loader: () => checkAuth({ requireAuth: false })
+      },
+
+      {
+        path: "/checkout/:id",
+        element: <CheckoutPage />,
+        loader: () => checkAuth({ requireAuth: false })
       },
     ],
   },

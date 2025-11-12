@@ -1,77 +1,50 @@
 // src/components/FeedComponents/GoldPost.tsx
 import React from "react";
 import { BsThreeDots } from "react-icons/bs";
-import {
-  FaRegHeart,
-  FaRegComment,
-  FaRegBookmark,
-} from "react-icons/fa";
+import { FaRegHeart, FaRegComment, FaRegBookmark } from "react-icons/fa";
 import { IoSend } from "react-icons/io5";
 import { FiShoppingCart } from "react-icons/fi";
 import { AiFillStar } from "react-icons/ai"; // Star icon for Gold status
+import { useNavigate } from "react-router-dom";
+import { ProductType } from "@/pages/Feed";
 
 // --- Imported Assets ---
 import userA from "../../assets/feedImg/usermale1.jpg";
 import productA from "../../assets/feedImg/diamond1.png";
 import productB from "../../assets/feedImg/diamond2.png";
 import commenterA from "../../assets/feedImg/userFeed.jpg";
-import { useNavigate } from "react-router-dom";
 
 // --- Mock Data ---
-const postData = {
+const postData: ProductType & { sellerName: string; profileImageUrl: string; timePosted: string; status: string; hashtags: string[]; stats: { likes: number; comments: number; views: string }; currentUserImageUrl: string; commentsList: { id: number; user: string; text: string; time: string; imageUrl: string }[] } = {
   id: "gold-01",
+  title: "Glitter DTF Transfers – A4 Sheets",
+  price: "$8 per sheet",
+  imageUrls: [productA, productB],
+  description: "High-quality glitter DTF transfers perfect for t-shirts, hoodies, and accessories. Easy to apply with heat press. Vibrant colors and excellent durability. Bulk discounts available for orders over 10 sheets!",
   sellerName: "VinylMaster",
   profileImageUrl: userA,
   timePosted: "4h ago",
   status: "Gold",
-  title: "Glitter DTF Transfers – A4 Sheets",
-  description:
-    "High-quality glitter DTF transfers perfect for t-shirts, hoodies, and accessories. Easy to apply with heat press. Vibrant colors and excellent durability. Bulk discounts available for orders over 10 sheets!",
-  price: "$8 per sheet",
-  imageUrls: [productA, productB],
   hashtags: ["#fabricdestash", "#cottonrolls", "#livesale"],
-  stats: {
-    likes: 234,
-    comments: 89,
-    views: "3.2k",
-  },
+  stats: { likes: 234, comments: 89, views: "3.2k" },
   currentUserImageUrl: commenterA,
-  comments: [
-    {
-      id: 1,
-      user: "CraftyBuyer",
-      text: "Do you offer international shipping? These look amazing!",
-      time: "2h ago",
-      imageUrl: commenterA,
-    },
-    {
-      id: 2,
-      user: "CraftyBuyer",
-      text: "Do you offer international shipping? These look amazing!",
-      time: "2h ago",
-      imageUrl: commenterA,
-    },
+  commentsList: [
+    { id: 1, user: "CraftyBuyer", text: "Do you offer international shipping? These look amazing!", time: "2h ago", imageUrl: commenterA },
+    { id: 2, user: "ArtisticSoul", text: "Love the quality! Will definitely order again.", time: "1h ago", imageUrl: commenterA },
   ],
 };
 
 // --- Props for Buy Now ---
 interface GoldPostProps {
-  onBuyNow?: (product: {
-    title: string;
-    price: string;
-    imageUrls: string[];
-    description: string;
-  }) => void;
+  onBuyNow?: (product: ProductType) => void;
 }
 
 const GoldPost: React.FC<GoldPostProps> = ({ onBuyNow }) => {
-
   const navigate = useNavigate();
 
   const handleMessageClick = () => {
     navigate(`/feed/messages/${postData.id}`);
   };
-
 
   return (
     <div className="max-w-6xl mx-auto p-4 sm:p-6">
@@ -86,39 +59,26 @@ const GoldPost: React.FC<GoldPostProps> = ({ onBuyNow }) => {
             />
             <div>
               <div className="flex items-center gap-2">
-                <span className="text-base font-semibold text-gray-900">
-                  {postData.sellerName}
-                </span>
+                <span className="text-base font-semibold text-gray-900">{postData.sellerName}</span>
                 <span className="flex items-center gap-1 px-2 py-1.5 text-xs font-semibold bg-yellow-400 rounded-sm">
                   <AiFillStar size={16} /> {postData.status}
                 </span>
-                <button className="text-sm font-medium text-pink-600 hover:text-pink-700 transition-colors">
-                  + Follow
-                </button>
+                <button className="text-sm font-medium text-pink-600 hover:text-pink-700 transition-colors">+ Follow</button>
               </div>
-              <p className="text-xs text-gray-500">
-                Posted {postData.timePosted}
-              </p>
+              <p className="text-xs text-gray-500">Posted {postData.timePosted}</p>
             </div>
           </div>
           <BsThreeDots className="w-5 h-5 text-gray-500 cursor-pointer hover:text-gray-700" />
         </div>
 
         {/* Title */}
-        <h2 className="text-lg font-bold text-gray-900 mb-2">
-          {postData.title}
-        </h2>
-        <p className="text-gray-700 text-sm mb-4 leading-relaxed">
-          {postData.description}
-        </p>
+        <h2 className="text-lg font-bold text-gray-900 mb-2">{postData.title}</h2>
+        <p className="text-gray-700 text-sm mb-4 leading-relaxed">{postData.description}</p>
 
         {/* Product Images */}
         <div className="grid grid-cols-2 gap-3 mb-4">
           {postData.imageUrls.map((src, index) => (
-            <div
-              key={index}
-              className="aspect-[4/3] overflow-hidden rounded-lg shadow-sm"
-            >
+            <div key={index} className="aspect-[4/3] overflow-hidden rounded-lg shadow-sm">
               <img
                 src={src}
                 alt={`Product ${index + 1}`}
@@ -148,18 +108,17 @@ const GoldPost: React.FC<GoldPostProps> = ({ onBuyNow }) => {
               <FiShoppingCart className="w-5 h-5" />
               <span className="font-semibold text-sm">Cart</span>
             </button>
-            <button  onClick={handleMessageClick} className="px-3 py-2 border border-gray-200 rounded-lg text-gray-700 font-semibold hover:bg-gray-50 transition duration-150">
+            <button onClick={handleMessageClick} className="px-3 py-2 border border-gray-200 rounded-lg text-gray-700 font-semibold hover:bg-gray-50 transition duration-150">
               Message
             </button>
             <button
-              onClick={() =>
-                onBuyNow?.({
-                  title: postData.title,
-                  price: postData.price,
-                  imageUrls: postData.imageUrls,
-                  description: postData.description,
-                })
-              }
+              onClick={() => onBuyNow?.({
+                id: postData.id,
+                title: postData.title,
+                price: postData.price,
+                imageUrls: postData.imageUrls,
+                description: postData.description,
+              })}
               className="px-4 py-2 bg-pink-600 text-white font-semibold rounded-lg shadow hover:bg-pink-700 transition duration-150"
             >
               Buy Now
@@ -204,11 +163,8 @@ const GoldPost: React.FC<GoldPostProps> = ({ onBuyNow }) => {
 
         {/* Comments */}
         <div className="mt-4 space-y-3">
-          {postData.comments.map((comment) => (
-            <div
-              key={comment.id}
-              className="flex items-start gap-3 pb-3 border-b border-gray-50 last:border-0"
-            >
+          {postData.commentsList.map((comment) => (
+            <div key={comment.id} className="flex items-start gap-3 pb-3 border-b border-gray-50 last:border-0">
               <img
                 src={comment.imageUrl}
                 alt={comment.user}
@@ -216,9 +172,7 @@ const GoldPost: React.FC<GoldPostProps> = ({ onBuyNow }) => {
               />
               <div className="flex-1">
                 <div className="bg-gray-50 px-3 py-2 rounded-lg">
-                  <span className="text-sm font-semibold text-gray-800 block">
-                    {comment.user}
-                  </span>
+                  <span className="text-sm font-semibold text-gray-800 block">{comment.user}</span>
                   <p className="text-sm text-gray-700">{comment.text}</p>
                 </div>
                 <div className="flex items-center gap-4 mt-1 ml-2 text-xs text-gray-500">

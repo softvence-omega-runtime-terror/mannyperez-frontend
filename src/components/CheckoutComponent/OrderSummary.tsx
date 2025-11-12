@@ -1,4 +1,3 @@
-// src/components/CheckoutComponent/OrderSummary.tsx
 import { ProductType } from "@/lib/types";
 import React from "react";
 
@@ -22,7 +21,9 @@ const OrderSummary: React.FC<Props> = ({ product }) => {
           </p>
         </div>
         <div className="text-right">
-          <p className="text-md font-medium text-gray-600">{product.price} each</p>
+          <p className="text-md font-medium text-gray-600">
+            {product.price} each
+          </p>
           <p className="text-lg font-bold">{product.price}</p>
         </div>
       </div>
