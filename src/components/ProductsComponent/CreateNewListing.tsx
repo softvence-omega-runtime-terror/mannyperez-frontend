@@ -1,12 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import {
-  Calendar as CalendarIcon,
-  Plus,
-  CheckCircle2,
-  XCircle,
-} from "lucide-react";
+import { Calendar as CalendarIcon, Plus, CheckCircle2 } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -27,6 +22,9 @@ import { format } from "date-fns";
 import { DayPicker } from "react-day-picker";
 import "react-day-picker/dist/style.css";
 import { useCreateLiveStreamMutation } from "@/store/services/liveStreamApi";
+import { useForm, Controller } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import * as z from "zod";
 
 // Popover wrappers
 const Popover = ({ children }: any) => (
@@ -80,25 +78,26 @@ const generateTimeOptions = () => {
 const generateDurationOptions = () =>
   Array.from({ length: 12 }, (_, i) => (i + 1) * 5);
 
+// Zod schema for validation
+const schema = z.object({
+  date: z.date({ error: "Date is required" }),
+  time: z.string().min(1, "Time is required"),
+  duration: z.number().min(1, "Duration is required"),
+  title: z.string().min(1, "Title is required"),
+  description: z.string().min(1, "Description is required"),
+  paymentMethod: z.string().min(1, "Payment method is required"),
+});
+
+type FormValues = z.infer<typeof schema>;
+
 const CreateNewListing = () => {
   const navigate = useNavigate();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [step, setStep] = useState(1);
-  const [errorMsg, setErrorMsg] = useState("");
-
-  const [date, setDate] = useState<Date | undefined>();
-  const [time, setTime] = useState<string | undefined>();
-  const [duration, setDuration] = useState<number | undefined>();
-  const [title, setTitle] = useState<string>("");
-  const [description, setDescription] = useState<string>("");
-
   const [selectedPromos, setSelectedPromos] = useState<string[]>([]);
-  const [paymentMethod, setPaymentMethod] = useState<string>(
-    "**** **** **** 4242 (Visa)"
-  );
+  const [isCalendarOpen, setIsCalendarOpen] = useState(false);
 
   const [createLiveStream] = useCreateLiveStreamMutation();
-  const [isCalendarOpen, setIsCalendarOpen] = useState(false);
 
   const promoOptions = [
     {
@@ -146,37 +145,51 @@ const CreateNewListing = () => {
     },
   ];
 
-  const handleNext = () => {
-    setErrorMsg("");
-    if (step < 5) setStep(step + 1);
+  const {
+    control,
+    register,
+    watch,
+    trigger,
+    formState: { errors },
+  } = useForm<FormValues>({
+    resolver: zodResolver(schema),
+    defaultValues: {
+      date: undefined,
+      time: "",
+      duration: undefined,
+      title: "",
+      description: "",
+      paymentMethod: "**** **** **** 4242 (Visa)",
+    },
+    mode: "onBlur",
+  });
+
+  const currentValues = watch();
+
+  const handleNext = async () => {
+    let valid = false;
+    if (step === 1) valid = await trigger(["date", "time", "duration"]);
+    else if (step === 2) valid = await trigger(["title", "description"]);
+    else if (step === 4) valid = await trigger(["paymentMethod"]);
+    else valid = true;
+
+    if (valid) setStep(step + 1);
   };
 
-  const handlePrevious = () => {
-    setErrorMsg("");
-    if (step > 1) setStep(step - 1);
-  };
-
-  const handleDone = () => {
-    setStep(1);
-    setIsDialogOpen(false);
-    setErrorMsg("");
-  };
+  const handlePrevious = () => setStep(step - 1);
 
   const handleLiveStream = async () => {
-    setErrorMsg("");
-    if (!date || !time || !duration || !title || !description) {
-      setErrorMsg("All fields are required before submitting.");
-      return;
-    }
+    const isValid = await trigger();
+    if (!isValid) return;
 
     const payload = {
-      title,
-      description,
-      startAt: date.toISOString(),
-      time,
-      durationMinutes: duration,
+      title: currentValues.title,
+      description: currentValues.description,
+      startAt: currentValues.date!.toISOString(),
+      time: currentValues.time,
+      durationMinutes: currentValues.duration,
       promos: selectedPromos,
-      paymentMethod,
+      paymentMethod: currentValues.paymentMethod,
       totalCost,
     };
 
@@ -185,9 +198,6 @@ const CreateNewListing = () => {
       setStep(5);
     } catch (err: any) {
       console.error("Create live stream failed:", err);
-      setErrorMsg(
-        err?.data?.message || "Failed to create live stream. Try again."
-      );
     }
   };
 
@@ -225,7 +235,7 @@ const CreateNewListing = () => {
           </DialogHeader>
 
           {/* STEP 1 */}
-          {step === 1 && (
+          {/* {step === 1 && (
             <div className="space-y-6 mt-4">
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 <Popover>
@@ -233,62 +243,214 @@ const CreateNewListing = () => {
                     <Button
                       variant="outline"
                       className={`w-full justify-start text-left font-normal ${
-                        !date ? "text-muted-foreground" : ""
+                        !currentValues.date ? "text-muted-foreground" : ""
                       }`}
                       onClick={() => setIsCalendarOpen(!isCalendarOpen)}
                     >
                       <CalendarIcon className="mr-2 h-4 w-4" />
-                      {date ? format(date, "PPP") : <span>Select Date</span>}
+                      {currentValues.date ? (
+                        format(currentValues.date, "PPP")
+                      ) : (
+                        <span>Select Date</span>
+                      )}
                     </Button>
                   </PopoverTrigger>
                   {isCalendarOpen && (
                     <PopoverContent className="p-0">
-                      <Calendar
-                        selected={date}
-                        onSelect={setDate}
-                        closePopover={() => setIsCalendarOpen(false)}
+                      <Controller
+                        control={control}
+                        name="date"
+                        render={({ field }) => (
+                          <Calendar
+                            selected={field.value}
+                            onSelect={field.onChange}
+                            closePopover={() => setIsCalendarOpen(false)}
+                          />
+                        )}
                       />
                     </PopoverContent>
                   )}
                 </Popover>
 
-                <Select
-                  value={time}
-                  onValueChange={setTime}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Choose Time" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {generateTimeOptions().map((t) => (
-                      <SelectItem
-                        key={t}
-                        value={t}
-                      >
-                        {t}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <Controller
+                  control={control}
+                  name="time"
+                  render={({ field }) => (
+                    <Select
+                      value={field.value}
+                      onValueChange={field.onChange}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Choose Time" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {generateTimeOptions().map((t) => (
+                          <SelectItem
+                            key={t}
+                            value={t}
+                          >
+                            {t}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  )}
+                />
+                {errors.time && (
+                  <p className="text-red-600 text-sm">{errors.time.message}</p>
+                )}
 
-                <Select
-                  value={duration?.toString()}
-                  onValueChange={(v) => setDuration(parseInt(v))}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Duration" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {generateDurationOptions().map((d) => (
-                      <SelectItem
-                        key={d}
-                        value={d.toString()}
+                <Controller
+                  control={control}
+                  name="duration"
+                  render={({ field }) => (
+                    <Select
+                      value={field.value?.toString()}
+                      onValueChange={(v) => field.onChange(parseInt(v))}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Duration" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {generateDurationOptions().map((d) => (
+                          <SelectItem
+                            key={d}
+                            value={d.toString()}
+                          >
+                            {d} min
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  )}
+                />
+                {errors.duration && (
+                  <p className="text-red-600 text-sm">
+                    {errors.duration.message}
+                  </p>
+                )}
+              </div>
+              {errors.date && (
+                <p className="text-red-600 text-sm mt-1">
+                  {errors.date.message}
+                </p>
+              )}
+            </div>
+          )} */}
+
+          {/* STEP 1 */}
+          {/* STEP 1 */}
+          {step === 1 && (
+            <div className="space-y-6 mt-4">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                {/* Date Picker */}
+                <div className="flex flex-col">
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button
+                        variant="outline"
+                        className={`w-full justify-start text-left font-normal ${
+                          !currentValues.date ? "text-muted-foreground" : ""
+                        }`}
+                        onClick={() => setIsCalendarOpen(!isCalendarOpen)}
                       >
-                        {d} min
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                        <CalendarIcon className="mr-2 h-4 w-4" />
+                        {currentValues.date ? (
+                          format(currentValues.date, "PPP")
+                        ) : (
+                          <span>Select Date</span>
+                        )}
+                      </Button>
+                    </PopoverTrigger>
+                    {isCalendarOpen && (
+                      <PopoverContent className="p-0">
+                        <Controller
+                          control={control}
+                          name="date"
+                          render={({ field }) => (
+                            <Calendar
+                              selected={field.value}
+                              onSelect={field.onChange}
+                              closePopover={() => setIsCalendarOpen(false)}
+                            />
+                          )}
+                        />
+                      </PopoverContent>
+                    )}
+                  </Popover>
+                  {/* Inline error (better UI) */}
+                  {errors.date && (
+                    <span className="mt-1 text-red-700 text-sm font-medium">
+                      {errors.date.message}
+                    </span>
+                  )}
+                </div>
+
+                {/* Time Picker */}
+                <div className="flex flex-col">
+                  <Controller
+                    control={control}
+                    name="time"
+                    render={({ field }) => (
+                      <Select
+                        value={field.value}
+                        onValueChange={field.onChange}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Choose Time" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {generateTimeOptions().map((t) => (
+                            <SelectItem
+                              key={t}
+                              value={t}
+                            >
+                              {t}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    )}
+                  />
+                  {errors.time && (
+                    <span className="mt-1 text-red-700 text-sm font-medium">
+                      {errors.time.message}
+                    </span>
+                  )}
+                </div>
+
+                {/* Duration Picker */}
+                <div className="flex flex-col">
+                  <Controller
+                    control={control}
+                    name="duration"
+                    render={({ field }) => (
+                      <Select
+                        value={field.value?.toString()}
+                        onValueChange={(v) => field.onChange(parseInt(v))}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Duration" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {generateDurationOptions().map((d) => (
+                            <SelectItem
+                              key={d}
+                              value={d.toString()}
+                            >
+                              {d} min
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    )}
+                  />
+                  {errors.duration && (
+                    <span className="mt-1 text-red-700 text-sm font-medium">
+                      {errors.duration.message}
+                    </span>
+                  )}
+                </div>
               </div>
             </div>
           )}
@@ -304,9 +466,11 @@ const CreateNewListing = () => {
                   type="text"
                   className="w-full border rounded p-2"
                   placeholder="Enter event title"
-                  value={title}
-                  onChange={(e) => setTitle(e.target.value)}
+                  {...register("title")}
                 />
+                {errors.title && (
+                  <p className="text-red-600 text-sm">{errors.title.message}</p>
+                )}
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -316,9 +480,13 @@ const CreateNewListing = () => {
                   className="w-full border rounded p-2"
                   placeholder="Enter event description"
                   rows={4}
-                  value={description}
-                  onChange={(e) => setDescription(e.target.value)}
+                  {...register("description")}
                 />
+                {errors.description && (
+                  <p className="text-red-600 text-sm">
+                    {errors.description.message}
+                  </p>
+                )}
               </div>
             </div>
           )}
@@ -391,30 +559,34 @@ const CreateNewListing = () => {
                 <label className="block text-sm font-medium mb-2">
                   Payment Method
                 </label>
-                <Select
-                  value={paymentMethod}
-                  onValueChange={setPaymentMethod}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select Payment Method" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="**** **** **** 4242 (Visa)">
-                      **** **** **** 4242 (Visa)
-                    </SelectItem>
-                    <SelectItem value="**** **** **** 1111 (Mastercard)">
-                      **** **** **** 1111 (Mastercard)
-                    </SelectItem>
-                  </SelectContent>
-                </Select>
+                <Controller
+                  control={control}
+                  name="paymentMethod"
+                  render={({ field }) => (
+                    <Select
+                      value={field.value}
+                      onValueChange={field.onChange}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select Payment Method" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="**** **** **** 4242 (Visa)">
+                          **** **** **** 4242 (Visa)
+                        </SelectItem>
+                        <SelectItem value="**** **** **** 1111 (Mastercard)">
+                          **** **** **** 1111 (Mastercard)
+                        </SelectItem>
+                      </SelectContent>
+                    </Select>
+                  )}
+                />
+                {errors.paymentMethod && (
+                  <p className="text-red-600 text-sm mt-1">
+                    {errors.paymentMethod.message}
+                  </p>
+                )}
               </div>
-
-              {errorMsg && (
-                <div className="flex items-center text-red-600 text-sm mt-2">
-                  <XCircle className="h-4 w-4 mr-1" />
-                  {errorMsg}
-                </div>
-              )}
             </div>
           )}
 
@@ -454,9 +626,7 @@ const CreateNewListing = () => {
                   Cancel
                 </Button>
                 <Button
-                  onClick={() =>
-                    step === 4 ? handleLiveStream() : handleNext()
-                  }
+                  onClick={step === 4 ? handleLiveStream : handleNext}
                   className={
                     step === 4 ? "bg-[#D82479] hover:bg-[#c41f6d]" : ""
                   }
@@ -470,7 +640,10 @@ const CreateNewListing = () => {
           {step === 5 && (
             <div className="mt-8 flex justify-center">
               <Button
-                onClick={handleDone}
+                onClick={() => {
+                  setStep(1);
+                  setIsDialogOpen(false);
+                }}
                 className="bg-[#D82479] hover:bg-[#c41f6d]"
               >
                 Done
