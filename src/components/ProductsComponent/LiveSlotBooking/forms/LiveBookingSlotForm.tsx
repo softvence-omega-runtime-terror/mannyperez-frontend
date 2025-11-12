@@ -62,7 +62,10 @@ export default function LiveBookingSlotForm({
         paymentStatus: "pending",
       }).unwrap();
 
+      console.log(res);
+
       if (res.success) {
+        setShowSuccessModal(true);
         setFormData({
           date: new Date().toString(),
           time: "",
@@ -71,8 +74,7 @@ export default function LiveBookingSlotForm({
           description: "",
           promoAddOn: [],
         });
-        onOpenChange(false);
-        setShowSuccessModal(true);
+        // onOpenChange(false);
       }
     } catch (error) {
       console.log(error);
@@ -153,6 +155,7 @@ export default function LiveBookingSlotForm({
         open={showSuccessModal}
         onClose={() => {
           setShowSuccessModal(false);
+          onOpenChange(false);
         }}
       />
     </>

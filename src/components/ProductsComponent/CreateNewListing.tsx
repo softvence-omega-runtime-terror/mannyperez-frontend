@@ -1,7 +1,12 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Calendar as CalendarIcon, Plus, CheckCircle2 } from "lucide-react";
+import {
+  Calendar as CalendarIcon,
+  Plus,
+  CheckCircle2,
+  XCircle,
+} from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -21,24 +26,32 @@ import {
 import { format } from "date-fns";
 import { DayPicker } from "react-day-picker";
 import "react-day-picker/dist/style.css";
+import { useCreateLiveStreamMutation } from "@/store/services/liveStreamApi";
 
 // Popover wrappers
-const Popover = ({ children }: any) => <div className="relative">{children}</div>;
+const Popover = ({ children }: any) => (
+  <div className="relative">{children}</div>
+);
 const PopoverTrigger = ({ children }: any) => <>{children}</>;
 const PopoverContent = ({ children, className }: any) => (
-  <div className={`absolute z-50 mt-2 bg-white shadow-md rounded-lg ${className}`}>
+  <div
+    className={`absolute z-50 mt-2 bg-white shadow-md rounded-lg ${className}`}
+  >
     {children}
   </div>
 );
 
-// Calendar component
 type InlineCalendarProps = {
   selected?: Date | undefined;
   onSelect: (date: Date | undefined) => void;
   closePopover?: () => void;
 };
 
-const Calendar = ({ selected, onSelect, closePopover }: InlineCalendarProps) => (
+const Calendar = ({
+  selected,
+  onSelect,
+  closePopover,
+}: InlineCalendarProps) => (
   <div className="p-2">
     <DayPicker
       mode="single"
@@ -51,7 +64,6 @@ const Calendar = ({ selected, onSelect, closePopover }: InlineCalendarProps) => 
   </div>
 );
 
-// Generate 12-hour time options with AM/PM
 const generateTimeOptions = () => {
   const times: string[] = [];
   for (let h = 0; h < 24; h++) {
@@ -65,13 +77,14 @@ const generateTimeOptions = () => {
   return times;
 };
 
-// Generate durations 5–60 min
-const generateDurationOptions = () => Array.from({ length: 12 }, (_, i) => (i + 1) * 5);
+const generateDurationOptions = () =>
+  Array.from({ length: 12 }, (_, i) => (i + 1) * 5);
 
 const CreateNewListing = () => {
   const navigate = useNavigate();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [step, setStep] = useState(1);
+  const [errorMsg, setErrorMsg] = useState("");
 
   const [date, setDate] = useState<Date | undefined>();
   const [time, setTime] = useState<string | undefined>();
@@ -80,18 +93,32 @@ const CreateNewListing = () => {
   const [description, setDescription] = useState<string>("");
 
   const [selectedPromos, setSelectedPromos] = useState<string[]>([]);
-  const [paymentMethod, setPaymentMethod] = useState<string>("**** **** **** 4242 (Visa)");
+  const [paymentMethod, setPaymentMethod] = useState<string>(
+    "**** **** **** 4242 (Visa)"
+  );
 
-  const togglePromo = (promo: string) => {
-    setSelectedPromos((prev) =>
-      prev.includes(promo) ? prev.filter((p) => p !== promo) : [...prev, promo]
-    );
-  };
+  const [createLiveStream] = useCreateLiveStreamMutation();
+  const [isCalendarOpen, setIsCalendarOpen] = useState(false);
 
   const promoOptions = [
-    { id: "homepage", label: "Homepage Feature", desc: "Featured prominently on marketplace homepage", price: 25 },
-    { id: "email", label: "Email Blast", desc: "Notify all marketplace subscribers", price: 20 },
-    { id: "buyer", label: "Buyer Notifications", desc: "Push notifications to interested buyers", price: 10 },
+    {
+      id: "homepage",
+      label: "Homepage Feature",
+      desc: "Featured on homepage",
+      price: 25,
+    },
+    {
+      id: "email",
+      label: "Email Blast",
+      desc: "Notify all subscribers",
+      price: 20,
+    },
+    {
+      id: "buyer",
+      label: "Buyer Notifications",
+      desc: "Push to interested buyers",
+      price: 10,
+    },
   ];
 
   const liveSlotFee = 150;
@@ -99,8 +126,6 @@ const CreateNewListing = () => {
     .filter((p) => selectedPromos.includes(p.id))
     .reduce((acc, curr) => acc + curr.price, 0);
   const totalCost = liveSlotFee + selectedPromoTotal;
-
-  const [isCalendarOpen, setIsCalendarOpen] = useState(false);
 
   const actions = [
     {
@@ -122,21 +147,52 @@ const CreateNewListing = () => {
   ];
 
   const handleNext = () => {
+    setErrorMsg("");
     if (step < 5) setStep(step + 1);
   };
 
   const handlePrevious = () => {
+    setErrorMsg("");
     if (step > 1) setStep(step - 1);
   };
 
   const handleDone = () => {
     setStep(1);
     setIsDialogOpen(false);
+    setErrorMsg("");
+  };
+
+  const handleLiveStream = async () => {
+    setErrorMsg("");
+    if (!date || !time || !duration || !title || !description) {
+      setErrorMsg("All fields are required before submitting.");
+      return;
+    }
+
+    const payload = {
+      title,
+      description,
+      startAt: date.toISOString(),
+      time,
+      durationMinutes: duration,
+      promos: selectedPromos,
+      paymentMethod,
+      totalCost,
+    };
+
+    try {
+      await createLiveStream(payload).unwrap();
+      setStep(5);
+    } catch (err: any) {
+      console.error("Create live stream failed:", err);
+      setErrorMsg(
+        err?.data?.message || "Failed to create live stream. Try again."
+      );
+    }
   };
 
   return (
     <>
-      {/* Action Buttons */}
       <div className="lg:flex space-y-6 lg:space-y-0 gap-6 w-full">
         {actions.map((item) => (
           <div
@@ -144,7 +200,9 @@ const CreateNewListing = () => {
             onClick={item.onClick}
             className="cursor-pointer flex-1 border w-full px-8 py-16 rounded-2xl grid place-content-center place-items-center bg-white hover:shadow-md transition"
           >
-            <div className={`size-14 rounded-full mb-8 ${item.iconBg} grid place-items-center`}>
+            <div
+              className={`size-14 rounded-full mb-8 ${item.iconBg} grid place-items-center`}
+            >
               <item.icon className="text-white" />
             </div>
             <h3 className="text-lg font-semibold">{item.title}</h3>
@@ -153,17 +211,20 @@ const CreateNewListing = () => {
         ))}
       </div>
 
-      {/* Book Live Slot Modal */}
-      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+      <Dialog
+        open={isDialogOpen}
+        onOpenChange={setIsDialogOpen}
+      >
         <DialogContent className="sm:max-w-2xl w-full">
           <DialogHeader>
             <DialogTitle>Book Live Slot</DialogTitle>
             <DialogDescription>
-              Schedule your live selling session. Buyers will join through marketplace live events.
+              Schedule your live selling session. Buyers will join through
+              marketplace live events.
             </DialogDescription>
           </DialogHeader>
 
-          {/* Step 1: Date, Time, Duration */}
+          {/* STEP 1 */}
           {step === 1 && (
             <div className="space-y-6 mt-4">
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
@@ -191,13 +252,19 @@ const CreateNewListing = () => {
                   )}
                 </Popover>
 
-                <Select value={time} onValueChange={setTime}>
+                <Select
+                  value={time}
+                  onValueChange={setTime}
+                >
                   <SelectTrigger>
                     <SelectValue placeholder="Choose Time" />
                   </SelectTrigger>
                   <SelectContent>
                     {generateTimeOptions().map((t) => (
-                      <SelectItem key={t} value={t}>
+                      <SelectItem
+                        key={t}
+                        value={t}
+                      >
                         {t}
                       </SelectItem>
                     ))}
@@ -213,7 +280,10 @@ const CreateNewListing = () => {
                   </SelectTrigger>
                   <SelectContent>
                     {generateDurationOptions().map((d) => (
-                      <SelectItem key={d} value={d.toString()}>
+                      <SelectItem
+                        key={d}
+                        value={d.toString()}
+                      >
                         {d} min
                       </SelectItem>
                     ))}
@@ -223,11 +293,13 @@ const CreateNewListing = () => {
             </div>
           )}
 
-          {/* Step 2: Event Title & Description */}
+          {/* STEP 2 */}
           {step === 2 && (
             <div className="space-y-6 mt-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Event Title</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Event Title
+                </label>
                 <input
                   type="text"
                   className="w-full border rounded p-2"
@@ -251,10 +323,12 @@ const CreateNewListing = () => {
             </div>
           )}
 
-          {/* Step 3: Select Promote Options */}
+          {/* STEP 3 */}
           {step === 3 && (
             <div className="mt-4">
-              <h4 className="text-lg font-semibold mb-3">Select Promote Options</h4>
+              <h4 className="text-lg font-semibold mb-3">
+                Select Promote Options
+              </h4>
               <div className="space-y-3">
                 {promoOptions.map((opt) => (
                   <div
@@ -265,7 +339,13 @@ const CreateNewListing = () => {
                       <input
                         type="checkbox"
                         checked={selectedPromos.includes(opt.id)}
-                        onChange={() => togglePromo(opt.id)}
+                        onChange={() =>
+                          setSelectedPromos((prev) =>
+                            prev.includes(opt.id)
+                              ? prev.filter((p) => p !== opt.id)
+                              : [...prev, opt.id]
+                          )
+                        }
                         className="mt-1 size-4"
                       />
                       <div>
@@ -280,7 +360,7 @@ const CreateNewListing = () => {
             </div>
           )}
 
-          {/* Step 4: Payment Summary */}
+          {/* STEP 4 */}
           {step === 4 && (
             <div className="mt-4 space-y-6">
               <h4 className="text-lg font-semibold">Payment Summary</h4>
@@ -292,7 +372,10 @@ const CreateNewListing = () => {
                 {promoOptions
                   .filter((p) => selectedPromos.includes(p.id))
                   .map((p) => (
-                    <div key={p.id} className="flex justify-between text-gray-700">
+                    <div
+                      key={p.id}
+                      className="flex justify-between text-gray-700"
+                    >
                       <p>{p.label}</p>
                       <p>${p.price}</p>
                     </div>
@@ -305,8 +388,13 @@ const CreateNewListing = () => {
               </div>
 
               <div>
-                <label className="block text-sm font-medium mb-2">Payment Method</label>
-                <Select value={paymentMethod} onValueChange={setPaymentMethod}>
+                <label className="block text-sm font-medium mb-2">
+                  Payment Method
+                </label>
+                <Select
+                  value={paymentMethod}
+                  onValueChange={setPaymentMethod}
+                >
                   <SelectTrigger>
                     <SelectValue placeholder="Select Payment Method" />
                   </SelectTrigger>
@@ -320,35 +408,58 @@ const CreateNewListing = () => {
                   </SelectContent>
                 </Select>
               </div>
+
+              {errorMsg && (
+                <div className="flex items-center text-red-600 text-sm mt-2">
+                  <XCircle className="h-4 w-4 mr-1" />
+                  {errorMsg}
+                </div>
+              )}
             </div>
           )}
 
-          {/* Step 5: Success Message */}
+          {/* STEP 5 SUCCESS */}
           {step === 5 && (
             <div className="text-center py-12">
-              <CheckCircle2 className="mx-auto mb-4 text-green-500" size={60} />
-              <h3 className="text-2xl font-semibold mb-2">Booking Confirmed!</h3>
+              <CheckCircle2
+                className="mx-auto mb-4 text-green-500"
+                size={60}
+              />
+              <h3 className="text-2xl font-semibold mb-2">
+                Booking Confirmed!
+              </h3>
               <p className="text-gray-600">
-                Your live slot has been successfully booked. We’ll send confirmation shortly.
+                Your live slot has been successfully booked. We’ll send
+                confirmation shortly.
               </p>
             </div>
           )}
 
-          {/* Footer Navigation */}
+          {/* FOOTER */}
           {step < 5 && (
             <DialogFooter className="mt-6 flex justify-between">
               {step > 1 && (
-                <Button variant="outline" onClick={handlePrevious}>
+                <Button
+                  variant="outline"
+                  onClick={handlePrevious}
+                >
                   Back
                 </Button>
               )}
               <div className="ml-auto space-x-2">
-                <Button variant="outline" onClick={() => setIsDialogOpen(false)}>
+                <Button
+                  variant="outline"
+                  onClick={() => setIsDialogOpen(false)}
+                >
                   Cancel
                 </Button>
                 <Button
-                  onClick={() => (step === 4 ? setStep(5) : handleNext())}
-                  className={step === 4 ? "bg-[#D82479] hover:bg-[#c41f6d]" : ""}
+                  onClick={() =>
+                    step === 4 ? handleLiveStream() : handleNext()
+                  }
+                  className={
+                    step === 4 ? "bg-[#D82479] hover:bg-[#c41f6d]" : ""
+                  }
                 >
                   {step === 4 ? "Submit Booking" : "Next Step"}
                 </Button>
@@ -358,7 +469,10 @@ const CreateNewListing = () => {
 
           {step === 5 && (
             <div className="mt-8 flex justify-center">
-              <Button onClick={handleDone} className="bg-[#D82479] hover:bg-[#c41f6d]">
+              <Button
+                onClick={handleDone}
+                className="bg-[#D82479] hover:bg-[#c41f6d]"
+              >
                 Done
               </Button>
             </div>
@@ -370,4 +484,3 @@ const CreateNewListing = () => {
 };
 
 export default CreateNewListing;
-
