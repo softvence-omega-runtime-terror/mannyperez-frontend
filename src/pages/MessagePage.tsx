@@ -82,6 +82,10 @@ const MessagingPage = () => {
 
   if (productLoading || receiverLoading) return <div>Loading...</div>;
 
+  if (!product || !receiver || !user) return <div>
+    Select a Conversation
+  </div>;
+
   return (
     <div className="w-full bg-white rounded-xl shadow p-6">
       <h2 className="text-xl font-bold mb-4">

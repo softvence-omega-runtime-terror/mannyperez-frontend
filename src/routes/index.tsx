@@ -21,6 +21,7 @@ import Promotions from "@/components/SellersComponent/Promotions";
 import Orders from "@/components/BuyerCompnents/Orders";
 import SavedItems from "@/components/BuyerCompnents/SavedItems";
 import OrdersList from "@/components/SellersComponent/OrdersList";
+import SellerMessagePage from "@/pages/SellerMessagePage";
 
 // Simple auth check function
 const checkAuth = (options?: {
@@ -149,6 +150,12 @@ const routes = createBrowserRouter([
       {
         path: "/seller/profile",
         element: <SellerProfile />,
+        loader: () =>
+          checkAuth({ requireAuth: false, allowedRoles: ["seller", "admin"] }),
+      },
+      {
+        path: "seller/messages",
+        element: <SellerMessagePage />,
         loader: () =>
           checkAuth({ requireAuth: false, allowedRoles: ["seller", "admin"] }),
       },

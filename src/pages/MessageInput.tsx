@@ -1,10 +1,10 @@
-import { socket, SocketEvent } from "@/lib/socket";
 import { useState } from "react";
+import { socket, SocketEvent } from "@/lib/socket";
 
-type Props = {
+interface Props {
   receiverId: string;
   productId: string;
-};
+}
 
 const MessageInput = ({ receiverId, productId }: Props) => {
   const [text, setText] = useState("");
@@ -13,14 +13,8 @@ const MessageInput = ({ receiverId, productId }: Props) => {
     const msg = text.trim();
     if (!msg) return;
 
-    // ✅ Emit payload matching Zod validation
     socket.emit(SocketEvent.SEND_MESSAGE, {
-      payload: {
-        message: {
-          text: msg,
-          // mediaUrl and mediaType can be added here later
-        },
-      },
+      payload: { message: { text: msg } },
       receiverId,
       productId,
     });
@@ -29,10 +23,10 @@ const MessageInput = ({ receiverId, productId }: Props) => {
   };
 
   return (
-    <div className="flex items-center mt-6 space-x-3">
+    <div className="flex items-center mt-4 space-x-3">
       <input
         type="text"
-        placeholder="Write a message"
+        placeholder="Write a message..."
         className="flex-1 border border-gray-300 rounded-full px-4 py-2 focus:outline-none focus:border-pink-500"
         value={text}
         onChange={(e) => setText(e.target.value)}
