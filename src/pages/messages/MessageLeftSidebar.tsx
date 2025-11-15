@@ -1,25 +1,51 @@
 // src/components/Messages/MessageLeftSidebar.tsx
-import React from "react";
+import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { socket, SocketEvent } from "@/lib/socket";
 
-interface Conversation {
-  id: string;
-  avatar: string;
-  name: string;
-  message: string;
-  product?: string;
-  time: string;
+export type Conversation = {
+  _id: string;
+  otherUser: {
+    _id: string;
+    name?: string;
+    email?: string;
+    avatar?: string;
+  };
+  product?: {
+    _id: string;
+    productInformation?: { title?: string };
+  };
+  lastMessage?: string;
   unreadCount?: number;
-}
+  time?: string;
+};
 
-interface MessageLeftSidebarProps {
-  conversations?: Conversation[];
-  onSelectConversation?: (id: string) => void;
-}
+const MessageLeftSidebar: React.FC = () => {
+  const [conversations, setConversations] = useState<Conversation[]>([]);
+  const navigate = useNavigate();
 
-const MessageLeftSidebar: React.FC<MessageLeftSidebarProps> = ({
-  conversations = [],
-  onSelectConversation,
-}) => {
+  useEffect(() => {
+    // Request conversations from server
+    socket.emit(SocketEvent.LOAD_CONTACTS);
+
+    const handleContactsLoaded = (data: { conversations: Conversation[] }) => {
+      setConversations(data.conversations || []);
+    };
+
+    socket.on(SocketEvent.CONTACTS_LOADED, handleContactsLoaded);
+
+    return () => {
+      socket.off(SocketEvent.CONTACTS_LOADED, handleContactsLoaded);
+    };
+  }, []);
+
+  const handleSelectConversation = (conversation: Conversation) => {
+    // Navigate to chat page with conversation state
+    navigate(
+      `/feed/messages/${conversation.otherUser._id}/${conversation.product?._id}`
+    );
+  };
+
   return (
     <div className="bg-white p-4 shadow min-h-[calc(100vh-100px)] rounded-xl border border-gray-100">
       <h2 className="text-xl font-bold mb-4">Messages</h2>
@@ -33,21 +59,27 @@ const MessageLeftSidebar: React.FC<MessageLeftSidebarProps> = ({
       {conversations.length > 0 ? (
         conversations.map((c) => (
           <div
-            key={c.id}
+            key={c._id}
             className="flex items-start justify-between p-2 rounded-lg cursor-pointer hover:bg-pink-50 mb-2"
-            onClick={() => onSelectConversation?.(c.id)}
+            onClick={() => handleSelectConversation(c)}
           >
             <div className="flex items-start space-x-3">
               <img
-                src={c.avatar}
-                alt={c.name}
+                src={c.otherUser.avatar || "/default-avatar.png"}
+                alt={c.otherUser.name || c.otherUser.email || "User"}
                 className="w-10 h-10 rounded-full object-cover"
               />
               <div>
-                <p className="text-sm font-semibold text-gray-800">{c.name}</p>
-                <p className="text-xs text-gray-500">{c.message}</p>
-                {c.product && (
-                  <p className="text-xs text-pink-600">{c.product}</p>
+                <p className="text-sm font-semibold text-gray-800">
+                  {c.otherUser.name || c.otherUser.email}
+                </p>
+                {/* {c.lastMessage && (
+                  <p className="text-xs text-gray-500">{c.lastMessage}</p>
+                )} */}
+                {c.product?.productInformation?.title && (
+                  <p className="text-xs text-pink-600">
+                    {c.product.productInformation.title}
+                  </p>
                 )}
               </div>
             </div>

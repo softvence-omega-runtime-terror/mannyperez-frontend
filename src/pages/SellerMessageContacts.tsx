@@ -1,4 +1,6 @@
 import { socket, SocketEvent } from "@/lib/socket";
+import { useAppDispatch } from "@/store/hooks";
+import { setConversation } from "@/store/slices/chatSlice";
 import { useEffect, useState } from "react";
 
 export type SellerMessageUser = {
@@ -17,25 +19,21 @@ type ConversationItem = {
   _id: string;
   otherUser: SellerMessageUser;
   product: SellerMessageProduct;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  lastMessage?: any;
+  lastMessage?: never;
   unreadCount?: number;
 };
 
-type Props = {
-  onSelectContact: (conversation: {
-    receiver: SellerMessageUser;
-    product: SellerMessageProduct;
-  }) => void;
-};
-
-const SellerMessageContacts: React.FC<Props> = ({ onSelectContact }) => {
+const SellerMessageContacts: React.FC = () => {
   const [conversations, setConversations] = useState<ConversationItem[]>([]);
+  const dispatch = useAppDispatch();
 
   useEffect(() => {
+    // Load contacts from server
     socket.emit(SocketEvent.LOAD_CONTACTS);
 
-    const handleContactsLoaded = (data: { conversations: ConversationItem[] }) => {
+    const handleContactsLoaded = (data: {
+      conversations: ConversationItem[];
+    }) => {
       setConversations(data.conversations || []);
     };
 
@@ -46,6 +44,13 @@ const SellerMessageContacts: React.FC<Props> = ({ onSelectContact }) => {
     };
   }, []);
 
+  const handleSelectConversation = (
+    receiver: SellerMessageUser,
+    product: SellerMessageProduct
+  ) => {
+    dispatch(setConversation({ receiver, product }));
+  };
+
   return (
     <div className="bg-white p-4 shadow min-h-[calc(100vh-100px)] rounded-xl border border-gray-100">
       <h2 className="text-xl font-bold mb-4">Contacts</h2>
@@ -54,7 +59,7 @@ const SellerMessageContacts: React.FC<Props> = ({ onSelectContact }) => {
           <div
             key={c._id}
             className="flex items-start justify-between p-2 rounded-lg cursor-pointer hover:bg-pink-50 mb-2"
-            onClick={() => onSelectContact({ receiver: c.otherUser, product: c.product })}
+            onClick={() => handleSelectConversation(c.otherUser, c.product)}
           >
             <div className="flex items-start space-x-3">
               <img
@@ -67,7 +72,9 @@ const SellerMessageContacts: React.FC<Props> = ({ onSelectContact }) => {
                   {c.otherUser.name || c.otherUser.email}
                 </p>
                 {c.product?.productInformation?.title && (
-                  <p className="text-xs text-pink-600">{c.product.productInformation.title}</p>
+                  <p className="text-xs text-pink-600">
+                    {c.product.productInformation.title}
+                  </p>
                 )}
               </div>
             </div>

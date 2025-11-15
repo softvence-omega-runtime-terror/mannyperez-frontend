@@ -95,7 +95,7 @@ const MessageList = ({ receiverId, productId }: Props) => {
   const productInfo = productData?.data.productInformation;
 
   return (
-    <div className="flex-1 flex flex-col relative overflow-hidden">
+    <div className="flex-1 flex flex-col relative overflow-y-auto max-h-screen">
       {/* Product Info */}
       <div className="sticky top-0 z-10 bg-white border-b flex items-center gap-4 px-4 py-2">
         {productInfo?.image && (
