@@ -22,8 +22,9 @@ export type Message = {
   receiver: MessageUser; // populated receiver info
   text?: string; // optional text
   mediaUrl?: string; // optional media URL
-  mediaType?: "image" | "video" | "pdf"; // optional media type
+  mediaType?: "image" | "video" | "pdf" | "document"; // optional media type
   status: "sent" | "delivered" | "read"; // status
+  fileName?: string; // optional file name
 };
 
 export type MessageProduct = {
