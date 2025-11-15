@@ -1,9 +1,11 @@
-// src/components/Messages/SellerChatWindow.tsx
 import { useEffect } from "react";
 import MessageInput from "./MessageInput";
 import MessageList from "./MessageList";
 import { socket, SocketEvent } from "@/lib/socket";
-import { SellerMessageProduct, SellerMessageUser } from "./SellerMessageContacts";
+import {
+  SellerMessageProduct,
+  SellerMessageUser,
+} from "./SellerMessageContacts";
 
 type Props = {
   product: SellerMessageProduct;
@@ -33,18 +35,25 @@ const SellerChatWindow: React.FC<Props> = ({ product, receiver }) => {
     return <h2 className="text-xl font-bold mb-4">No Conversation Selected</h2>;
 
   return (
-    <div className="flex-1 bg-white rounded-xl shadow p-4 flex flex-col">
-      <h2 className="text-xl font-bold mb-2 lg:hidden">
+    <div className="flex-1 flex flex-col h-full max-h-screen bg-white rounded-xl shadow">
+      {/* Mobile header */}
+      <div className="lg:hidden px-4 py-2 border-b flex items-center font-bold text-lg">
         Messaging for Post: {product?.productInformation?.title}
-      </h2>
-      <h3 className="text-sm text-gray-600 mb-2">Chat with {receiver.email}</h3>
-
-      <div className="flex-1 overflow-y-auto mb-4">
-        <MessageList productId={product._id} receiverId={receiver._id} />
       </div>
 
-      <div className="mt-auto">
-        <MessageInput productId={product._id} receiverId={receiver._id} />
+      {/* Chat area: messages + input */}
+      <div className="flex-1 flex flex-col overflow-hidden">
+        <MessageList
+          productId={product._id}
+          receiverId={receiver._id}
+        />
+
+        <div className="px-4 py-2 border-t flex-shrink-0">
+          <MessageInput
+            productId={product._id}
+            receiverId={receiver._id}
+          />
+        </div>
       </div>
     </div>
   );

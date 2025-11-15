@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useRef } from "react";
 import { socket, SocketEvent } from "@/lib/socket";
 import { FiPaperclip, FiSend, FiX } from "react-icons/fi";
 import { FaSpinner, FaFilePdf, FaFileWord, FaFileAlt } from "react-icons/fa";
@@ -12,47 +12,32 @@ interface Props {
 const MessageInput = ({ receiverId, productId }: Props) => {
   const [text, setText] = useState("");
   const [file, setFile] = useState<File | null>(null);
-  console.log("🚀 ~ MessageInput ~ file:", file);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [isUploading, setIsUploading] = useState(false);
+
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [fileUpload, { isLoading }] = useFileUploadMutation();
 
   // Generate preview for image/video
-  useEffect(() => {
-    if (!file) {
-      setPreviewUrl(null);
-      return;
-    }
+  const handleFileChange = (selectedFile: File) => {
+    setFile(selectedFile);
 
-    if (file.type.startsWith("image") || file.type.startsWith("video")) {
-      const url = URL.createObjectURL(file);
+    if (selectedFile.type.startsWith("image") || selectedFile.type.startsWith("video")) {
+      const url = URL.createObjectURL(selectedFile);
       setPreviewUrl(url);
-      return () => URL.revokeObjectURL(url);
-    }
-
-    setPreviewUrl(null);
-  }, [file]);
-
-  // Clear input & preview after message is sent
-  useEffect(() => {
-    const handleMessageAck = () => {
-      setText("");
-      setFile(null);
+    } else {
       setPreviewUrl(null);
-    };
-    socket.on(SocketEvent.MESSAGE_SENT_ACK, handleMessageAck);
-    return () => {
-      socket.off(SocketEvent.MESSAGE_SENT_ACK, handleMessageAck);
-    };
-  }, []);
+    }
+  };
 
-  const handleFileUpload = async () => {
-    if (!file) return null;
+  // Upload file to server
+  const handleFileUpload = async (uploadFile: File) => {
     try {
       setIsUploading(true);
+
       const formData = new FormData();
-      formData.append("file", file);
+      formData.append("file", uploadFile);
       formData.append("caption", text);
 
       const res = await fileUpload(formData);
@@ -67,87 +52,63 @@ const MessageInput = ({ receiverId, productId }: Props) => {
     }
   };
 
+  // Send message
   const handleSend = async () => {
-    const fileData = file ? await handleFileUpload() : null;
-    if (!text.trim() && !fileData) return;
+    if (!text.trim() && !file) return;
+
+    let fileData = null;
+    if (file) {
+      const currentFile = file;
+      // Clear state immediately to allow new attachments
+      setFile(null);
+      setPreviewUrl(null);
+      if (fileInputRef.current) fileInputRef.current.value = "";
+
+      fileData = await handleFileUpload(currentFile);
+    }
 
     const payload = {
       message: {
         text: text.trim(),
         mediaUrl: fileData?.fileUrl,
-        fileName: file?.name,
+        fileName: fileData?.fileName,
         mediaType: fileData?.mediaType,
       },
     };
 
-    socket.emit(SocketEvent.SEND_MESSAGE, {
-      payload,
-      receiverId,
-      productId,
-    });
+    socket.emit(SocketEvent.SEND_MESSAGE, { payload, receiverId, productId });
+    setText("");
   };
 
+  // Render file preview
   const renderFilePreview = () => {
     if (!file) return null;
 
-    // Images
-    if (file.type.startsWith("image")) {
-      return (
-        <img
-          src={previewUrl!}
-          alt="preview"
-          className="max-h-40 rounded-md object-cover"
-        />
-      );
-    }
+    if (file.type.startsWith("image"))
+      return <img src={previewUrl!} alt="preview" className="max-h-40 rounded-md object-cover" />;
 
-    // Videos
-    if (file.type.startsWith("video")) {
-      return (
-        <video
-          src={previewUrl!}
-          className="max-h-40 rounded-md"
-          controls
-        />
-      );
-    }
+    if (file.type.startsWith("video"))
+      return <video src={previewUrl!} className="max-h-40 rounded-md" controls />;
 
-    // PDFs
-    if (file.type === "application/pdf") {
+    if (file.type === "application/pdf")
       return (
         <div className="flex items-center space-x-2">
-          <FaFilePdf
-            size={30}
-            className="text-red-600"
-          />
+          <FaFilePdf size={30} className="text-red-600" />
           <span className="text-sm">{file.name}</span>
         </div>
       );
-    }
 
-    // Word Docs
-    if (
-      file.type.includes("msword") ||
-      file.type.includes("officedocument.wordprocessingml")
-    ) {
+    if (file.type.includes("msword") || file.type.includes("officedocument.wordprocessingml"))
       return (
         <div className="flex items-center space-x-2">
-          <FaFileWord
-            size={30}
-            className="text-blue-600"
-          />
+          <FaFileWord size={30} className="text-blue-600" />
           <span className="text-sm">{file.name}</span>
         </div>
       );
-    }
 
-    // Other files fallback
     return (
       <div className="flex items-center space-x-2">
-        <FaFileAlt
-          size={30}
-          className="text-gray-500"
-        />
+        <FaFileAlt size={30} className="text-gray-500" />
         <span className="text-sm">{file.name}</span>
       </div>
     );
@@ -160,7 +121,11 @@ const MessageInput = ({ receiverId, productId }: Props) => {
         <div className="relative w-52 p-2 border border-gray-300 rounded-lg bg-gray-50 flex items-center justify-center">
           {renderFilePreview()}
           <button
-            onClick={() => setFile(null)}
+            onClick={() => {
+              setFile(null);
+              setPreviewUrl(null);
+              if (fileInputRef.current) fileInputRef.current.value = "";
+            }}
             className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1 hover:bg-red-600 transition"
           >
             <FiX size={14} />
@@ -174,15 +139,13 @@ const MessageInput = ({ receiverId, productId }: Props) => {
           htmlFor="file-input"
           className="flex items-center justify-center w-10 h-10 bg-gray-100 rounded-full cursor-pointer hover:bg-gray-200 transition"
         >
-          <FiPaperclip
-            size={20}
-            className="text-gray-600"
-          />
+          <FiPaperclip size={20} className="text-gray-600" />
           <input
+            ref={fileInputRef}
             id="file-input"
             type="file"
             className="hidden"
-            onChange={(e) => setFile(e.target.files![0])}
+            onChange={(e) => e.target.files && handleFileChange(e.target.files[0])}
             accept="image/*,video/*,application/pdf,.doc,.docx"
           />
         </label>
@@ -203,11 +166,7 @@ const MessageInput = ({ receiverId, productId }: Props) => {
           disabled={isUploading || isLoading}
           className="flex items-center justify-center w-10 h-10 bg-pink-600 text-white rounded-full hover:bg-pink-700 transition"
         >
-          {isUploading ? (
-            <FaSpinner className="animate-spin" />
-          ) : (
-            <FiSend size={20} />
-          )}
+          {isUploading ? <FaSpinner className="animate-spin" /> : <FiSend size={20} />}
         </button>
       </div>
     </div>
