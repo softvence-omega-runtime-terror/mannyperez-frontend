@@ -9,6 +9,7 @@ export const socket = (() => {
   });
 
   s.on("connect", () => console.log("✅ Socket connected:", s.id));
+
   s.on("connect_error", (err) =>
     console.error("⚠️ Socket connect error:", err.message)
   );
@@ -21,15 +22,21 @@ export const socket = (() => {
 
 // --- Socket events ---
 export const SocketEvent = {
+  // lifecycle
   JOIN: "join",
-  DISCONNECT: "disconnect",
 
-  // Chat events
+  // chat - request
   SEND_MESSAGE: "send_message",
-  RECEIVE_MESSAGE: "receive_message",
   LOAD_MESSAGES: "load_messages",
-  MESSAGE_SENT_ACK: "message_sent_ack",
   LOAD_CONTACTS: "load_contacts",
+  JOIN_ROOM: 'join_room',
+  LEAVE_ROOM: 'leave_room',
+
+  // chat - server push
+  RECEIVE_MESSAGE: "receive_message",
+  MESSAGE_SENT_ACK: "message_sent_ack",
+  MESSAGES_LOADED: "messages_loaded",
+  CONTACTS_LOADED: "contacts_loaded",
 } as const;
 
 // Type for union of all event names

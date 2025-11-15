@@ -19,7 +19,6 @@ import MessageRightSidebar from "./messages/MessageRightSidebar";
 
 // --- Import separate message sidebars ---
 
-
 // --- Types ---
 export interface ProductType {
   id: string;
@@ -32,7 +31,7 @@ export interface ProductType {
 // --- Dummy Product ---
 const DUMMY_PRODUCT: ProductType = {
   id: "dummy-01",
-  title: "Glitter DTF Transfers – A4 Sheets",
+  title: "Glitter DTF Transfers - A4 Sheets",
   price: "$15.00",
   imageUrls: ["/dummy/image_d19c84.png"],
   description: "High-quality glitter DTF transfers on A4 sheets.",
@@ -112,7 +111,9 @@ const Feed: React.FC = () => {
   const location = useLocation();
   const isMessagesRoute = location.pathname.startsWith("/feed/messages");
 
-  const [checkoutProduct, setCheckoutProduct] = useState<ProductType | null>(null);
+  const [checkoutProduct, setCheckoutProduct] = useState<ProductType | null>(
+    null
+  );
   const [selectedShipping, setSelectedShipping] = useState<number | null>(null);
 
   // --- Handle Buy Now ---
@@ -136,7 +137,9 @@ const Feed: React.FC = () => {
             <OrderSummary product={checkoutProduct} />
             <BuyerInformation />
             <ShippingAddress />
-            <ShippingMethod onShippingSelect={(id: number) => setSelectedShipping(id)} />
+            <ShippingMethod
+              onShippingSelect={(id: number) => setSelectedShipping(id)}
+            />
             <PaymentMethod />
           </div>
         </div>
@@ -155,40 +158,40 @@ const Feed: React.FC = () => {
               <div className="lg:col-span-3">
                 <MessageLeftSidebar
                   conversations={[
-    {
-      id: "1",
-      avatar: "/dummy/user1.jpg",
-      name: "CraftyCreations",
-      message: "That sounds perfect! Let me pr...",
-      product: "Glitter DTF Transfers",
-      time: "2h",
-      unreadCount: 2,
-    },
-    {
-      id: "2",
-      avatar: "/dummy/user2.jpg",
-      name: "DesignPro",
-      message: "That sounds perfect! Let me pr...",
-      product: "Custom Logo Design",
-      time: "2h",
-    },
-    {
-      id: "3",
-      avatar: "/dummy/user3.jpg",
-      name: "PrintMaster",
-      message: "Your files are ready for download",
-      product: "Business Cards",
-      time: "2h",
-    },
-    {
-      id: "4",
-      avatar: "/dummy/user4.jpg",
-      name: "VintageVibes",
-      message: "I can definitely help with that pr...",
-      product: "Vintage Posters",
-      time: "2h",
-    },
-  ]}
+                    {
+                      id: "1",
+                      avatar: "/dummy/user1.jpg",
+                      name: "CraftyCreations",
+                      message: "That sounds perfect! Let me pr...",
+                      product: "Glitter DTF Transfers",
+                      time: "2h",
+                      unreadCount: 2,
+                    },
+                    {
+                      id: "2",
+                      avatar: "/dummy/user2.jpg",
+                      name: "DesignPro",
+                      message: "That sounds perfect! Let me pr...",
+                      product: "Custom Logo Design",
+                      time: "2h",
+                    },
+                    {
+                      id: "3",
+                      avatar: "/dummy/user3.jpg",
+                      name: "PrintMaster",
+                      message: "Your files are ready for download",
+                      product: "Business Cards",
+                      time: "2h",
+                    },
+                    {
+                      id: "4",
+                      avatar: "/dummy/user4.jpg",
+                      name: "VintageVibes",
+                      message: "I can definitely help with that pr...",
+                      product: "Vintage Posters",
+                      time: "2h",
+                    },
+                  ]}
                 />
               </div>
               <div className="lg:col-span-6">
@@ -234,5 +237,3 @@ const Feed: React.FC = () => {
 };
 
 export default Feed;
-
-

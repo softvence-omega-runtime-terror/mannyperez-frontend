@@ -1,13 +1,11 @@
 /**
  * Products API Service
- * 
+ *
  * This file contains all API endpoints related to products.
  * It uses RTK Query for automatic caching, refetching, and state management.
  */
 
-import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
-import type { RootState } from '../index';
-import { baseApi } from './baseApi';
+import { baseApi } from "./baseApi";
 
 // Define types for your API responses
 export interface Product {
@@ -20,7 +18,7 @@ export interface Product {
   sellerId: string;
   condition: string;
   createdAt: string;
-  status: 'active' | 'sold' | 'pending';
+  status: "active" | "sold" | "pending";
 }
 
 export interface ProductsResponse {
@@ -41,55 +39,59 @@ export interface CreateProductRequest {
 
 /**
  * Products API
- * 
+ *
  * Contains all product-related endpoints
  */
 export const productsApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
-  getProducts: builder.query({ 
-      query:({page,limit})=>({
+    getProducts: builder.query({
+      query: () => ({
         url: `/products`,
         method: "GET",
-     
-       params: { page, limit },
+
+        //  params: { page, limit },
       }),
-      providesTags:['Products']
+      providesTags: ["Products"],
     }),
- createProducts: builder.mutation({ 
-      query:(payload)=>({
+    createProducts: builder.mutation({
+      query: (payload) => ({
         url: `/products`,
         method: "POST",
-     
-       body: payload,
+
+        body: payload,
       }),
-      invalidatesTags:['Products']
+      invalidatesTags: ["Products"],
     }),
- updateProduct: builder.mutation({ 
-      query:({payload,id})=>({
+    updateProduct: builder.mutation({
+      query: ({ payload, id }) => ({
         url: `/products/${id}`,
         method: "PATCH",
-     
-       body: payload,
+
+        body: payload,
       }),
-       invalidatesTags:['Products']
+      invalidatesTags: ["Products"],
     }),
- deleteProducts: builder.mutation({ 
-      query:(id)=>({
+    getProductById: builder.query({
+      query: (id) => ({
+        url: `/products/${id}`,
+        method: "GET",
+      }),
+      providesTags: ["Products"],
+    }),
+    deleteProducts: builder.mutation({
+      query: (id) => ({
         url: `/products/${id}`,
         method: "POST",
-     
-    
       }),
-       invalidatesTags:['Products']
+      invalidatesTags: ["Products"],
     }),
-})
-})
-
+  }),
+});
 
 export const {
   useGetProductsQuery,
   useCreateProductsMutation,
   useUpdateProductMutation,
-  useDeleteProductsMutation
-  
+  useDeleteProductsMutation,
+  useGetProductByIdQuery,
 } = productsApi;
