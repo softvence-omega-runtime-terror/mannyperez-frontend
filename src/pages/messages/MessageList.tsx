@@ -1,6 +1,6 @@
 import { useEffect, useState, useRef } from "react";
 import MessageBubble from "./MessageBubble";
-import { Message } from "./MessagePage";
+import { Message } from "../MessagePage";
 import { socket, SocketEvent } from "@/lib/socket";
 import { useGetProductByIdQuery } from "@/store/services/productsApi";
 

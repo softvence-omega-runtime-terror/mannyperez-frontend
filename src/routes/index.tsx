@@ -21,7 +21,7 @@ import Promotions from "@/components/SellersComponent/Promotions";
 import Orders from "@/components/BuyerCompnents/Orders";
 import SavedItems from "@/components/BuyerCompnents/SavedItems";
 import OrdersList from "@/components/SellersComponent/OrdersList";
-import SellerMessagePage from "@/pages/SellerMessagePage";
+import SellerMessagePage from "@/pages/messages/seller/SellerMessagePage";
 
 // Simple auth check function
 const checkAuth = (options?: {

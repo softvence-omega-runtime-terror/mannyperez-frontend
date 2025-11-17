@@ -12,7 +12,19 @@ export type SellerMessageUser = {
 
 export type SellerMessageProduct = {
   _id: string;
-  productInformation?: { title?: string };
+  productInformation?: {
+    title?: string;
+    description?: string;
+    tags?: string[];
+  
+  };
+  images?: string[];
+  sellerId?: string;
+  pricingAndInventory?:[{
+    price: number;
+    quantity: number;
+    id: string
+  }]
 };
 
 type ConversationItem = {
@@ -28,7 +40,7 @@ const SellerMessageContacts: React.FC = () => {
   const dispatch = useAppDispatch();
 
   useEffect(() => {
-    // Load contacts from server
+    // Initial load
     socket.emit(SocketEvent.LOAD_CONTACTS);
 
     const handleContactsLoaded = (data: {
@@ -37,10 +49,16 @@ const SellerMessageContacts: React.FC = () => {
       setConversations(data.conversations || []);
     };
 
+    const handleContactsUpdated = () => {
+      socket.emit(SocketEvent.LOAD_CONTACTS);
+    };
+
     socket.on(SocketEvent.CONTACTS_LOADED, handleContactsLoaded);
+    socket.on(SocketEvent.CONTACTS_UPDATED, handleContactsUpdated);
 
     return () => {
       socket.off(SocketEvent.CONTACTS_LOADED, handleContactsLoaded);
+      socket.off(SocketEvent.CONTACTS_UPDATED, handleContactsUpdated);
     };
   }, []);
 

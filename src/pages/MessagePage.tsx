@@ -1,5 +1,5 @@
-import MessageList from "./MessageList";
-import MessageInput from "./MessageInput";
+import MessageList from "./messages/MessageList";
+import MessageInput from "./messages/MessageInput";
 import { useParams } from "react-router-dom";
 import { useAppSelector } from "@/store/hooks";
 import { useEffect } from "react";

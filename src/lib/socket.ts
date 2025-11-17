@@ -31,6 +31,7 @@ export const SocketEvent = {
   LOAD_CONTACTS: "load_contacts",
   JOIN_ROOM: 'join_room',
   LEAVE_ROOM: 'leave_room',
+  CONTACTS_UPDATED: "contacts_updated",
 
   // chat - server push
   RECEIVE_MESSAGE: "receive_message",
