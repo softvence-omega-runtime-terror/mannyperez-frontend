@@ -25,6 +25,7 @@ export type Message = {
   mediaType?: "image" | "video" | "pdf" | "document"; // optional media type
   status: "sent" | "delivered" | "read"; // status
   fileName?: string; // optional file name
+  createdAt: Date;
 };
 
 export type MessageProduct = {

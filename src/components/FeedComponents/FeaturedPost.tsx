@@ -20,6 +20,7 @@ import productC from "../../assets/feedImg/spotlight3.png";
 import commenterA from "../../assets/feedImg/userFeed.jpg";
 import { useGetProductsQuery } from "@/store/services/productsApi";
 
+
 // --- Props ---
 interface FeaturedPostProps {
   onBuyNow?: (product: ProductType) => void;
@@ -86,7 +87,7 @@ const FeaturedPost: React.FC<FeaturedPostProps> = ({ onBuyNow }) => {
 
   return (
     <div className="max-w-7xl mx-auto p-6">
-      {products.map((product) => (
+      {products.map((product: { sellerId: { _id: string }; _id: string }) => (
         <div className="bg-white rounded-xl shadow-lg border border-gray-100 p-6">
           {/* Header */}
           <div className="flex items-center justify-between mb-4">

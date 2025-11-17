@@ -3,6 +3,7 @@ import { socket, SocketEvent } from "@/lib/socket";
 import { FiPaperclip, FiSend, FiX } from "react-icons/fi";
 import { FaSpinner, FaFilePdf, FaFileWord, FaFileAlt } from "react-icons/fa";
 import { useFileUploadMutation } from "@/store/services/chatApi";
+import { Textarea } from "@/components/ui/textarea";
 
 interface Props {
   receiverId: string;
@@ -16,35 +17,30 @@ const MessageInput = ({ receiverId, productId }: Props) => {
   const [isUploading, setIsUploading] = useState(false);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
-
   const [fileUpload, { isLoading }] = useFileUploadMutation();
 
-  // Generate preview for image/video
   const handleFileChange = (selectedFile: File) => {
     setFile(selectedFile);
-
-    if (selectedFile.type.startsWith("image") || selectedFile.type.startsWith("video")) {
-      const url = URL.createObjectURL(selectedFile);
-      setPreviewUrl(url);
+    if (
+      selectedFile.type.startsWith("image") ||
+      selectedFile.type.startsWith("video")
+    ) {
+      setPreviewUrl(URL.createObjectURL(selectedFile));
     } else {
       setPreviewUrl(null);
     }
   };
 
-  // Upload file to server
   const handleFileUpload = async (uploadFile: File) => {
     try {
       setIsUploading(true);
-
       const formData = new FormData();
       formData.append("file", uploadFile);
       formData.append("caption", text);
 
       const res = await fileUpload(formData);
       setIsUploading(false);
-
-      if (res.data?.success) return res.data.data; // { fileUrl, fileName, mediaType }
-      return null;
+      return res.data?.success ? res.data.data : null;
     } catch (err) {
       console.error(err);
       setIsUploading(false);
@@ -52,18 +48,15 @@ const MessageInput = ({ receiverId, productId }: Props) => {
     }
   };
 
-  // Send message
   const handleSend = async () => {
     if (!text.trim() && !file) return;
 
     let fileData = null;
     if (file) {
       const currentFile = file;
-      // Clear state immediately to allow new attachments
       setFile(null);
       setPreviewUrl(null);
       if (fileInputRef.current) fileInputRef.current.value = "";
-
       fileData = await handleFileUpload(currentFile);
     }
 
@@ -80,35 +73,58 @@ const MessageInput = ({ receiverId, productId }: Props) => {
     setText("");
   };
 
-  // Render file preview
   const renderFilePreview = () => {
     if (!file) return null;
 
     if (file.type.startsWith("image"))
-      return <img src={previewUrl!} alt="preview" className="max-h-40 rounded-md object-cover" />;
+      return (
+        <img
+          src={previewUrl!}
+          alt="preview"
+          className="max-h-40 rounded-md object-cover"
+        />
+      );
 
     if (file.type.startsWith("video"))
-      return <video src={previewUrl!} className="max-h-40 rounded-md" controls />;
+      return (
+        <video
+          src={previewUrl!}
+          className="max-h-40 rounded-md"
+          controls
+        />
+      );
 
     if (file.type === "application/pdf")
       return (
         <div className="flex items-center space-x-2">
-          <FaFilePdf size={30} className="text-red-600" />
+          <FaFilePdf
+            size={30}
+            className="text-red-600"
+          />
           <span className="text-sm">{file.name}</span>
         </div>
       );
 
-    if (file.type.includes("msword") || file.type.includes("officedocument.wordprocessingml"))
+    if (
+      file.type.includes("msword") ||
+      file.type.includes("officedocument.wordprocessingml")
+    )
       return (
         <div className="flex items-center space-x-2">
-          <FaFileWord size={30} className="text-blue-600" />
+          <FaFileWord
+            size={30}
+            className="text-blue-600"
+          />
           <span className="text-sm">{file.name}</span>
         </div>
       );
 
     return (
       <div className="flex items-center space-x-2">
-        <FaFileAlt size={30} className="text-gray-500" />
+        <FaFileAlt
+          size={30}
+          className="text-gray-500"
+        />
         <span className="text-sm">{file.name}</span>
       </div>
     );
@@ -139,25 +155,34 @@ const MessageInput = ({ receiverId, productId }: Props) => {
           htmlFor="file-input"
           className="flex items-center justify-center w-10 h-10 bg-gray-100 rounded-full cursor-pointer hover:bg-gray-200 transition"
         >
-          <FiPaperclip size={20} className="text-gray-600" />
+          <FiPaperclip
+            size={20}
+            className="text-gray-600"
+          />
           <input
             ref={fileInputRef}
             id="file-input"
             type="file"
             className="hidden"
-            onChange={(e) => e.target.files && handleFileChange(e.target.files[0])}
+            onChange={(e) =>
+              e.target.files && handleFileChange(e.target.files[0])
+            }
             accept="image/*,video/*,application/pdf,.doc,.docx"
           />
         </label>
 
-        {/* Text Input */}
-        <input
-          type="text"
+        <Textarea
           placeholder="Type a message..."
-          className="flex-1 border border-gray-300 rounded-full px-4 py-2 focus:outline-none focus:ring-2 focus:ring-pink-400 focus:border-transparent transition"
           value={text}
           onChange={(e) => setText(e.target.value)}
-          onKeyDown={(e) => e.key === "Enter" && handleSend()}
+          className="flex-1 resize-none px-4 py-3 rounded-full border border-gray-300 focus:ring-2 focus:ring-pink-400 focus:border-transparent transition placeholder-gray-400"
+          rows={1}
+          onKeyDown={(e) => {
+            if (e.key === "Enter" && !e.shiftKey) {
+              e.preventDefault();
+              handleSend();
+            }
+          }}
         />
 
         {/* Send Button */}
@@ -166,7 +191,11 @@ const MessageInput = ({ receiverId, productId }: Props) => {
           disabled={isUploading || isLoading}
           className="flex items-center justify-center w-10 h-10 bg-pink-600 text-white rounded-full hover:bg-pink-700 transition"
         >
-          {isUploading ? <FaSpinner className="animate-spin" /> : <FiSend size={20} />}
+          {isUploading ? (
+            <FaSpinner className="animate-spin" />
+          ) : (
+            <FiSend size={20} />
+          )}
         </button>
       </div>
     </div>

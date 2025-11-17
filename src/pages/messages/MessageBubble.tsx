@@ -1,7 +1,8 @@
 import { useAppSelector } from "@/store/hooks";
-import { Message } from "./MessagePage";
+
 import { FaFileWord, FaFileAlt, FaFilePdf } from "react-icons/fa";
 import { format } from "date-fns";
+import { Message } from "./buyer/MessagePage";
 
 type Props = {
   message: Message;

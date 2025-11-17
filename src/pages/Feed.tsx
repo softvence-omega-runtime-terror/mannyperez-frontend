@@ -19,8 +19,6 @@ import MessageRightSidebar from "./messages/buyer/MessageRightSidebar";
 import { useGetProductByIdQuery } from "@/store/services/productsApi";
 import { MessageProduct } from "./messages/buyer/MessagePage";
 
-// --- Import separate message sidebars ---
-
 // --- Types ---
 export interface ProductType {
   id: string;
@@ -39,7 +37,6 @@ const DUMMY_PRODUCT: ProductType = {
   description: "High-quality glitter DTF transfers on A4 sheets.",
 };
 
-// --- Placeholder for Current Package in Messages ---
 interface CurrentPackageProps {
   onBuyNow?: (product: ProductType) => void;
   onSendMessage?: (message: string) => void;
@@ -122,7 +119,8 @@ const Feed: React.FC = () => {
   const [selectedShipping, setSelectedShipping] = useState<number | null>(null);
 
   // --- Handle Buy Now ---
-  const handleBuyNow = (product: ProductType) => {
+
+  const handleBuyNow = (product) => {
     setCheckoutProduct(product);
     navigate(`/checkout/${product._id}`);
   };
@@ -170,10 +168,7 @@ const Feed: React.FC = () => {
                 </div>
               </div>
               <div className="lg:col-span-3">
-                <MessageRightSidebar
-                  sellerInfo="John Doe - Premium Seller"
-                  buyerInfo="Jane Smith - Interested Buyer"
-                />
+                <MessageRightSidebar />
               </div>
             </>
           ) : (
