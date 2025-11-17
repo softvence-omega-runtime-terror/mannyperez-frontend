@@ -18,6 +18,9 @@ export type SellerMessageProduct = {
     tags?: string[];
   
   };
+  extraOptions?: {
+    productVariants?: boolean;
+  }
   images?: string[];
   sellerId?: string;
   pricingAndInventory?:[{

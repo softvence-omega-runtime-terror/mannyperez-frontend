@@ -35,63 +35,71 @@ const SellerChatWindow: React.FC<Props> = ({ product, receiver }) => {
   }, [product, receiver]);
 
   if (!product || !receiver)
-    return <h2 className="text-xl font-bold mb-4">No Conversation Selected</h2>;
+    return (
+      <div className="flex-1 flex items-center justify-center text-gray-400 bg-white rounded-xl shadow">
+        <h2 className="text-xl font-bold">No Conversation Selected</h2>
+      </div>
+    );
+
+  // Price calculation logic
+  const renderPrice = () => {
+    const prices = product.pricingAndInventory?.map((p) => p.price);
+    if (!prices || prices.length === 0) return null;
+
+    if (product.extraOptions?.productVariants && prices.length > 1) {
+      const min = Math.min(...prices);
+      const max = Math.max(...prices);
+      return (
+        <p className="text-xl font-bold text-pink-600">
+          ${min.toFixed(2)}{min !== max && ` - $${max.toFixed(2)}`}
+        </p>
+      );
+    }
+    return (
+      <p className="text-xl font-bold text-pink-600">
+        ${prices[0]?.toFixed(2)}
+      </p>
+    );
+  };
 
   return (
-    <div className="flex-1 flex flex-col h-screen bg-white rounded-xl shadow overflow-hidden">
-      {/* Header */}
-    {/* Header */}
-<div className="flex justify-between items-start px-4 py-3 border-b bg-gray-50">
-  <div className="flex space-x-4">
-    {/* Product Image */}
-    <img
-      src={product.images[0]}
-      alt={product.productInformation?.title}
-      className="w-12 h-12 object-cover rounded"
-    />
+    <div className="flex-1 flex flex-col h-full bg-white rounded-xl shadow overflow-hidden">
+      {/* Header - Sticky Product Info - Added responsiveness and clearer layout */}
+      <div className="flex justify-between items-start p-4 border-b bg-gray-50 flex-shrink-0">
+        <div className="flex space-x-4 min-w-0">
+          {/* Product Image - Increased size for prominence */}
+          <img
+            src={product.images?.[0] || "/default-product.png"}
+            alt={product.productInformation?.title}
+            className="w-14 h-14 object-cover rounded-md flex-shrink-0 border border-gray-200"
+          />
 
-    {/* Product Info */}
-    <div className="flex flex-col">
-      <p className="text-lg font-semibold">
-        {product.productInformation?.title}
-      </p>
-      <p className="text-sm text-gray-500 truncate max-w-xs">
-        {product.productInformation?.description}
-      </p>
-      <div className="mt-1">
-        {product.extraOptions?.productVariants ? (
-          (() => {
-            const prices = product.pricingAndInventory.map(p => p.price);
-            const min = Math.min(...prices);
-            const max = Math.max(...prices);
-            return (
-              <p className="text-xl font-bold text-pink-600">
-                ${min.toFixed(2)}{min !== max && ` - $${max.toFixed(2)}`}
-              </p>
-            );
-          })()
-        ) : (
-          <p className="text-xl font-bold text-pink-600">
-            ${product.pricingAndInventory[0]?.price.toFixed(2)}
-          </p>
-        )}
+          {/* Product Info - Ensures content doesn't overflow horizontally */}
+          <div className="flex flex-col min-w-0 pr-2">
+            <p className="text-lg font-semibold truncate">
+              {product.productInformation?.title || "Product Title"}
+            </p>
+            {/* Removed max-w-xs to allow it to use available space, kept truncate */}
+            <p className="text-sm text-gray-500 truncate">
+              {product.productInformation?.description || "Product description..."}
+            </p>
+            <div className="mt-1 flex-shrink-0">{renderPrice()}</div>
+          </div>
+        </div>
+
+        {/* Action Button - Moved to the right, slightly larger text on large screens */}
+        <button
+          className="bg-pink-600 text-white px-4 py-2 rounded-lg font-semibold text-sm md:text-base hover:bg-pink-700 transition self-start flex-shrink-0"
+          onClick={() => navigate(`/checkout/${product._id}`)}
+        >
+          Buy Now
+        </button>
       </div>
-    </div>
-  </div>
 
-  {/* Buy Now Button */}
-  <button
-    className="bg-pink-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-pink-700 transition self-start"
-    onClick={() => navigate(`/checkout/${product._id}`)}
-  >
-    Buy Now
-  </button>
-</div>
-
-
-      {/* Messages */}
+      {/* Messages and Input Area */}
       <div className="flex-1 flex flex-col overflow-hidden">
-        <div className="flex-1 overflow-y-auto px-4 py-2">
+        {/* Messages List */}
+        <div className="flex-1 overflow-y-auto">
           <SellerMessageList
             productId={product._id}
             receiverId={receiver._id}
@@ -99,7 +107,7 @@ const SellerChatWindow: React.FC<Props> = ({ product, receiver }) => {
         </div>
 
         {/* Message Input */}
-        <div className="px-4 py-2 border-t bg-white">
+        <div className="px-4 py-3 border-t bg-white flex-shrink-0">
           <MessageInput
             productId={product._id}
             receiverId={receiver._id}

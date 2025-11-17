@@ -15,9 +15,10 @@ const SellerMessageList = ({ receiverId, productId }: Props) => {
 
   const scrollRef = useRef<HTMLDivElement>(null);
 
-  const { data: productData, isLoading: productLoading } =
-    useGetProductByIdQuery(productId);
+  const { isLoading: productLoading } =
+    useGetProductByIdQuery(productId, { skip: !productId });
 
+  // Helper to scroll to the bottom of the message list
   const scrollToBottom = (smooth = false) => {
     if (!scrollRef.current) return;
     scrollRef.current.scrollTo({
@@ -26,31 +27,39 @@ const SellerMessageList = ({ receiverId, productId }: Props) => {
     });
   };
 
+  // Helper to check if the user is near the bottom of the list
   const isUserNearBottom = () => {
     if (!scrollRef.current) return true;
     const { scrollTop, clientHeight, scrollHeight } = scrollRef.current;
-    return scrollHeight - scrollTop - clientHeight < 120;
+    // Considered "near bottom" if scroll position is within 200px of the bottom
+    return scrollHeight - scrollTop - clientHeight < 200; 
   };
 
-  // Scroll on initial list load
+  // 1. Initial scroll on messages load
   useEffect(() => {
     if (messages.length === 0) return;
-    scrollToBottom(false);
-  }, [messages.length]);
+    // Use rAF for a stable scroll after DOM update, only scroll once.
+    if ((scrollRef.current?.scrollTop || 0) === 0) {
+      requestAnimationFrame(() => scrollToBottom(false));
+    }
+  }, [messages.length]); 
 
-  // Auto-scroll on new messages
+  // 2. Auto-scroll on new message received
   useEffect(() => {
     if (messages.length === 0) return;
 
     if (isUserNearBottom()) {
+      // Auto-scroll smoothly if user is near the bottom
       scrollToBottom(true);
       setShowNewMessageIndicator(false);
     } else {
+      // Show indicator if user is scrolled up
       setShowNewMessageIndicator(true);
     }
-  }, [messages]);
+    // Dependency only on messages array, not messages.length
+  }, [messages]); 
 
-  // Scroll detection for indicator
+  // 3. Scroll detection for indicator dismissal
   useEffect(() => {
     const handleScroll = () => {
       if (isUserNearBottom()) {
@@ -61,28 +70,28 @@ const SellerMessageList = ({ receiverId, productId }: Props) => {
     const el = scrollRef.current;
     el?.addEventListener("scroll", handleScroll);
     return () => el?.removeEventListener("scroll", handleScroll);
-  }, []);
+  }, []); // Only runs once on mount
 
-  // Load messages
+  // 4. Socket listeners for loading and receiving messages
   useEffect(() => {
     const handleMessagesLoaded = (data: {
       roomId: string;
       messages: Message[];
     }) => {
       setMessages(data.messages || []);
-
-      requestAnimationFrame(() => {
-        scrollToBottom(false);
-      });
+      // Initial scroll after loading, use rAF to ensure DOM is updated
+      requestAnimationFrame(() => scrollToBottom(false));
     };
 
     const handleReceiveMessage = (message: Message) => {
       setMessages((prev) => {
+        // Prevent duplicates
         if (prev.some((m) => m._id === message._id)) return prev;
         return [...prev, message];
       });
     };
 
+    // Emit to load messages when product/receiver changes
     socket.emit(SocketEvent.LOAD_MESSAGES, { receiverId, productId });
 
     socket.on(SocketEvent.MESSAGES_LOADED, handleMessagesLoaded);
@@ -107,18 +116,12 @@ const SellerMessageList = ({ receiverId, productId }: Props) => {
     );
   }
 
-
-
   return (
     <div className="flex-1 flex flex-col overflow-hidden relative">
-
-      {/* Sticky product header */}
-     
-
-      {/* Messages list */}
+      {/* Messages list container - takes up all available space */}
       <div
         ref={scrollRef}
-        className="flex-1 overflow-y-auto px-4 py-3 bg-gray-50 space-y-4"
+        className="flex-1 overflow-y-auto px-4 py-3 bg-white space-y-4"
       >
         {messages.length === 0 ? (
           <p className="text-center text-gray-400 mt-4">
@@ -131,16 +134,16 @@ const SellerMessageList = ({ receiverId, productId }: Props) => {
         )}
       </div>
 
-      {/* Bottom floating button */}
+      {/* Bottom floating button - New message indicator */}
       {showNewMessageIndicator && (
         <button
           onClick={() => {
-            scrollToBottom(true);
+            scrollToBottom(true); // Smooth scroll on click
             setShowNewMessageIndicator(false);
           }}
-          className="absolute bottom-24 left-1/2 -translate-x-1/2 bg-blue-600 text-white px-4 py-2 rounded-full shadow-md"
+          className="absolute bottom-4 right-4 bg-pink-600 text-white px-4 py-2 rounded-full shadow-lg font-semibold hover:bg-pink-700 transition"
         >
-          New message
+          New message ↓
         </button>
       )}
     </div>
