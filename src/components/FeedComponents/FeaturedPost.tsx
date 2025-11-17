@@ -20,6 +20,7 @@ import productC from "../../assets/feedImg/spotlight3.png";
 import commenterA from "../../assets/feedImg/userFeed.jpg";
 import { useGetProductsQuery } from "@/store/services/productsApi";
 
+
 // --- Props ---
 interface FeaturedPostProps {
   onBuyNow?: (product: ProductType) => void;
@@ -34,8 +35,6 @@ const FeaturedPost: React.FC<FeaturedPostProps> = ({ onBuyNow }) => {
   if (isLoading) {
     return <div>Loading...</div>;
   }
-
-  console.log("🚀 ~ FeaturedPost ~ data:", data.data);
 
   const products = data.data;
 
@@ -88,7 +87,7 @@ const FeaturedPost: React.FC<FeaturedPostProps> = ({ onBuyNow }) => {
 
   return (
     <div className="max-w-7xl mx-auto p-6">
-      {products.map((product) => (
+      {products.map((product: { sellerId: { _id: string }; _id: string }) => (
         <div className="bg-white rounded-xl shadow-lg border border-gray-100 p-6">
           {/* Header */}
           <div className="flex items-center justify-between mb-4">
@@ -170,7 +169,9 @@ const FeaturedPost: React.FC<FeaturedPostProps> = ({ onBuyNow }) => {
               {/* Message Button */}
               <button
                 onClick={() =>
-                  navigate(`/feed/messages/${product.sellerId._id}/${product._id}`)
+                  navigate(
+                    `/feed/messages/${product.sellerId._id}/${product._id}`
+                  )
                 }
                 className="px-4 py-2 border border-pink-600 text-pink-600 font-semibold rounded-lg hover:bg-pink-50 transition duration-150"
               >

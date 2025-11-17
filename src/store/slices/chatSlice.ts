@@ -2,7 +2,7 @@
 import {
   SellerMessageProduct,
   SellerMessageUser,
-} from "@/pages/SellerMessageContacts";
+} from "@/pages/messages/seller/SellerMessageContacts";
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
 interface SelectedConversationState {

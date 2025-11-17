@@ -1,11 +1,11 @@
-import MessageList from "./MessageList";
-import MessageInput from "./MessageInput";
 import { useParams } from "react-router-dom";
 import { useAppSelector } from "@/store/hooks";
 import { useEffect } from "react";
 import { socket, SocketEvent } from "@/lib/socket";
 import { useGetProductByIdQuery } from "@/store/services/productsApi";
 import { useGetSingleUserQuery } from "@/store/services/userApi";
+import MessageInput from "../MessageInput";
+import MessageList from "./MessageList";
 
 type MessageUser = {
   _id: string;
@@ -25,6 +25,7 @@ export type Message = {
   mediaType?: "image" | "video" | "pdf" | "document"; // optional media type
   status: "sent" | "delivered" | "read"; // status
   fileName?: string; // optional file name
+  createdAt: Date;
 };
 
 export type MessageProduct = {
@@ -83,26 +84,20 @@ const MessagingPage = () => {
 
   if (productLoading || receiverLoading) return <div>Loading...</div>;
 
-  if (!product || !receiver || !user) return <div>
-    Select a Conversation
-  </div>;
+  if (!product || !receiver || !user) return <div>Select a Conversation</div>;
 
   return (
-    <div className="w-full bg-white rounded-xl shadow p-6">
-      <h2 className="text-xl font-bold mb-4">
-        Messaging for Post: {product?.productInformation.title}{" "}
-      </h2>
-      <h3>Chat with {receiver.email}</h3>
-      <h3>My Email: {user?.email}</h3>
+    <div className="flex flex-col max-h-screen bg-white">
       <MessageList
         productId={product._id}
         receiverId={receiver._id}
       />
-
-      <MessageInput
-        productId={product._id}
-        receiverId={receiver._id}
-      />
+      <div className="sticky bottom-0 bg-white z-10">
+        <MessageInput
+          productId={product._id}
+          receiverId={receiver._id}
+        />
+      </div>
     </div>
   );
 };
