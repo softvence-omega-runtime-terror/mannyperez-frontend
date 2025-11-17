@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import React, { useState } from "react";
-import { Outlet, useLocation, useNavigate } from "react-router-dom";
+import { Outlet, useLocation, useNavigate, useParams } from "react-router-dom";
 import DestashAdmin from "@/components/FeedComponents/DestashAdmin";
 import DiamondPost from "@/components/FeedComponents/DiamondPost";
 import FeaturedPost from "@/components/FeedComponents/FeaturedPost";
@@ -14,8 +14,10 @@ import ShippingAddress from "@/components/CheckoutComponent/ShippingAdress";
 import ShippingMethod from "@/components/CheckoutComponent/ShippingMethod";
 import PaymentMethod from "@/components/CheckoutComponent/PaymentMethod";
 import UserNavbar from "@/components/layout/UserNavbar";
-import MessageLeftSidebar from "./messages/MessageLeftSidebar";
-import MessageRightSidebar from "./messages/MessageRightSidebar";
+import MessageLeftSidebar from "./messages/buyer/MessageLeftSidebar";
+import MessageRightSidebar from "./messages/buyer/MessageRightSidebar";
+import { useGetProductByIdQuery } from "@/store/services/productsApi";
+import { MessageProduct } from "./messages/buyer/MessagePage";
 
 // --- Import separate message sidebars ---
 
@@ -39,22 +41,41 @@ const DUMMY_PRODUCT: ProductType = {
 
 // --- Placeholder for Current Package in Messages ---
 interface CurrentPackageProps {
-  product?: ProductType;
   onBuyNow?: (product: ProductType) => void;
   onSendMessage?: (message: string) => void;
 }
-const CurrentPackage: React.FC<CurrentPackageProps> = ({
-  product = DUMMY_PRODUCT,
-  onBuyNow,
-  onSendMessage,
-}) => {
-  const [message, setMessage] = useState("");
+const CurrentPackage: React.FC<CurrentPackageProps> = ({ onBuyNow }) => {
+  const { productId } = useParams();
 
-  const handleSend = () => {
-    if (message.trim() && onSendMessage) {
-      onSendMessage(message.trim());
-      setMessage("");
+  const { data: productData, isLoading } = useGetProductByIdQuery(productId, {
+    skip: !productId,
+  });
+
+  if (isLoading) {
+    return <div>Loading...</div>;
+  }
+
+  const product = productData?.data as MessageProduct;
+
+  const renderPrice = () => {
+    const prices = product.pricingAndInventory?.map((p) => p.price);
+    if (!prices || prices.length === 0) return null;
+
+    if (product.extraOptions?.productVariants && prices.length > 1) {
+      const min = Math.min(...prices);
+      const max = Math.max(...prices);
+      return (
+        <p className="text-xl font-bold text-pink-600">
+          ${min.toFixed(2)}
+          {min !== max && ` - $${max.toFixed(2)}`}
+        </p>
+      );
     }
+    return (
+      <p className="text-xl font-bold text-pink-600">
+        ${prices[0]?.toFixed(2)}
+      </p>
+    );
   };
 
   return (
@@ -62,14 +83,18 @@ const CurrentPackage: React.FC<CurrentPackageProps> = ({
       <div className="flex justify-between items-center mb-4">
         <div className="flex items-center">
           <img
-            src={product.imageUrls[0]}
-            alt={product.title}
+            src={product.images[0]}
+            alt={product.productInformation.title}
             className="w-12 h-12 object-cover rounded mr-4"
           />
           <div>
-            <p className="text-lg font-semibold">{product.title}</p>
-            <p className="text-sm text-gray-500">{product.description}</p>
-            <p className="text-md font-bold text-pink-600">{product.price}</p>
+            <p className="text-lg font-semibold">
+              {product.productInformation.title}
+            </p>
+            <p className="text-sm text-gray-500">
+              {product.productInformation.description}
+            </p>
+            <div className="mt-1 flex-shrink-0">{renderPrice()}</div>
           </div>
         </div>
         {onBuyNow && (
@@ -81,26 +106,6 @@ const CurrentPackage: React.FC<CurrentPackageProps> = ({
           </button>
         )}
       </div>
-
-      {/* Message Input */}
-      {onSendMessage && (
-        <div className="flex items-center space-x-3">
-          <input
-            type="text"
-            placeholder="Write a message"
-            className="flex-1 border border-gray-300 rounded-full px-4 py-2 focus:outline-none focus:border-pink-500"
-            value={message}
-            onChange={(e) => setMessage(e.target.value)}
-            onKeyDown={(e) => e.key === "Enter" && handleSend()}
-          />
-          <button
-            className="px-4 py-2 bg-pink-600 text-white rounded-full hover:bg-pink-700 transition"
-            onClick={handleSend}
-          >
-            Send
-          </button>
-        </div>
-      )}
     </div>
   );
 };
@@ -119,7 +124,7 @@ const Feed: React.FC = () => {
   // --- Handle Buy Now ---
   const handleBuyNow = (product: ProductType) => {
     setCheckoutProduct(product);
-    navigate(`/checkout/${product.id}`);
+    navigate(`/checkout/${product._id}`);
   };
 
   // --- Placeholder for sending message ---
@@ -156,49 +161,10 @@ const Feed: React.FC = () => {
           {isMessagesRoute ? (
             <>
               <div className="lg:col-span-3">
-                <MessageLeftSidebar
-                  conversations={[
-                    {
-                      id: "1",
-                      avatar: "/dummy/user1.jpg",
-                      name: "CraftyCreations",
-                      message: "That sounds perfect! Let me pr...",
-                      product: "Glitter DTF Transfers",
-                      time: "2h",
-                      unreadCount: 2,
-                    },
-                    {
-                      id: "2",
-                      avatar: "/dummy/user2.jpg",
-                      name: "DesignPro",
-                      message: "That sounds perfect! Let me pr...",
-                      product: "Custom Logo Design",
-                      time: "2h",
-                    },
-                    {
-                      id: "3",
-                      avatar: "/dummy/user3.jpg",
-                      name: "PrintMaster",
-                      message: "Your files are ready for download",
-                      product: "Business Cards",
-                      time: "2h",
-                    },
-                    {
-                      id: "4",
-                      avatar: "/dummy/user4.jpg",
-                      name: "VintageVibes",
-                      message: "I can definitely help with that pr...",
-                      product: "Vintage Posters",
-                      time: "2h",
-                    },
-                  ]}
-                />
+                <MessageLeftSidebar />
               </div>
               <div className="lg:col-span-6">
-                <CurrentPackage
-                  onBuyNow={handleBuyNow}
-                  onSendMessage={handleSendMessage}
-                />
+                <CurrentPackage onBuyNow={handleBuyNow} />
                 <div className="bg-white p-4 shadow min-h-[calc(100vh-220px)] rounded-xl border border-gray-100">
                   <Outlet />
                 </div>

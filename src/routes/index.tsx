@@ -6,7 +6,7 @@ import Login from "@/pages/Auth/Login";
 import SignUp from "@/pages/Auth/SignUp";
 import Feed from "@/pages/Feed";
 import FeedHome from "@/pages/FeedHome";
-import MessagingPage from "@/pages/MessagePage";
+
 import Live from "@/pages/Live";
 import Products from "@/pages/Products";
 import NewListingSteps from "@/components/ProductsComponent/CreateNewListing/NewListingStepsContainer";
@@ -22,6 +22,7 @@ import Orders from "@/components/BuyerCompnents/Orders";
 import SavedItems from "@/components/BuyerCompnents/SavedItems";
 import OrdersList from "@/components/SellersComponent/OrdersList";
 import SellerMessagePage from "@/pages/messages/seller/SellerMessagePage";
+import MessagingPage from "@/pages/messages/buyer/MessagePage";
 
 // Simple auth check function
 const checkAuth = (options?: {

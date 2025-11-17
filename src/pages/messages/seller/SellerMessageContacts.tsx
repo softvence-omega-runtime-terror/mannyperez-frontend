@@ -16,18 +16,19 @@ export type SellerMessageProduct = {
     title?: string;
     description?: string;
     tags?: string[];
-  
   };
   extraOptions?: {
     productVariants?: boolean;
-  }
+  };
   images?: string[];
   sellerId?: string;
-  pricingAndInventory?:[{
-    price: number;
-    quantity: number;
-    id: string
-  }]
+  pricingAndInventory?: [
+    {
+      price: number;
+      quantity: number;
+      id: string;
+    }
+  ];
 };
 
 type ConversationItem = {

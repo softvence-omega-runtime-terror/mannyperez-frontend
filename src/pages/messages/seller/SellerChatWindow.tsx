@@ -51,7 +51,8 @@ const SellerChatWindow: React.FC<Props> = ({ product, receiver }) => {
       const max = Math.max(...prices);
       return (
         <p className="text-xl font-bold text-pink-600">
-          ${min.toFixed(2)}{min !== max && ` - $${max.toFixed(2)}`}
+          ${min.toFixed(2)}
+          {min !== max && ` - $${max.toFixed(2)}`}
         </p>
       );
     }
@@ -81,7 +82,8 @@ const SellerChatWindow: React.FC<Props> = ({ product, receiver }) => {
             </p>
             {/* Removed max-w-xs to allow it to use available space, kept truncate */}
             <p className="text-sm text-gray-500 truncate">
-              {product.productInformation?.description || "Product description..."}
+              {product.productInformation?.description ||
+                "Product description..."}
             </p>
             <div className="mt-1 flex-shrink-0">{renderPrice()}</div>
           </div>

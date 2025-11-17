@@ -1,8 +1,8 @@
 import { socket, SocketEvent } from "@/lib/socket";
-import { Message } from "@/pages/MessagePage";
-import { useGetProductByIdQuery } from "@/store/services/productsApi";
+
 import { useEffect, useRef, useState } from "react";
 import MessageBubble from "../MessageBubble";
+import { Message } from "../buyer/MessagePage";
 
 interface Props {
   receiverId: string;
@@ -14,9 +14,6 @@ const SellerMessageList = ({ receiverId, productId }: Props) => {
   const [showNewMessageIndicator, setShowNewMessageIndicator] = useState(false);
 
   const scrollRef = useRef<HTMLDivElement>(null);
-
-  const { isLoading: productLoading } =
-    useGetProductByIdQuery(productId, { skip: !productId });
 
   // Helper to scroll to the bottom of the message list
   const scrollToBottom = (smooth = false) => {
@@ -32,7 +29,7 @@ const SellerMessageList = ({ receiverId, productId }: Props) => {
     if (!scrollRef.current) return true;
     const { scrollTop, clientHeight, scrollHeight } = scrollRef.current;
     // Considered "near bottom" if scroll position is within 200px of the bottom
-    return scrollHeight - scrollTop - clientHeight < 200; 
+    return scrollHeight - scrollTop - clientHeight < 200;
   };
 
   // 1. Initial scroll on messages load
@@ -42,7 +39,7 @@ const SellerMessageList = ({ receiverId, productId }: Props) => {
     if ((scrollRef.current?.scrollTop || 0) === 0) {
       requestAnimationFrame(() => scrollToBottom(false));
     }
-  }, [messages.length]); 
+  }, [messages.length]);
 
   // 2. Auto-scroll on new message received
   useEffect(() => {
@@ -57,7 +54,7 @@ const SellerMessageList = ({ receiverId, productId }: Props) => {
       setShowNewMessageIndicator(true);
     }
     // Dependency only on messages array, not messages.length
-  }, [messages]); 
+  }, [messages]);
 
   // 3. Scroll detection for indicator dismissal
   useEffect(() => {
@@ -103,19 +100,6 @@ const SellerMessageList = ({ receiverId, productId }: Props) => {
     };
   }, [receiverId, productId]);
 
-  if (productLoading) {
-    return (
-      <div className="flex-1 flex flex-col p-4 animate-pulse">
-        <div className="h-6 bg-gray-200 rounded w-1/3 mb-4"></div>
-        <div className="flex-1 space-y-2">
-          {[...Array(5)].map((_, i) => (
-            <div key={i} className="h-10 bg-gray-200 rounded"></div>
-          ))}
-        </div>
-      </div>
-    );
-  }
-
   return (
     <div className="flex-1 flex flex-col overflow-hidden relative">
       {/* Messages list container - takes up all available space */}
@@ -129,7 +113,10 @@ const SellerMessageList = ({ receiverId, productId }: Props) => {
           </p>
         ) : (
           messages.map((msg) => (
-            <MessageBubble key={msg._id} message={msg} />
+            <MessageBubble
+              key={msg._id}
+              message={msg}
+            />
           ))
         )}
       </div>

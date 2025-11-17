@@ -28,7 +28,6 @@ const SellerMessagePage = () => {
 
       {/* Main Container: Full height, flexible content area */}
       <div className="flex flex-1 overflow-hidden relative bg-gray-50">
-        
         {/* Mobile top header (for toggling contacts) */}
         <div className="lg:hidden absolute top-0 left-0 right-0 bg-white z-30 px-4 py-3 border-b flex justify-between items-center">
           <h2 className="text-lg font-semibold">Messages</h2>

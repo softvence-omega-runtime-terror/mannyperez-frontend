@@ -35,8 +35,6 @@ const FeaturedPost: React.FC<FeaturedPostProps> = ({ onBuyNow }) => {
     return <div>Loading...</div>;
   }
 
-  console.log("🚀 ~ FeaturedPost ~ data:", data.data);
-
   const products = data.data;
 
   const postData: ProductType & {
@@ -170,7 +168,9 @@ const FeaturedPost: React.FC<FeaturedPostProps> = ({ onBuyNow }) => {
               {/* Message Button */}
               <button
                 onClick={() =>
-                  navigate(`/feed/messages/${product.sellerId._id}/${product._id}`)
+                  navigate(
+                    `/feed/messages/${product.sellerId._id}/${product._id}`
+                  )
                 }
                 className="px-4 py-2 border border-pink-600 text-pink-600 font-semibold rounded-lg hover:bg-pink-50 transition duration-150"
               >

@@ -1,56 +1,31 @@
-import React from "react";
-import { useSelector } from "react-redux";
-import { FaStar } from "react-icons/fa";
-import { RootState } from "@/store";
+import { useParams } from "react-router-dom";
+import { useGetProductByIdQuery } from "@/store/services/productsApi";
 import { useGetSingleUserQuery } from "@/store/services/userApi";
+import { FaStar } from "react-icons/fa";
+import { useAppSelector } from "@/store/hooks";
 
-const SellerMessageRightSidebar: React.FC = () => {
-  const selectedConversation = useSelector(
-    (state: RootState) => state.selectedConversation
-  );
+const MessageRightSidebar = () => {
+  const { productId } = useParams<{
+    productId: string;
+    receiverId: string;
+  }>();
 
-  const { receiver, product } = selectedConversation;
-  const { data, isLoading } = useGetSingleUserQuery(
-    product?.sellerId as string,
+  const user = useAppSelector((state) => state.auth.user);
+
+  // Fetch product details
+  const { data: productData, isLoading: productLoading } =
+    useGetProductByIdQuery(productId);
+
+  // Once we have the product, fetch seller info
+  const sellerId = productData?.data?.sellerId?._id;
+  const { data: sellerData, isLoading: sellerLoading } = useGetSingleUserQuery(
+    sellerId!,
     {
-      skip: !product?.sellerId,
+      skip: !sellerId,
     }
   );
 
-  const seller = data?.data;
-
-  // Default values
-  const sellerName = seller?.name || "Unknown Seller";
-  const productTitle = product?.productInformation?.title || "No title";
-  const description =
-    product?.productInformation?.description ||
-    "Specialized product with unique features";
-
-  const price = product?.pricingAndInventory?.[0]?.price;
-
-
-  // TODO: Replace with actual stats
-  const orderCompletion = "98%"; // Example stat
-  const totalOrders = 1247; // Example stat
-  const responseTime = "Within 1 hour"; // Example stat
-  const badge = "Gold";
-
-  const badgeColors: Record<string, string> = {
-    Gold: "bg-yellow-100 text-yellow-800",
-    Silver: "bg-gray-200 text-gray-800",
-    Platinum: "bg-purple-100 text-purple-800",
-  };
-
-  if (!product || !receiver)
-    return (
-      <div className="flex flex-col bg-white min-h-full rounded-xl border border-gray-100">
-        <p className="text-gray-400 text-center mt-10 p-4">
-          No conversation selected
-        </p>
-      </div>
-    );
-
-  if (isLoading) {
+  if (productLoading || sellerLoading) {
     return (
       <div className="flex flex-col bg-white min-h-full rounded-xl border border-gray-100">
         <p className="text-gray-400 text-center mt-10 p-4">Loading...</p>
@@ -58,8 +33,38 @@ const SellerMessageRightSidebar: React.FC = () => {
     );
   }
 
+  if (!productData?.data || !sellerData?.data) {
+    return (
+      <div className="flex flex-col bg-white min-h-full rounded-xl border border-gray-100">
+        <p className="text-gray-400 text-center mt-10 p-4">
+          Data not available
+        </p>
+      </div>
+    );
+  }
+
+  const product = productData.data;
+  const seller = sellerData.data;
+
+  const badgeColors: Record<string, string> = {
+    Gold: "bg-yellow-100 text-yellow-800",
+    Silver: "bg-gray-200 text-gray-800",
+    Platinum: "bg-purple-100 text-purple-800",
+  };
+
+  const productTitle = product.productInformation?.title || "No title";
+  const description =
+    product.productInformation?.description ||
+    "Specialized product with unique features";
+  const price = product.pricingAndInventory?.[0]?.price;
+
+  const orderCompletion = "98%"; // Example stat
+  const totalOrders = 1247; // Example stat
+  const responseTime = "Within 1 hour"; // Example stat
+  const badge = "Gold";
+
   return (
-    <div className="flex flex-col bg-white min-h-full rounded-xl space-y-6">
+    <div className="flex flex-col bg-white min-h-full rounded-xl space-y-6 p-6 shadow border border-gray-100">
       {/* Profile Image */}
       <div className="flex justify-center">
         <img
@@ -85,17 +90,15 @@ const SellerMessageRightSidebar: React.FC = () => {
         {description}
       </p>
 
-      {/* Product & User Info */}
+      {/* Product & Seller Info */}
       <div className="space-y-3">
         <div className="flex justify-between text-gray-700">
           <span className="font-medium">Seller:</span>
-          <span className="font-semibold">{sellerName}</span>
+          <span className="font-semibold">{seller.name}</span>
         </div>
         <div className="flex justify-between text-gray-700">
           <span className="font-medium">Buyer:</span>
-          <span className="font-semibold">
-            {receiver.name || receiver.email}
-          </span>
+          <span className="font-semibold">{user?.name}</span>
         </div>
         {price && (
           <div className="flex justify-between text-gray-700">
@@ -134,4 +137,4 @@ const SellerMessageRightSidebar: React.FC = () => {
   );
 };
 
-export default SellerMessageRightSidebar;
+export default MessageRightSidebar;
