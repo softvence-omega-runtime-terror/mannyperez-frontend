@@ -1,57 +1,80 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable @typescript-eslint/ban-ts-comment */
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { useParams } from "react-router-dom";
-import { useStartLiveStreamMutation } from "@/store/services/liveStreamApi";
-import { LiveEventStatus } from "../Live";
-import { Button } from "@/components/ui/button";
 import {
-  LiveRole,
-  LiveStreamingMode,
-  ScenarioModel,
-  ZegoUIKitPrebuilt,
-} from "@zegocloud/zego-uikit-prebuilt";
+  useEndLiveStreamMutation,
+  useStartLiveStreamMutation,
+  useGetLiveEventInfoForHostQuery,
+} from "@/store/services/liveStreamApi";
+import { LiveEvent } from "../Live";
+import { Button } from "@/components/ui/button";
+import { ZegoUIKitPrebuilt } from "@zegocloud/zego-uikit-prebuilt";
 import { toast } from "sonner";
 import { useAppSelector } from "@/store/hooks";
 
-type Props = {
-  eventStatus: LiveEventStatus;
-};
+type Props = { event: LiveEvent };
 
-// Define a type for the config state
-type LiveConfig = {
-  token: string | null;
-  roomId: string | null;
-  appID: string | null;
-};
-
-const StreamerLive = ({ eventStatus }: Props) => {
+const StreamerLive = ({ event }: Props) => {
   const { eventId } = useParams<{ eventId: string }>();
   const [startLive, { isLoading }] = useStartLiveStreamMutation();
+  const [endLive] = useEndLiveStreamMutation();
 
   const liveRef = useRef<HTMLDivElement>(null);
-  const zegoRoomRef = useRef<any>(null);
 
-  const [liveConfig, setLiveConfig] = useState<LiveConfig>({
-    token: null,
-    roomId: null,
-    appID: null,
-  });
+  const zegoRoomRef = useRef<any>(null);
+  const initializedRef = useRef(false);
 
   const user = useAppSelector((state) => state.auth.user);
   const userID = user?._id;
   const userName = user?.name || "Host";
 
-  const initZego = useCallback(
-    async (config: LiveConfig) => {
-      // Ensure we have a valid config
-      if (!config.token || !config.roomId || !config.appID) return;
+  const eventStatus = event?.status;
 
+  const { data: savedLiveConfig, isSuccess } = useGetLiveEventInfoForHostQuery(
+    eventId!,
+    { skip: !eventId }
+  );
+
+  const [liveConfig, setLiveConfig] = useState<{
+    token: string | null;
+    roomId: string | null;
+    appID: string | null;
+  }>({
+    token: null,
+    roomId: null,
+    appID: null,
+  });
+
+  // Set liveConfig from saved data
+  useEffect(() => {
+    if (savedLiveConfig?.data) {
+      setLiveConfig({
+        token: savedLiveConfig.data.token,
+        roomId: savedLiveConfig.data.roomId,
+        appID: savedLiveConfig.data.appID,
+      });
+    }
+  }, [savedLiveConfig]);
+
+  // Initialize Zego
+  const initZego = useCallback(
+    async ({
+      appID,
+      roomId,
+      token,
+    }: {
+      appID: string;
+      roomId: string;
+      token: string;
+    }) => {
       try {
         await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
 
         const KitToken = ZegoUIKitPrebuilt.generateKitTokenForProduction(
-          Number(config.appID),
-          config.token,
-          config.roomId,
+          Number(appID),
+          token,
+          roomId,
           userID!,
           userName
         );
@@ -61,109 +84,185 @@ const StreamerLive = ({ eventStatus }: Props) => {
 
         zp.joinRoom({
           container: liveRef.current,
-          scenario: {
-            mode: "LiveStreaming",
-            config: { role: "Host" },
-          },
+          // @ts-ignore
+          scenario: { mode: "LiveStreaming", config: { role: "Host" } },
           turnOnCameraWhenJoining: true,
           turnOnMicrophoneWhenJoining: true,
           showMyCameraToggleButton: true,
           showMyMicrophoneToggleButton: true,
           showTextChat: true,
-          onLiveEnd: () => {
+          onLiveEnd: async () => {
             toast.info("Live stream ended");
+            await endLive(eventId!).unwrap();
             setLiveConfig({ token: null, roomId: null, appID: null });
           },
-          onJoinRoom: () => {
-            console.log("Host joined room, starting camera & mic");
-          },
-          onLocalStreamUpdated: (state) => {
-            console.log("Local stream state:", state);
-            if (state !== "published") {
-              // You might want to log non-published states
-            }
-          },
         });
-
-        console.log("Zego room initialized");
-      } catch (err) {
-        console.error("Failed to init Zego:", err);
-        toast.error("Failed to start live stream. Check camera/mic and token.");
-        // Clear config on failure to allow retry
-        setLiveConfig({ token: null, roomId: null, appID: null });
+      } catch {
+        toast.error("Failed to join live room.");
       }
     },
-    [userID, userName] // liveRef is stable, no need to include
+    [endLive, eventId, userID, userName]
   );
 
+  // Auto-init Zego if config exists
+  useEffect(() => {
+    if (!liveRef.current) return;
+    if (initializedRef.current) return;
+
+    const config =
+      liveConfig.token && liveConfig.roomId && liveConfig.appID
+        ? liveConfig
+        : isSuccess &&
+          savedLiveConfig?.hostToken &&
+          savedLiveConfig.roomId &&
+          savedLiveConfig.appID
+        ? {
+            token: savedLiveConfig.hostToken,
+            roomId: savedLiveConfig.roomId,
+            appID: savedLiveConfig.appID,
+          }
+        : null;
+
+    if (!config) return;
+
+    initializedRef.current = true;
+    initZego(config);
+  }, [
+    liveConfig.token,
+    liveConfig.roomId,
+    liveConfig.appID,
+    isSuccess,
+    savedLiveConfig,
+    initZego,
+    liveConfig,
+  ]);
+
   const handleStartLive = async () => {
-    if (!eventId) return;
-
     try {
-      const response = await startLive(eventId).unwrap();
-      console.log("🚀 ~ handleStartLive ~ response:", response);
+      const response = await startLive(eventId!).unwrap();
       const { token, roomId, appID } = response.data;
-
-      // JUST set the config. Do not call initZego here.
-      setLiveConfig({
-        token,
-        roomId,
-        appID,
-      });
+      setLiveConfig({ token, roomId, appID });
     } catch (err: any) {
       toast.error(err?.data?.message || "Failed to start live stream");
-      console.error("Start live error:", err);
     }
   };
 
-  // This single useEffect handles Zego creation and destruction
   useEffect(() => {
-    // Only run if we have a token and the Zego instance isn't already created
-    if (
-      liveConfig.token &&
-      liveConfig.roomId &&
-      liveConfig.appID &&
-      !zegoRoomRef.current &&
-      liveRef.current // And the container is ready
-    ) {
-      console.log("Config detected, initializing Zego...");
-      initZego(liveConfig);
-    }
-
-    // This cleanup will run ONLY when the component unmounts
     return () => {
       if (zegoRoomRef.current) {
-        console.log("Destroying Zego instance on unmount...");
         zegoRoomRef.current.destroy();
-        zegoRoomRef.current = null;
+        initializedRef.current = false;
       }
     };
-    // Re-run this effect if the config changes (e.g., token becomes non-null)
-    // or if initZego function identity changes (it shouldn't, due to useCallback)
-  }, [liveConfig, initZego]);
+  }, []);
 
-  // Render logic based on whether we have a token, not eventStatus
-  if (!liveConfig.token) {
-    // We don't have a token. Show the button.
-    // The div ref is not needed yet.
+  // --- Event timing calculations ---
+  const startTime = new Date(event.startAt).getTime();
+  const endTime = startTime + (event.durationMinutes || 0) * 60 * 1000;
+
+  const checkIsEventAllowed = useCallback(() => {
+    const now = Date.now();
+    return now >= startTime - 60 * 1000 && now <= endTime; // 1 min before start until end
+  }, [startTime, endTime]);
+
+  const [isEventAllowed, setIsEventAllowed] = useState(checkIsEventAllowed());
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setIsEventAllowed(checkIsEventAllowed());
+    }, 1000);
+    return () => clearInterval(interval);
+  }, [checkIsEventAllowed]);
+
+  // Countdown to start
+  const getCountdown = () => {
+    const diffMs = startTime - Date.now();
+    const minutes = Math.floor(diffMs / 1000 / 60);
+    const seconds = Math.floor((diffMs / 1000) % 60);
+    return { minutes, seconds, diffMs };
+  };
+
+  const countdown = getCountdown();
+
+  // --- UI States ---
+
+  // Not yet allowed (1 min before start)
+  if (!isEventAllowed) {
+    if (Date.now() < startTime) {
+      return (
+        <div className="p-6 text-center">
+          <h1 className="text-2xl font-bold text-gray-800">
+            Live stream coming soon
+          </h1>
+          <p className="mt-2 text-gray-600">
+            The live session will start within 1 minute of the scheduled time.
+          </p>
+          <p className="mt-4 text-lg font-semibold text-gray-700">
+            Starts in {countdown.minutes}m {countdown.seconds}s
+          </p>
+        </div>
+      );
+    } else {
+      return (
+        <div className="p-6 text-center">
+          <h1 className="text-2xl font-bold text-gray-800">
+            Live stream has ended
+          </h1>
+          <p className="mt-2 text-gray-600">
+            The scheduled duration for this event has passed. Thank you for
+            hosting!
+          </p>
+        </div>
+      );
+    }
+  }
+
+  // Scheduled but not started yet
+  if (eventStatus === "scheduled") {
     return (
-      <Button onClick={handleStartLive} disabled={isLoading}>
-        {isLoading ? "Starting..." : "Start Live"}
-      </Button>
+      <div className="flex flex-col items-center mt-4">
+        <p className="mb-2 text-gray-700">
+          Your live session is ready to start.
+        </p>
+        <Button
+          onClick={handleStartLive}
+          disabled={isLoading}
+          size="lg"
+        >
+          {isLoading ? "Starting..." : "Start Live"}
+        </Button>
+      </div>
     );
   }
 
-  // We have a token. Render the container for Zego.
-  // The useEffect will have already triggered initZego.
+  // Event ended by status
+  if (eventStatus === "ended" || Date.now() > endTime) {
+    return (
+      <div className="p-6 text-center">
+        <h1 className="text-2xl font-bold text-gray-800">
+          Live stream has ended
+        </h1>
+        <p className="mt-2 text-gray-600">
+          Thank you for hosting! You can create a new live event anytime.
+        </p>
+      </div>
+    );
+  }
+
+  // Preparing live session
+  if (!liveConfig.token) {
+    return (
+      <div className="p-6 text-center text-gray-500">
+        Preparing your live session. Hang tight, it will start shortly...
+      </div>
+    );
+  }
+
+  // Live ongoing
   return (
     <div
       ref={liveRef}
-      style={{
-        width: "100%",
-        height: "600px",
-        backgroundColor: "#000",
-        position: "relative",
-      }}
+      className="w-full h-[600px] bg-black rounded-lg overflow-hidden"
     />
   );
 };

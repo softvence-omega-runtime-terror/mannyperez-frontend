@@ -37,9 +37,8 @@ function Live() {
   if (isLoading) return <div>Loading...</div>;
 
   const event = data?.data;
-  console.log("🚀 ~ Live ~ event:", event)
 
-  const eventStatus = event?.status 
+
 
   const isHost = event?.sellerId === user?._id;
 
@@ -56,9 +55,9 @@ function Live() {
             <LiveChat />
           </div> */}
           {isHost ? (
-            <StreamerLive eventStatus={eventStatus} />
+            <StreamerLive event={event}/>
           ) : (
-            <WatcherLive eventStatus={eventStatus} />
+            <WatcherLive event={event} />
           )}
         </div>
       </Wrapper>
