@@ -10,7 +10,36 @@ export const liveStreamApi = baseApi.injectEndpoints({
       }),
       invalidatesTags: ["LiveEvents"],
     }),
+
+    getLiveEventInfo: builder.query({
+      query: (id) => ({
+        url: `/live-event/info/${id}`,
+        method: "GET",
+      }),
+      providesTags: ["LiveEvents"],
+    }),
+
+    startLiveStream: builder.mutation({
+      query: (id) => ({
+        url: `/live-event/stream/start/${id}`,
+        method: "POST",
+      }),
+      invalidatesTags: ["LiveEvents"],
+    }),
+
+    joinLiveStream: builder.mutation({
+      query: (id) => ({
+        url: `/live-event/stream/join/${id}`,
+        method: "POST",
+      }),
+      invalidatesTags: ["LiveEvents"],
+    }),
   }),
 });
 
-export const { useCreateLiveStreamMutation } = liveStreamApi;
+export const {
+  useCreateLiveStreamMutation,
+  useGetLiveEventInfoQuery,
+  useStartLiveStreamMutation,
+  useJoinLiveStreamMutation,
+} = liveStreamApi;

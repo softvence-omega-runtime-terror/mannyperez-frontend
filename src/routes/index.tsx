@@ -162,7 +162,7 @@ const routes = createBrowserRouter([
       },
 
       {
-        path: "/live",
+        path: "/live/:eventId",
         element: <Live />,
         loader: () => checkAuth({ requireAuth: false }),
       },

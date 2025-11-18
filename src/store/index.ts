@@ -16,6 +16,7 @@ import { sellersApi } from "./services/sellersApi";
 // Import slices
 import authReducer from "./slices/authSlice";
 import selectedConversationReducer from "./slices/chatSlice";
+import liveChatReducer from "./slices/live-stream-slice";
 
 /**
  * Configure the Redux store
@@ -31,6 +32,7 @@ export const store = configureStore({
     // Regular slices
     auth: authReducer,
     selectedConversation: selectedConversationReducer,
+    liveStreamConfig: liveChatReducer
   },
 
   middleware: (getDefaultMiddleware) =>
