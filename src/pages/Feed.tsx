@@ -131,7 +131,6 @@ const Feed: React.FC = () => {
     // Future: Call API to send message
   };
 
-  // --- Checkout Layout ---
   if (checkoutProduct) {
     return (
       <div className="container mx-auto px-4 py-6 min-h-screen">
