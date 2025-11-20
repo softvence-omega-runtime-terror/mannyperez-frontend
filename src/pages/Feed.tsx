@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import React, { useState } from "react";
 import { Outlet, useLocation, useNavigate, useParams } from "react-router-dom";
@@ -38,9 +39,10 @@ const DUMMY_PRODUCT: ProductType = {
 };
 
 interface CurrentPackageProps {
-  onBuyNow?: (product: ProductType) => void;
+  onBuyNow?: (product: any) => void;
   onSendMessage?: (message: string) => void;
 }
+
 const CurrentPackage: React.FC<CurrentPackageProps> = ({ onBuyNow }) => {
   const { productId } = useParams();
 
@@ -48,11 +50,13 @@ const CurrentPackage: React.FC<CurrentPackageProps> = ({ onBuyNow }) => {
     skip: !productId,
   });
 
-  if (isLoading) {
+  // --- Show loading state ---
+  if (isLoading || !productData?.data) {
     return <div>Loading...</div>;
   }
 
-  const product = productData?.data as MessageProduct;
+  // --- Safe product object ---
+  const product = productData.data as MessageProduct;
 
   const renderPrice = () => {
     const prices = product.pricingAndInventory?.map((p) => p.price);
@@ -80,16 +84,16 @@ const CurrentPackage: React.FC<CurrentPackageProps> = ({ onBuyNow }) => {
       <div className="flex justify-between items-center mb-4">
         <div className="flex items-center">
           <img
-            src={product.images[0]}
-            alt={product.productInformation.title}
+            src={product.images?.[0] || "/dummy/image_d19c84.png"}
+            alt={product.productInformation?.title || "Product Image"}
             className="w-12 h-12 object-cover rounded mr-4"
           />
           <div>
             <p className="text-lg font-semibold">
-              {product.productInformation.title}
+              {product.productInformation?.title || "Product Title"}
             </p>
             <p className="text-sm text-gray-500">
-              {product.productInformation.description}
+              {product.productInformation?.description || "Product Description"}
             </p>
             <div className="mt-1 flex-shrink-0">{renderPrice()}</div>
           </div>
@@ -113,14 +117,11 @@ const Feed: React.FC = () => {
   const location = useLocation();
   const isMessagesRoute = location.pathname.startsWith("/feed/messages");
 
-  const [checkoutProduct, setCheckoutProduct] = useState<ProductType | null>(
-    null
-  );
+  const [checkoutProduct, setCheckoutProduct] = useState<any | null>(null);
   const [selectedShipping, setSelectedShipping] = useState<number | null>(null);
 
   // --- Handle Buy Now ---
-
-  const handleBuyNow = (product) => {
+  const handleBuyNow = (product: any) => {
     setCheckoutProduct(product);
     navigate(`/checkout/${product._id}`);
   };
@@ -128,7 +129,6 @@ const Feed: React.FC = () => {
   // --- Placeholder for sending message ---
   const handleSendMessage = (message: string) => {
     console.log("Send message:", message);
-    // Future: Call API to send message
   };
 
   if (checkoutProduct) {
@@ -149,7 +149,6 @@ const Feed: React.FC = () => {
     );
   }
 
-  // --- Feed / Messages Layout ---
   return (
     <>
       <UserNavbar />

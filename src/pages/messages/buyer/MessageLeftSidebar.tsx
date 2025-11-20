@@ -5,27 +5,30 @@ import { socket, SocketEvent } from "@/lib/socket";
 
 export type Conversation = {
   _id: string;
-  otherUser: {
+  members: {
     _id: string;
     name?: string;
     email?: string;
     avatar?: string;
-  };
+  }[];
   product?: {
     _id: string;
     productInformation?: { title?: string };
+  } | null;
+  lastMessage?: {
+    text?: string;
+    createdAt?: string;
   };
-  lastMessage?: string;
   unreadCount?: number;
-  time?: string;
+  updatedAt?: string;
 };
 
 const MessageLeftSidebar: React.FC = () => {
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const navigate = useNavigate();
+  console.log(conversations[0]?.product?._id, "message")
 
   useEffect(() => {
-    // Request conversations from server
     socket.emit(SocketEvent.LOAD_CONTACTS);
 
     const handleContactsLoaded = (data: { conversations: Conversation[] }) => {
@@ -40,10 +43,16 @@ const MessageLeftSidebar: React.FC = () => {
   }, []);
 
   const handleSelectConversation = (conversation: Conversation) => {
-    // Navigate to chat page with conversation state
-    navigate(
-      `/feed/messages/${conversation.otherUser._id}/${conversation.product?._id}`
-    );
+    const otherUser = conversation.members?.[0];
+    navigate(`/feed/messages/${otherUser?._id}/${conversation.product?._id || "null"}`);
+  };
+
+  const formatTime = (timestamp?: string) => {
+    if (!timestamp) return "";
+    return new Date(timestamp).toLocaleTimeString([], {
+      hour: "2-digit",
+      minute: "2-digit",
+    });
   };
 
   return (
@@ -57,42 +66,55 @@ const MessageLeftSidebar: React.FC = () => {
       />
 
       {conversations.length > 0 ? (
-        conversations.map((c) => (
-          <div
-            key={c._id}
-            className="flex items-start justify-between p-2 rounded-lg cursor-pointer hover:bg-pink-50 mb-2"
-            onClick={() => handleSelectConversation(c)}
-          >
-            <div className="flex items-start space-x-3">
-              <img
-                src={c.otherUser.avatar || "/default-avatar.png"}
-                alt={c.otherUser.name || c.otherUser.email || "User"}
-                className="w-10 h-10 rounded-full object-cover"
-              />
-              <div>
-                <p className="text-sm font-semibold text-gray-800">
-                  {c.otherUser.name || c.otherUser.email}
-                </p>
-                {/* {c.lastMessage && (
-                  <p className="text-xs text-gray-500">{c.lastMessage}</p>
-                )} */}
-                {c.product?.productInformation?.title && (
-                  <p className="text-xs text-pink-600">
-                    {c.product.productInformation.title}
+        conversations.map((c) => {
+          const otherUser = c.members?.[0];
+
+          return (
+            <div
+              key={c._id}
+              className="flex items-start justify-between p-2 rounded-lg cursor-pointer hover:bg-pink-50 mb-2"
+              onClick={() => handleSelectConversation(c)}
+            >
+              <div className="flex items-start space-x-3">
+                <img
+                  src={otherUser?.avatar || "/logoDestash.png"}
+                  alt={otherUser?.name || otherUser?.email || "User"}
+                  className="w-10 h-10 rounded-full object-cover"
+                />
+
+                <div>
+                  <p className="text-sm font-semibold text-gray-800">
+                    {otherUser?.name || otherUser?.email}
                   </p>
+
+                  {c.lastMessage?.text ? (
+                    <p className="text-xs text-gray-500 line-clamp-1">
+                      {c.lastMessage.text || "Image"}
+                    </p>
+                  ) : null}
+
+                  {c.product?.productInformation?.title && (
+                    <p className="text-xs text-pink-600">
+                      {c.product.productInformation.title}
+                    </p>
+                  )}
+                </div>
+              </div>
+
+              <div className="flex flex-col items-end">
+                <span className="text-xs text-gray-400">
+                  {formatTime(c.lastMessage?.createdAt)}
+                </span>
+
+                {c.unreadCount && c.unreadCount > 0 && (
+                  <span className="bg-pink-600 text-white text-xs w-5 h-5 flex items-center justify-center rounded-full mt-1">
+                    {c.unreadCount}
+                  </span>
                 )}
               </div>
             </div>
-            <div className="flex flex-col items-end">
-              <span className="text-xs text-gray-400">{c.time}</span>
-              {c.unreadCount && c.unreadCount > 0 && (
-                <span className="bg-pink-600 text-white text-xs w-5 h-5 flex items-center justify-center rounded-full mt-1">
-                  {c.unreadCount}
-                </span>
-              )}
-            </div>
-          </div>
-        ))
+          );
+        })
       ) : (
         <p className="text-gray-500">No conversations yet...</p>
       )}

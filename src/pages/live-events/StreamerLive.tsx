@@ -46,6 +46,8 @@ const StreamerLive = ({ event }: Props) => {
     appID: null,
   });
 
+  console.log("Saved Live Config:", liveConfig);
+
   // Set liveConfig from saved data
   useEffect(() => {
     if (savedLiveConfig?.data) {
@@ -187,35 +189,35 @@ const StreamerLive = ({ event }: Props) => {
   // --- UI States ---
 
   // Not yet allowed (1 min before start)
-  if (!isEventAllowed) {
-    if (Date.now() < startTime) {
-      return (
-        <div className="p-6 text-center">
-          <h1 className="text-2xl font-bold text-gray-800">
-            Live stream coming soon
-          </h1>
-          <p className="mt-2 text-gray-600">
-            The live session will start within 1 minute of the scheduled time.
-          </p>
-          <p className="mt-4 text-lg font-semibold text-gray-700">
-            Starts in {countdown.minutes}m {countdown.seconds}s
-          </p>
-        </div>
-      );
-    } else {
-      return (
-        <div className="p-6 text-center">
-          <h1 className="text-2xl font-bold text-gray-800">
-            Live stream has ended
-          </h1>
-          <p className="mt-2 text-gray-600">
-            The scheduled duration for this event has passed. Thank you for
-            hosting!
-          </p>
-        </div>
-      );
-    }
-  }
+  // if (!isEventAllowed) {
+  //   if (Date.now() < startTime) {
+  //     return (
+  //       <div className="p-6 text-center">
+  //         <h1 className="text-2xl font-bold text-gray-800">
+  //           Live stream coming soon
+  //         </h1>
+  //         <p className="mt-2 text-gray-600">
+  //           The live session will start within 1 minute of the scheduled time.
+  //         </p>
+  //         <p className="mt-4 text-lg font-semibold text-gray-700">
+  //           Starts in {countdown.minutes}m {countdown.seconds}s
+  //         </p>
+  //       </div>
+  //     );
+  //   } else {
+  //     return (
+  //       <div className="p-6 text-center">
+  //         <h1 className="text-2xl font-bold text-gray-800">
+  //           Live stream has ended
+  //         </h1>
+  //         <p className="mt-2 text-gray-600">
+  //           The scheduled duration for this event has passed. Thank you for
+  //           hosting!
+  //         </p>
+  //       </div>
+  //     );
+  //   }
+  // }
 
   // Scheduled but not started yet
   if (eventStatus === "scheduled") {
@@ -236,27 +238,27 @@ const StreamerLive = ({ event }: Props) => {
   }
 
   // Event ended by status
-  if (eventStatus === "ended" || Date.now() > endTime) {
-    return (
-      <div className="p-6 text-center">
-        <h1 className="text-2xl font-bold text-gray-800">
-          Live stream has ended
-        </h1>
-        <p className="mt-2 text-gray-600">
-          Thank you for hosting! You can create a new live event anytime.
-        </p>
-      </div>
-    );
-  }
+  // if (eventStatus === "ended" || Date.now() > endTime) {
+  //   return (
+  //     <div className="p-6 text-center">
+  //       <h1 className="text-2xl font-bold text-gray-800">
+  //         Live stream has ended
+  //       </h1>
+  //       <p className="mt-2 text-gray-600">
+  //         Thank you for hosting! You can create a new live event anytime.
+  //       </p>
+  //     </div>
+  //   );
+  // }
 
   // Preparing live session
-  if (!liveConfig.token) {
-    return (
-      <div className="p-6 text-center text-gray-500">
-        Preparing your live session. Hang tight, it will start shortly...
-      </div>
-    );
-  }
+  // if (!liveConfig.token) {
+  //   return (
+  //     <div className="p-6 text-center text-gray-500">
+  //       Preparing your live session. Hang tight, it will start shortly...
+  //     </div>
+  //   );
+  // }
 
   // Live ongoing
   return (

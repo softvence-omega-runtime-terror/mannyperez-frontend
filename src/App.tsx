@@ -3,6 +3,7 @@ import { useEffect } from "react";
 import { Outlet } from "react-router-dom";
 import { useAppSelector } from "./store/hooks";
 import { socket, SocketEvent } from "./lib/socket";
+import Navbar from "@/components/layout/Navbar";
 
 function App() {
   const { isAuthenticated } = useAppSelector((state) => state.auth);
@@ -13,9 +14,7 @@ function App() {
     const token = localStorage.getItem("authToken");
 
     socket.auth = { token };
-
     socket.connect();
-
     socket.emit(SocketEvent.JOIN);
 
     return () => {
@@ -25,7 +24,12 @@ function App() {
 
   return (
     <div className="app">
-      {/* This is where nested routes render */}
+      {/* Global Navbar */}
+      <div className="sticky top-0 z-50">
+        <Navbar />
+      </div>
+
+      {/* Render child routes */}
       <Outlet />
     </div>
   );

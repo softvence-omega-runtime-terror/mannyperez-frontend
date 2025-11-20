@@ -8,7 +8,6 @@ import TrendingListing from '@/components/landing/TrendingListing'
 import VerifiedTopSellers from '@/components/landing/VerifiedTopSellers'
 import Footer from '@/components/layout/Footer'
 
-import Navbar from '@/components/layout/Navbar'
 
 
 function Landing() {
@@ -16,7 +15,6 @@ function Landing() {
 
      <div className=''>
     <div className="sticky top-0 z-99">
-      <Navbar />
       </div>
         <Hero/>
         <SalesEvent/>

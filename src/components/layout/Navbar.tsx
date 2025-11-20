@@ -5,6 +5,7 @@ import Wrapper from "./Wrapper";
 import SearchInput from "../landing/SectionComponents/SearchInput";
 import PrimaryButton from "@/reuseableComponents/PrimaryButton";
 import { HiMenu, HiX } from "react-icons/hi";
+import { Button } from "../ui/button";
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -25,6 +26,7 @@ const Navbar = () => {
         setIsOpen(false);
       }
     };
+
 
     const handleKey = (e: KeyboardEvent) => {
       if (e.key === "Escape") setIsOpen(false);
@@ -133,8 +135,8 @@ const Navbar = () => {
                 setIsOpen(false);
               }}
             />
-            <PrimaryButton
-              type="Primary"
+            <Button
+              value="Primary"
               title="Sign Up"
               onClick={() => {
                 navigate("/sign-up");
