@@ -177,18 +177,18 @@ const StreamerLive = ({ event }: Props) => {
   }, [checkIsEventAllowed]);
 
   // Countdown to start
-  const getCountdown = () => {
-    const diffMs = startTime - Date.now();
-    const minutes = Math.floor(diffMs / 1000 / 60);
-    const seconds = Math.floor((diffMs / 1000) % 60);
-    return { minutes, seconds, diffMs };
-  };
+  // const getCountdown = () => {
+  //   const diffMs = startTime - Date.now();
+  //   const minutes = Math.floor(diffMs / 1000 / 60);
+  //   const seconds = Math.floor((diffMs / 1000) % 60);
+  //   return { minutes, seconds, diffMs };
+  // };
 
-  const countdown = getCountdown();
+  // const countdown = getCountdown();
 
-  // --- UI States ---
+  // // --- UI States ---
 
-  // Not yet allowed (1 min before start)
+  // // Not yet allowed (1 min before start)
   // if (!isEventAllowed) {
   //   if (Date.now() < startTime) {
   //     return (
@@ -219,25 +219,25 @@ const StreamerLive = ({ event }: Props) => {
   //   }
   // }
 
-  // Scheduled but not started yet
-  if (eventStatus === "scheduled") {
-    return (
-      <div className="flex flex-col items-center mt-4">
-        <p className="mb-2 text-gray-700">
-          Your live session is ready to start.
-        </p>
-        <Button
-          onClick={handleStartLive}
-          disabled={isLoading}
-          size="lg"
-        >
-          {isLoading ? "Starting..." : "Start Live"}
-        </Button>
-      </div>
-    );
-  }
+  // // Scheduled but not started yet
+  // if (eventStatus === "scheduled") {
+  //   return (
+  //     <div className="flex flex-col items-center mt-4">
+  //       <p className="mb-2 text-gray-700">
+  //         Your live session is ready to start.
+  //       </p>
+  //       <Button
+  //         onClick={handleStartLive}
+  //         disabled={isLoading}
+  //         size="lg"
+  //       >
+  //         {isLoading ? "Starting..." : "Start Live"}
+  //       </Button>
+  //     </div>
+  //   );
+  // }
 
-  // Event ended by status
+  // // Event ended by status
   // if (eventStatus === "ended" || Date.now() > endTime) {
   //   return (
   //     <div className="p-6 text-center">
@@ -251,7 +251,7 @@ const StreamerLive = ({ event }: Props) => {
   //   );
   // }
 
-  // Preparing live session
+  // // Preparing live session
   // if (!liveConfig.token) {
   //   return (
   //     <div className="p-6 text-center text-gray-500">
