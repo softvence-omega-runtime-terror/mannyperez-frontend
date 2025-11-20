@@ -175,88 +175,88 @@ const StreamerLive = ({ event }: Props) => {
   }, [checkIsEventAllowed]);
 
   // Countdown to start
-  const getCountdown = () => {
-    const diffMs = startTime - Date.now();
-    const minutes = Math.floor(diffMs / 1000 / 60);
-    const seconds = Math.floor((diffMs / 1000) % 60);
-    return { minutes, seconds, diffMs };
-  };
+  // const getCountdown = () => {
+  //   const diffMs = startTime - Date.now();
+  //   const minutes = Math.floor(diffMs / 1000 / 60);
+  //   const seconds = Math.floor((diffMs / 1000) % 60);
+  //   return { minutes, seconds, diffMs };
+  // };
 
-  const countdown = getCountdown();
+  // const countdown = getCountdown();
 
-  // --- UI States ---
+  // // --- UI States ---
 
-  // Not yet allowed (1 min before start)
-  if (!isEventAllowed) {
-    if (Date.now() < startTime) {
-      return (
-        <div className="p-6 text-center">
-          <h1 className="text-2xl font-bold text-gray-800">
-            Live stream coming soon
-          </h1>
-          <p className="mt-2 text-gray-600">
-            The live session will start within 1 minute of the scheduled time.
-          </p>
-          <p className="mt-4 text-lg font-semibold text-gray-700">
-            Starts in {countdown.minutes}m {countdown.seconds}s
-          </p>
-        </div>
-      );
-    } else {
-      return (
-        <div className="p-6 text-center">
-          <h1 className="text-2xl font-bold text-gray-800">
-            Live stream has ended
-          </h1>
-          <p className="mt-2 text-gray-600">
-            The scheduled duration for this event has passed. Thank you for
-            hosting!
-          </p>
-        </div>
-      );
-    }
-  }
+  // // Not yet allowed (1 min before start)
+  // if (!isEventAllowed) {
+  //   if (Date.now() < startTime) {
+  //     return (
+  //       <div className="p-6 text-center">
+  //         <h1 className="text-2xl font-bold text-gray-800">
+  //           Live stream coming soon
+  //         </h1>
+  //         <p className="mt-2 text-gray-600">
+  //           The live session will start within 1 minute of the scheduled time.
+  //         </p>
+  //         <p className="mt-4 text-lg font-semibold text-gray-700">
+  //           Starts in {countdown.minutes}m {countdown.seconds}s
+  //         </p>
+  //       </div>
+  //     );
+  //   } else {
+  //     return (
+  //       <div className="p-6 text-center">
+  //         <h1 className="text-2xl font-bold text-gray-800">
+  //           Live stream has ended
+  //         </h1>
+  //         <p className="mt-2 text-gray-600">
+  //           The scheduled duration for this event has passed. Thank you for
+  //           hosting!
+  //         </p>
+  //       </div>
+  //     );
+  //   }
+  // }
 
-  // Scheduled but not started yet
-  if (eventStatus === "scheduled") {
-    return (
-      <div className="flex flex-col items-center mt-4">
-        <p className="mb-2 text-gray-700">
-          Your live session is ready to start.
-        </p>
-        <Button
-          onClick={handleStartLive}
-          disabled={isLoading}
-          size="lg"
-        >
-          {isLoading ? "Starting..." : "Start Live"}
-        </Button>
-      </div>
-    );
-  }
+  // // Scheduled but not started yet
+  // if (eventStatus === "scheduled") {
+  //   return (
+  //     <div className="flex flex-col items-center mt-4">
+  //       <p className="mb-2 text-gray-700">
+  //         Your live session is ready to start.
+  //       </p>
+  //       <Button
+  //         onClick={handleStartLive}
+  //         disabled={isLoading}
+  //         size="lg"
+  //       >
+  //         {isLoading ? "Starting..." : "Start Live"}
+  //       </Button>
+  //     </div>
+  //   );
+  // }
 
-  // Event ended by status
-  if (eventStatus === "ended" || Date.now() > endTime) {
-    return (
-      <div className="p-6 text-center">
-        <h1 className="text-2xl font-bold text-gray-800">
-          Live stream has ended
-        </h1>
-        <p className="mt-2 text-gray-600">
-          Thank you for hosting! You can create a new live event anytime.
-        </p>
-      </div>
-    );
-  }
+  // // Event ended by status
+  // if (eventStatus === "ended" || Date.now() > endTime) {
+  //   return (
+  //     <div className="p-6 text-center">
+  //       <h1 className="text-2xl font-bold text-gray-800">
+  //         Live stream has ended
+  //       </h1>
+  //       <p className="mt-2 text-gray-600">
+  //         Thank you for hosting! You can create a new live event anytime.
+  //       </p>
+  //     </div>
+  //   );
+  // }
 
-  // Preparing live session
-  if (!liveConfig.token) {
-    return (
-      <div className="p-6 text-center text-gray-500">
-        Preparing your live session. Hang tight, it will start shortly...
-      </div>
-    );
-  }
+  // // Preparing live session
+  // if (!liveConfig.token) {
+  //   return (
+  //     <div className="p-6 text-center text-gray-500">
+  //       Preparing your live session. Hang tight, it will start shortly...
+  //     </div>
+  //   );
+  // }
 
   // Live ongoing
   return (
