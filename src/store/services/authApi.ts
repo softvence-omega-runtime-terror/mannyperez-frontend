@@ -31,7 +31,7 @@ export interface SignupRequest {
     email: string;
     password: string;
     confirmPassword: string;
-    aggriedToTerms: boolean; // Note: Backend has typo "aggriedToTerms" instead of "agreedToTerms"
+    aggriedToTerms: boolean;
     role: 'buyer' | 'seller';
 }
 
@@ -70,10 +70,6 @@ export const authApi = createApi({
     endpoints: (builder) => ({
         /**
          * Login user
-         * 
-         * @example
-         * const [login, { isLoading }] = useLoginMutation();
-         * const result = await login({ email: 'user@example.com', password: 'pass123' });
          */
         login: builder.mutation<AuthResponse, LoginRequest>({
             query: (credentials) => ({
@@ -81,6 +77,14 @@ export const authApi = createApi({
                 method: 'POST',
                 body: credentials,
             }),
+
+            // FIX: Normalize backend response → matches your slice
+            transformResponse: (response: any) => ({
+                user: response.user,
+                approvalToken: response.approvalToken,
+                refreshToken: response.refreshToken,
+            }),
+
             invalidatesTags: ['User'],
         }),
 
@@ -101,31 +105,21 @@ export const authApi = createApi({
             })
         }),
 
-        logout: builder.mutation<void, void>({
-            query: () => ({
-                url: '/auth/logout',
-                method: 'POST',
-            }),
-            invalidatesTags: ['User'],
-        }),
+       logout: builder.mutation({
+  query: () => ({
+    url: "/auth/logout",
+    method: "POST",
+    body: {
+      refresh_token: localStorage.getItem("refreshToken"),
+    },
+  }),
+}),
 
-        /**
-         * Get current user profile
-         * 
-         * @example
-         * const { data: user, isLoading } = useGetCurrentUserQuery();
-         */
-        getCurrentUser: builder.query<User, void>({
-            query: () => '/auth/me',
-            providesTags: ['User'],
-        }),
+        // getCurrentUser: builder.query<User, void>({
+        //     query: () => '/auth/me',
+        //     providesTags: ['User'],
+        // }),
 
-        /**
-         * Refresh access token
-         * 
-         * @example
-         * const [refreshToken] = useRefreshTokenMutation();
-         */
         refreshToken: builder.mutation<{ token: string }, { refreshToken: string }>({
             query: (body) => ({
                 url: '/auth/refresh',
@@ -141,6 +135,6 @@ export const {
     useSignupMutation,
     useVerifyEmailMutation,
     useLogoutMutation,
-    useGetCurrentUserQuery,
+    // useGetCurrentUserQuery,
     useRefreshTokenMutation,
 } = authApi;
