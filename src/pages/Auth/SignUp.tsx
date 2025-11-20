@@ -5,14 +5,12 @@ import { FcGoogle } from "react-icons/fc";
 import { FaApple } from "react-icons/fa";
 import { Link, useNavigate } from "react-router-dom";
 import { useSignupMutation } from "@/store/services/authApi";
-import { useAppDispatch } from "@/store/hooks";
-// import { showNotification } from "@/store/slices/uiSlice";
+import { toast } from "sonner";
 
 const Signup = () => {
   const navigate = useNavigate();
   const [signup, { isLoading }] = useSignupMutation();
 
-  // Form state
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -21,130 +19,63 @@ const Signup = () => {
     role: "buyer" as "buyer" | "seller",
   });
 
-  // UI state
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [agreeToTerms, setAgreeToTerms] = useState(false);
-
-  // Validation errors
   const [errors, setErrors] = useState<Record<string, string>>({});
 
-  // Handle input changes
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
-    // Clear error when user types
-    if (errors[name]) {
-      setErrors((prev) => ({ ...prev, [name]: "" }));
-    }
+    setFormData((prev) => ({ ...prev, [name]: value }));
+    if (errors[name]) setErrors((prev) => ({ ...prev, [name]: "" }));
   };
 
-  // Validate form
   const validateForm = () => {
     const newErrors: Record<string, string> = {};
-
-    // Name validation
-    if (!formData.name.trim()) {
-      newErrors.name = "Name is required";
-    } else if (formData.name.trim().length < 2) {
-      newErrors.name = "Name must be at least 2 characters";
-    }
-
-    // Email validation
-    if (!formData.email.trim()) {
-      newErrors.email = "Email is required";
-    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
-      newErrors.email = "Please enter a valid email address";
-    }
-
-    // Password validation
-    if (!formData.password) {
-      newErrors.password = "Password is required";
-    } else if (formData.password.length < 8) {
-      newErrors.password = "Password must be at least 8 characters";
-    } else if (!/(?=.*[A-Z])(?=.*\d)/.test(formData.password)) {
-      newErrors.password = "Password must include 1 uppercase letter and 1 number";
-    }
-
-    // Confirm password validation
-    if (!formData.confirmPassword) {
-      newErrors.confirmPassword = "Please confirm your password";
-    } else if (formData.password !== formData.confirmPassword) {
-      newErrors.confirmPassword = "Passwords do not match";
-    }
-
-    // Terms validation
-    if (!agreeToTerms) {
-      newErrors.terms = "You must agree to the Terms of Service and Privacy Policy";
-    }
-
+    if (!formData.name.trim()) newErrors.name = "Name is required";
+    else if (formData.name.trim().length < 2) newErrors.name = "Name must be at least 2 characters";
+    if (!formData.email.trim()) newErrors.email = "Email is required";
+    else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) newErrors.email = "Please enter a valid email address";
+    if (!formData.password) newErrors.password = "Password is required";
+    else if (formData.password.length < 8) newErrors.password = "Password must be at least 8 characters";
+    else if (!/(?=.*[A-Z])(?=.*\d)/.test(formData.password)) newErrors.password = "Password must include 1 uppercase letter and 1 number";
+    if (!formData.confirmPassword) newErrors.confirmPassword = "Please confirm your password";
+    else if (formData.password !== formData.confirmPassword) newErrors.confirmPassword = "Passwords do not match";
+    if (!agreeToTerms) newErrors.terms = "You must agree to the Terms of Service and Privacy Policy";
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
-  // Handle form submission
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
-    // Validate form
-    if (!validateForm()) {
-      // dispatch(
-      //   showNotification({
-      //     type: "error",
-      //     message: "Please fix the errors in the form",
-      //     duration: 4000,
-      //   })
-      // );
-      return;
-    }
+    if (!validateForm()) return;
 
     try {
-      // Call signup API
       const result = await signup({
         name: formData.name.trim(),
         email: formData.email.trim().toLowerCase(),
         password: formData.password,
-        confirmPassword: formData.confirmPassword, // Backend requires this
-        aggriedToTerms: agreeToTerms, // Backend requires this (note the typo in backend)
+        confirmPassword: formData.confirmPassword,
+        aggriedToTerms: agreeToTerms, // Backend typo
         role: formData.role,
       }).unwrap();
 
-      // Show success notification
-      // dispatch(
-      //   showNotification({
-      //     type: "success",
-      //     message: `Welcome, ${result.user.name}! Your account has been created.`,
-      //     duration: 5000,
-      //   })
-      // );
+      //  Show success toast
+      toast.success("Account created successfully! Please verify your email.");
+      console.log(result)
 
-      // Redirect to dashboard or home
       if (result) {
         navigate("/verify-email", {
-          state: {
-            email: formData.email.trim().toLowerCase()
-          }
+          state: { email: formData.email.trim().toLowerCase() }
         });
       }
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (err: any) {
-      // Handle API errors
-      const errorMessage = err?.data?.message || err?.message || "Signup failed. Please try again.";
-
-      // dispatch(
-      //   showNotification({
-      //     type: "error",
-      //     message: errorMessage,
-      //     duration: 5000,
-      //   })
-      // );
+      //  Show error toast
+      toast.error(err?.data?.message || "Signup failed. Please try again.");
 
       // Set field-specific errors if provided by API
-      if (err?.data?.errors) {
-        setErrors(err.data.errors);
-      }
+      if (err?.data?.errors) setErrors(err.data.errors);
     }
   };
 
@@ -167,13 +98,10 @@ const Signup = () => {
                 value={formData.name}
                 onChange={handleChange}
                 placeholder="John Doe"
-                className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-transparent ${errors.name ? "border-red-500" : "border-gray-300"
-                  }`}
+                className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-transparent ${errors.name ? "border-red-500" : "border-gray-300"}`}
                 disabled={isLoading}
               />
-              {errors.name && (
-                <p className="text-red-500 text-sm mt-1">{errors.name}</p>
-              )}
+              {errors.name && <p className="text-red-500 text-sm mt-1">{errors.name}</p>}
             </div>
 
             <div>
@@ -203,13 +131,10 @@ const Signup = () => {
               value={formData.email}
               onChange={handleChange}
               placeholder="you@example.com"
-              className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-transparent ${errors.email ? "border-red-500" : "border-gray-300"
-                }`}
+              className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-transparent ${errors.email ? "border-red-500" : "border-gray-300"}`}
               disabled={isLoading}
             />
-            {errors.email && (
-              <p className="text-red-500 text-sm mt-1">{errors.email}</p>
-            )}
+            {errors.email && <p className="text-red-500 text-sm mt-1">{errors.email}</p>}
           </div>
 
           <div className="grid grid-cols-2 gap-4">
@@ -224,8 +149,7 @@ const Signup = () => {
                   value={formData.password}
                   onChange={handleChange}
                   placeholder="Enter password"
-                  className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-transparent pr-12 ${errors.password ? "border-red-500" : "border-gray-300"
-                    }`}
+                  className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-transparent pr-12 ${errors.password ? "border-red-500" : "border-gray-300"}`}
                   disabled={isLoading}
                 />
                 <button
@@ -237,9 +161,7 @@ const Signup = () => {
                   {showPassword ? <Eye size={20} /> : <EyeOff size={20} />}
                 </button>
               </div>
-              {errors.password && (
-                <p className="text-red-500 text-sm mt-1">{errors.password}</p>
-              )}
+              {errors.password && <p className="text-red-500 text-sm mt-1">{errors.password}</p>}
             </div>
 
             <div>
@@ -253,8 +175,7 @@ const Signup = () => {
                   value={formData.confirmPassword}
                   onChange={handleChange}
                   placeholder="Confirm password"
-                  className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-transparent pr-12 ${errors.confirmPassword ? "border-red-500" : "border-gray-300"
-                    }`}
+                  className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-transparent pr-12 ${errors.confirmPassword ? "border-red-500" : "border-gray-300"}`}
                   disabled={isLoading}
                 />
                 <button
@@ -266,9 +187,7 @@ const Signup = () => {
                   {showConfirmPassword ? <Eye size={20} /> : <EyeOff size={20} />}
                 </button>
               </div>
-              {errors.confirmPassword && (
-                <p className="text-red-500 text-sm mt-1">{errors.confirmPassword}</p>
-              )}
+              {errors.confirmPassword && <p className="text-red-500 text-sm mt-1">{errors.confirmPassword}</p>}
             </div>
           </div>
 
@@ -289,9 +208,7 @@ const Signup = () => {
                 I agree to the Terms of Service and Privacy Policy <span className="text-red-500">*</span>
               </span>
             </label>
-            {errors.terms && (
-              <p className="text-red-500 text-sm mt-1">{errors.terms}</p>
-            )}
+            {errors.terms && <p className="text-red-500 text-sm mt-1">{errors.terms}</p>}
           </div>
 
           <Button
