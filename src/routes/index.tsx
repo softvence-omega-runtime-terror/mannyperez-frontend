@@ -23,6 +23,7 @@ import SavedItems from "@/components/BuyerCompnents/SavedItems";
 import OrdersList from "@/components/SellersComponent/OrdersList";
 import SellerMessagePage from "@/pages/messages/seller/SellerMessagePage";
 import MessagingPage from "@/pages/messages/buyer/MessagePage";
+import LivePage from "@/pages/live-events/LivePage";
 
 // Simple auth check function
 const checkAuth = (options?: {
@@ -67,12 +68,12 @@ const routes = createBrowserRouter([
       {
         path: "/login",
         element: <Login />,
-        loader: () => checkAuth({ requireGuest: true }),
+        loader: () => checkAuth({ requireGuest: false }),
       },
       {
         path: "/sign-up",
         element: <SignUp />,
-        loader: () => checkAuth({ requireGuest: true }),
+        loader: () => checkAuth({ requireGuest: false }),
       },
       { path: "/verify-email", element: <VerifyEmail /> },
       { path: "/unauthorized", element: <Unauthorized /> },
@@ -159,6 +160,11 @@ const routes = createBrowserRouter([
         element: <SellerMessagePage />,
         loader: () =>
           checkAuth({ requireAuth: false, allowedRoles: ["seller", "admin"] }),
+      },
+      {
+       path: "/live",
+       element: <LivePage/>,
+       loader: ()=> checkAuth({requireAuth:  false})
       },
 
       {

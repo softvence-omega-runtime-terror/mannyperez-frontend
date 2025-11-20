@@ -2,12 +2,7 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import { BsThreeDots } from "react-icons/bs";
-import {
-  FaRegHeart,
-  FaRegComment,
-  FaRegBookmark,
-  FaCrown,
-} from "react-icons/fa";
+import { FaRegHeart, FaRegComment, FaRegBookmark, FaCrown } from "react-icons/fa";
 import { IoSend } from "react-icons/io5";
 import { FiShoppingCart } from "react-icons/fi";
 import { ProductType } from "@/pages/Feed"; // import ProductType
@@ -20,7 +15,6 @@ import productC from "../../assets/feedImg/spotlight3.png";
 import commenterA from "../../assets/feedImg/userFeed.jpg";
 import { useGetProductsQuery } from "@/store/services/productsApi";
 
-
 // --- Props ---
 interface FeaturedPostProps {
   onBuyNow?: (product: ProductType) => void;
@@ -31,8 +25,10 @@ const FeaturedPost: React.FC<FeaturedPostProps> = ({ onBuyNow }) => {
   const navigate = useNavigate();
 
   const { data, isLoading } = useGetProductsQuery(undefined);
+  console.log(data, "features posts")
 
-  if (isLoading) {
+  // --- Safety check ---
+  if (isLoading || !data?.data || !Array.isArray(data.data)) {
     return <div>Loading...</div>;
   }
 
@@ -87,8 +83,8 @@ const FeaturedPost: React.FC<FeaturedPostProps> = ({ onBuyNow }) => {
 
   return (
     <div className="max-w-7xl mx-auto p-6">
-      {products.map((product: { sellerId: { _id: string }; _id: string }) => (
-        <div className="bg-white rounded-xl shadow-lg border border-gray-100 p-6">
+      {products.map((product: { sellerId?: { _id: string }; _id: string }) => (
+        <div key={product._id} className="bg-white rounded-xl shadow-lg border border-gray-100 p-6">
           {/* Header */}
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center space-x-3">
@@ -111,9 +107,7 @@ const FeaturedPost: React.FC<FeaturedPostProps> = ({ onBuyNow }) => {
                     Unfollow
                   </button>
                 </div>
-                <p className="text-xs text-gray-500">
-                  Posted {postData.timePosted}
-                </p>
+                <p className="text-xs text-gray-500">Posted {postData.timePosted}</p>
               </div>
             </div>
             <span className="px-3 py-1 text-sm font-semibold bg-yellow-400 rounded-lg">
@@ -122,18 +116,13 @@ const FeaturedPost: React.FC<FeaturedPostProps> = ({ onBuyNow }) => {
           </div>
 
           {/* Title + Description */}
-          <h2 className="text-lg font-bold text-gray-900 mb-2">
-            {postData.title}
-          </h2>
+          <h2 className="text-lg font-bold text-gray-900 mb-2">{postData.title}</h2>
           <p className="text-sm text-gray-700 mb-4">{postData.description}</p>
 
           {/* Product Images */}
           <div className="grid grid-cols-3 gap-2 mb-4">
             {postData.imageUrls.map((src, index) => (
-              <div
-                key={index}
-                className="aspect-video overflow-hidden rounded-lg"
-              >
+              <div key={index} className="aspect-video overflow-hidden rounded-lg">
                 <img
                   src={src}
                   alt={`Sample product ${index + 1}`}
@@ -146,10 +135,7 @@ const FeaturedPost: React.FC<FeaturedPostProps> = ({ onBuyNow }) => {
           {/* Hashtags */}
           <div className="flex flex-wrap gap-2 mb-4">
             {postData.hashtags.map((tag, index) => (
-              <span
-                key={index}
-                className="text-xs text-blue-600 bg-blue-50 px-2 py-0.5 rounded-full font-medium"
-              >
+              <span key={index} className="text-xs text-blue-600 bg-blue-50 px-2 py-0.5 rounded-full font-medium">
                 {tag}
               </span>
             ))}
@@ -157,9 +143,7 @@ const FeaturedPost: React.FC<FeaturedPostProps> = ({ onBuyNow }) => {
 
           {/* Price + Actions */}
           <div className="flex items-center justify-between py-2 border-t border-gray-100">
-            <span className="text-xl font-bold text-gray-900">
-              {postData.price}
-            </span>
+            <span className="text-xl font-bold text-gray-900">{postData.price}</span>
             <div className="flex items-center space-x-3">
               <button className="flex items-center px-4 py-2 border border-gray-300 rounded-lg text-pink-600 hover:bg-gray-50 transition duration-150 space-x-2">
                 <FiShoppingCart className="w-5 h-5" />
@@ -170,7 +154,7 @@ const FeaturedPost: React.FC<FeaturedPostProps> = ({ onBuyNow }) => {
               <button
                 onClick={() =>
                   navigate(
-                    `/feed/messages/${product.sellerId._id}/${product._id}`
+                    `/feed/messages/${product.sellerId?._id || ""}/${product._id}`
                   )
                 }
                 className="px-4 py-2 border border-pink-600 text-pink-600 font-semibold rounded-lg hover:bg-pink-50 transition duration-150"
@@ -178,7 +162,7 @@ const FeaturedPost: React.FC<FeaturedPostProps> = ({ onBuyNow }) => {
                 Message
               </button>
 
-              {/* Buy Now with full product object */}
+              {/* Buy Now */}
               <button
                 onClick={() =>
                   onBuyNow?.({
@@ -217,18 +201,10 @@ const FeaturedPost: React.FC<FeaturedPostProps> = ({ onBuyNow }) => {
           {/* Comment Input */}
           <div className="flex items-center space-x-3 pt-4 border-t border-gray-100">
             <div className="w-8 h-8 rounded-full bg-gray-200 overflow-hidden flex-shrink-0">
-              <img
-                src={postData.currentUserImageUrl}
-                alt="User profile"
-                className="w-full h-full object-cover"
-              />
+              <img src={postData.currentUserImageUrl} alt="User profile" className="w-full h-full object-cover" />
             </div>
             <div className="flex flex-1 items-center border border-gray-300 rounded-full px-4 py-2 focus-within:border-pink-500">
-              <input
-                type="text"
-                placeholder="Write a comment"
-                className="flex-1 bg-white focus:outline-none text-sm"
-              />
+              <input type="text" placeholder="Write a comment" className="flex-1 bg-white focus:outline-none text-sm" />
             </div>
             <button className="p-2 bg-pink-600 rounded-full text-white hover:bg-pink-700 transition duration-150">
               <IoSend className="w-5 h-5" />
@@ -238,32 +214,19 @@ const FeaturedPost: React.FC<FeaturedPostProps> = ({ onBuyNow }) => {
           {/* Comments List */}
           <div className="mt-4 space-y-2">
             {postData.commentsList.map((comment) => (
-              <div
-                key={comment.id}
-                className="flex items-start space-x-3 py-3 border-b border-gray-50 last:border-b-0"
-              >
+              <div key={comment.id} className="flex items-start space-x-3 py-3 border-b border-gray-50 last:border-b-0">
                 <div className="w-8 h-8 rounded-full bg-gray-200 overflow-hidden flex-shrink-0 mt-1">
-                  <img
-                    src={comment.imageUrl}
-                    alt={`${comment.user} profile`}
-                    className="w-full h-full object-cover"
-                  />
+                  <img src={comment.imageUrl} alt={`${comment.user} profile`} className="w-full h-full object-cover" />
                 </div>
                 <div className="flex-1">
                   <div className="bg-gray-50 p-2 rounded-xl">
-                    <span className="text-sm font-semibold text-gray-800">
-                      {comment.user}
-                    </span>
+                    <span className="text-sm font-semibold text-gray-800">{comment.user}</span>
                     <p className="text-sm text-gray-700">{comment.text}</p>
                   </div>
                   <div className="flex items-center space-x-4 mt-1 ml-2 text-xs text-gray-500">
                     <span>{comment.time}</span>
-                    <button className="font-semibold hover:text-pink-600 transition-colors">
-                      Like
-                    </button>
-                    <button className="font-semibold hover:text-pink-600 transition-colors">
-                      Reply
-                    </button>
+                    <button className="font-semibold hover:text-pink-600 transition-colors">Like</button>
+                    <button className="font-semibold hover:text-pink-600 transition-colors">Reply</button>
                   </div>
                 </div>
                 <BsThreeDots className="w-4 h-4 text-gray-400 cursor-pointer hover:text-gray-600" />

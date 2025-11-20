@@ -21,7 +21,7 @@ const streamData = {
 };
 
 const LiveStream: React.FC = () => {
-  // 👇 State to control the modal's visibility
+  //  State to control the modal's visibility
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   return (

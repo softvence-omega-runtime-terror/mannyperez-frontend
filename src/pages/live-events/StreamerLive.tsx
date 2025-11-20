@@ -46,6 +46,8 @@ const StreamerLive = ({ event }: Props) => {
     appID: null,
   });
 
+  console.log("Saved Live Config:", liveConfig);
+
   // Set liveConfig from saved data
   useEffect(() => {
     if (savedLiveConfig?.data) {
