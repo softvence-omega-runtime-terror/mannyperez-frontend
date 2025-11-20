@@ -19,7 +19,7 @@ const WatcherLive = ({ event }: Props) => {
   const userName = user?.name || "Viewer";
 
   const [joinLive] = useJoinLiveStreamMutation();
-  const [isEventAllowed, setIsEventAllowed] = useState(false);
+  const [isEventAllowed, setIsEventAllowed] = useState(true);
   const [timeLeft, setTimeLeft] = useState<{
     minutes: number;
     seconds: number;
@@ -113,35 +113,35 @@ const WatcherLive = ({ event }: Props) => {
     const now = Date.now();
 
     // Event hasn't started yet
-    if (!isEventAllowed && now < startTime) {
-      return (
-        <div className="p-6 text-center">
-          <h1 className="text-2xl font-bold text-gray-800">
-            Live stream coming soon
-          </h1>
-          <p className="mt-2 text-gray-600">
-            The live session will start within 1 minute of the scheduled time.
-          </p>
-          <p className="mt-4 text-lg font-semibold text-gray-700">
-            Starts in {timeLeft.minutes}m {timeLeft.seconds}s
-          </p>
-        </div>
-      );
-    }
+    // if (!isEventAllowed && now < startTime) {
+    //   return (
+    //     <div className="p-6 text-center">
+    //       <h1 className="text-2xl font-bold text-gray-800">
+    //         Live stream coming soon
+    //       </h1>
+    //       <p className="mt-2 text-gray-600">
+    //         The live session will start within 1 minute of the scheduled time.
+    //       </p>
+    //       <p className="mt-4 text-lg font-semibold text-gray-700">
+    //         Starts in {timeLeft.minutes}m {timeLeft.seconds}s
+    //       </p>
+    //     </div>
+    //   );
+    // }
 
     // Event duration passed
-    if (now > endTime) {
-      return (
-        <div className="p-6 text-center">
-          <h1 className="text-2xl font-bold text-gray-800">
-            Live stream has ended
-          </h1>
-          <p className="mt-2 text-gray-600">
-            The live session duration has ended. Thank you for watching!
-          </p>
-        </div>
-      );
-    }
+    // if (now > endTime) {
+    //   return (
+    //     <div className="p-6 text-center">
+    //       <h1 className="text-2xl font-bold text-gray-800">
+    //         Live stream has ended
+    //       </h1>
+    //       <p className="mt-2 text-gray-600">
+    //         The live session duration has ended. Thank you for watching!
+    //       </p>
+    //     </div>
+    //   );
+    // }
 
     // Event is allowed and live
     if (isEventAllowed) {
