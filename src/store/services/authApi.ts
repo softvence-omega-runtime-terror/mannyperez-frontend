@@ -3,10 +3,11 @@ import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
 
 // Define types
 export interface User {
+    role(role: any): unknown;
     _id: string;
     name: string;
     email: string;
-    role: "buyer" | "seller" | "admin";
+   
     isVerified: boolean;
     isBlocked: boolean;
     isDeleted: boolean;
@@ -32,7 +33,6 @@ export interface SignupRequest {
     password: string;
     confirmPassword: string;
     aggriedToTerms: boolean;
-    role: 'buyer' | 'seller';
 }
 
 export interface VerifyEmailRequest {
