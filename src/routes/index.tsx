@@ -24,6 +24,7 @@ import OrdersList from "@/components/SellersComponent/OrdersList";
 import SellerMessagePage from "@/pages/messages/seller/SellerMessagePage";
 import MessagingPage from "@/pages/messages/buyer/MessagePage";
 import LivePage from "@/pages/live-events/LivePage";
+import ErrorPage from "@/pages/ErrorPage";
 
 // Simple auth check function
 const checkAuth = (options?: {
@@ -47,7 +48,7 @@ const checkAuth = (options?: {
       return redirect("/login");
     }
 
-    if (options?.allowedRoles && !options.allowedRoles.includes(user.role)) {
+    if (options?.allowedRoles && !options.allowedRoles.includes(user.role as unknown as string)) {
       return redirect("/unauthorized");
     }
 
@@ -63,7 +64,8 @@ const routes = createBrowserRouter([
   {
     path: "/",
     element: <App />,
-    children: [
+     errorElement: <ErrorPage />,
+     children: [
       { path: "/", element: <Landing /> },
       {
         path: "/login",

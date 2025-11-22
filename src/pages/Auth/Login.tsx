@@ -79,6 +79,7 @@ const Login = () => {
       if (result) navigate("/");
     } catch (err: any) {
       // Handle API errors
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const errorMessage =
         err?.data?.message ||
         err?.message ||
