@@ -3,7 +3,9 @@ import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
 
 // Define types
 export interface User {
-    role(role: any): unknown;
+    img: string;
+    role: string;
+    fullName: string;
     _id: string;
     name: string;
     email: string;

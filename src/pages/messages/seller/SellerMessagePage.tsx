@@ -3,7 +3,6 @@ import { useSelector } from "react-redux";
 import SellerMessageContacts from "./SellerMessageContacts";
 import SellerChatWindow from "./SellerChatWindow";
 import SellerMessageRightSidebar from "./SellerMessageRightSidebar";
-import UserNavbar from "@/components/layout/UserNavbar";
 import { RootState } from "@/store";
 import { HiOutlineMenu } from "react-icons/hi";
 
@@ -24,7 +23,6 @@ const SellerMessagePage = () => {
 
   return (
     <div className="flex flex-col h-screen w-full overflow-hidden">
-      <UserNavbar />
 
       {/* Main Container: Full height, flexible content area */}
       <div className="flex flex-1 overflow-hidden relative bg-gray-50">

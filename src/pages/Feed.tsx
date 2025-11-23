@@ -14,7 +14,6 @@ import BuyerInformation from "@/components/CheckoutComponent/BuyerInformation";
 import ShippingAddress from "@/components/CheckoutComponent/ShippingAdress";
 import ShippingMethod from "@/components/CheckoutComponent/ShippingMethod";
 import PaymentMethod from "@/components/CheckoutComponent/PaymentMethod";
-import UserNavbar from "@/components/layout/UserNavbar";
 import MessageLeftSidebar from "./messages/buyer/MessageLeftSidebar";
 import MessageRightSidebar from "./messages/buyer/MessageRightSidebar";
 import { useGetProductByIdQuery } from "@/store/services/productsApi";
@@ -151,7 +150,6 @@ const Feed: React.FC = () => {
 
   return (
     <>
-      <UserNavbar />
       <div className="container mx-auto px-4 py-6">
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-12">
           {isMessagesRoute ? (

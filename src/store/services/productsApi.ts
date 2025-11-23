@@ -1,13 +1,7 @@
-/**
- * Products API Service
- *
- * This file contains all API endpoints related to products.
- * It uses RTK Query for automatic caching, refetching, and state management.
- */
-
 import { baseApi } from "./baseApi";
+import { RootState } from "@/redux/store"; // Adjust path if needed
 
-// Define types for your API responses
+// Product types
 export interface Product {
   id: string;
   title: string;
@@ -17,6 +11,10 @@ export interface Product {
   category: string;
   sellerId: string;
   condition: string;
+  extraOptions?: {
+    productVariants?: boolean;
+    variants?: { size: string; color: string }[];
+  };
   createdAt: string;
   status: "active" | "sold" | "pending";
 }
@@ -35,53 +33,61 @@ export interface CreateProductRequest {
   images: string[];
   category: string;
   condition: string;
+  extraOptions?: {
+    productVariants?: boolean;
+    variants?: { size: string; color: string }[];
+  };
+  sellerId: string;
 }
 
-/**
- * Products API
- *
- * Contains all product-related endpoints
- */
+// Products API
 export const productsApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
-    getProducts: builder.query({
+    getProducts: builder.query<ProductsResponse, void>({
       query: () => ({
         url: `/products`,
         method: "GET",
-
-        //  params: { page, limit },
       }),
       providesTags: ["Products"],
     }),
-    createProducts: builder.mutation({
-      query: (payload) => ({
-        url: `/products`,
-        method: "POST",
 
-        body: payload,
-      }),
+    // Create product mutation
+    createProduct: builder.mutation<Product, Omit<CreateProductRequest, "sellerId"> & { userId: string }>({
+      query: (payload) => {
+        const { userId, ...rest } = payload;
+        return {
+          url: `/products/create`,
+          method: "POST",
+          body: {
+            ...rest,
+            sellerId: userId, // attach sellerId from auth state
+          },
+        };
+      },
       invalidatesTags: ["Products"],
     }),
-    updateProduct: builder.mutation({
+
+    updateProduct: builder.mutation<Product, { payload: Partial<CreateProductRequest>; id: string }>({
       query: ({ payload, id }) => ({
         url: `/products/${id}`,
         method: "PATCH",
-
         body: payload,
       }),
       invalidatesTags: ["Products"],
     }),
-    getProductById: builder.query({
+
+    getProductById: builder.query<Product, string>({
       query: (id) => ({
         url: `/products/${id}`,
         method: "GET",
       }),
       providesTags: ["Products"],
     }),
-    deleteProducts: builder.mutation({
+
+    deleteProducts: builder.mutation<{ success: boolean }, string>({
       query: (id) => ({
         url: `/products/${id}`,
-        method: "POST",
+        method: "DELETE",
       }),
       invalidatesTags: ["Products"],
     }),
@@ -90,7 +96,7 @@ export const productsApi = baseApi.injectEndpoints({
 
 export const {
   useGetProductsQuery,
-  useCreateProductsMutation,
+  useCreateProductMutation,
   useUpdateProductMutation,
   useDeleteProductsMutation,
   useGetProductByIdQuery,
