@@ -2,7 +2,6 @@ import React from "react";
 import { ChevronLeftCircle, Star } from "lucide-react";
 import { Button } from "@/components/ui/button"; // Shadcn Button import
 import Wrapper from "../layout/Wrapper";
-import UserNavbar from "../layout/UserNavbar";
 import Footer from "../layout/Footer";
 
 // --- Types ---
@@ -162,7 +161,6 @@ const OrderCard: React.FC<OrderCardProps> = ({ order }) => {
 const Orders: React.FC = () => {
   return (
     <>
-    <UserNavbar/>
     <Wrapper>
         <div className="min-h-screen  p-4 sm:p-8">
       {/* Header */}

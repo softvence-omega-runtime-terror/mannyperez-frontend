@@ -23,7 +23,7 @@ function App() {
   }, [isAuthenticated]);
 
   // List of paths where you **do not want** the global Navbar
-  const hideNavbarPaths = ["/feed", "/seller", "/seller/orders",];
+  const hideNavbarPaths = [""];
 
   return (
     <div className="app">

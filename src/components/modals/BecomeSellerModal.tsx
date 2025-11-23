@@ -4,8 +4,8 @@ import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import { Eye, EyeOff } from "lucide-react";
 import Swal from "sweetalert2";
-import { useApplyForSellerMutation } from "@/store/services/seller/BecomeSellerApi";
 import { useNavigate } from "react-router-dom";
+import { useApplyForSellerMutation } from "@/store/services/seller/becomeSellerApi";
 
 interface BecomeSellerModalProps {
   open: boolean;
@@ -97,13 +97,15 @@ const BecomeSellerModal = ({ open, onOpenChange }: BecomeSellerModalProps) => {
 
     try {
       const response: any = await applyForSeller(data).unwrap();
-      Swal.fire({
+     Swal.fire({
         icon: "success",
         title: "Success",
         text: response.message || "Seller request submitted successfully!",
+      }).then(() => {
+        onOpenChange(false);  
+        navigate("/verify-email");
       });
-      navigate("/verify-email");
-      console.log(response)
+
 
       // Reset form
       setFormData({
