@@ -1,10 +1,3 @@
-/**
- * Auth Slice
- * 
- * Manages authentication state including user info and tokens.
- * This works alongside authApi for managing local auth state.
- */
-
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { authApi } from '../services/authApi';
 import type { User } from '../services/authApi';
@@ -43,14 +36,7 @@ const initialState: AuthState = {
     isLoading: false,
 };
 
-/**
- * Auth Slice
- * 
- * Use this for managing authentication state in your components.
- * 
- * @example
- * const { user, isAuthenticated } = useAppSelector((state) => state.auth);
- */
+
 const authSlice = createSlice({
     name: 'auth',
     initialState,
@@ -114,13 +100,13 @@ const authSlice = createSlice({
 
             // Signup
             .addMatcher(authApi.endpoints.verifyEmail.matchPending, (state) => {
-                console.log("🔄 Verify Email: PENDING");
+                console.log(" Verify Email: PENDING");
                 state.isLoading = true;
             })
             .addMatcher(authApi.endpoints.verifyEmail.matchFulfilled, (state, action) => {
-                console.log("✅ Verify Email: FULFILLED", action.payload);
-                console.log("📦 User:", action.payload.user);
-                console.log("🔑 Token:", action.payload.approvalToken);
+                console.log(" Verify Email: FULFILLED", action.payload);
+                console.log(" User:", action.payload.user);
+                console.log(" Token:", action.payload.approvalToken);
                 
                 state.user = action.payload.user;
                 state.token = action.payload.approvalToken;
@@ -130,15 +116,15 @@ const authSlice = createSlice({
                 localStorage.setItem('authToken', action.payload.approvalToken);
                 localStorage.setItem('user', JSON.stringify(action.payload.user));
                 
-                console.log("💾 Saved to localStorage");
-                console.log("📊 New Auth State:", {
+                console.log(" Saved to localStorage");
+                console.log(" New Auth State:", {
                     user: state.user,
                     token: state.token,
                     isAuthenticated: state.isAuthenticated
                 });
             })
             .addMatcher(authApi.endpoints.verifyEmail.matchRejected, (state, action) => {
-                console.log("❌ Verify Email: REJECTED", action);
+                console.log(" Verify Email: REJECTED", action);
                 state.isLoading = false;
             })
 

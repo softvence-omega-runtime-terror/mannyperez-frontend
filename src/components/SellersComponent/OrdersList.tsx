@@ -1,7 +1,6 @@
 import { Search, ChevronDown, ShoppingBag } from "lucide-react";
 import { filterTabs, mockOrders } from "@/demoData";
 import Wrapper from "../layout/Wrapper";
-import UserNavbar from "../layout/UserNavbar";
 import Footer from "../layout/Footer";
 // --- STATUS BADGE ---
 const getStatusBadge = (status: string) => {
@@ -44,7 +43,6 @@ export default function OrdersList() {
 
   return (
     <>
-    <UserNavbar/>
     <Wrapper>
         <div className="min-h-screen bg-gray-50 p-6 sm:p-10">
       <div className="max-w-full mx-auto">

@@ -4,7 +4,6 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Camera } from "lucide-react";
 import Wrapper from "@/components/layout/Wrapper";
-import UserNavbar from "@/components/layout/UserNavbar";
 import Footer from "@/components/layout/Footer";
 
 export default function BuyerProfile() {
@@ -51,7 +50,6 @@ export default function BuyerProfile() {
 
   return (
     <>
-    <UserNavbar/>
    <Wrapper>
      <div className="min-h-screen  mt-8">
       <div className="w-full">

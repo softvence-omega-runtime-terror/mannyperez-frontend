@@ -1,35 +1,84 @@
-// src/components/layout/Navbar.tsx
 import { useEffect, useState } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
 import Wrapper from "./Wrapper";
 import SearchInput from "../landing/SectionComponents/SearchInput";
 import PrimaryButton from "@/reuseableComponents/PrimaryButton";
 import { HiMenu, HiX } from "react-icons/hi";
+import { Button } from "../ui/button";
+import { useLogoutMutation } from "@/store/services/authApi";
+import { useAppSelector, useAppDispatch } from "@/store/hooks";
+import { logout as logoutSlice } from "@/store/slices/authSlice";
+
+import {
+  User,
+  ShoppingBag,
+  Bookmark,
+  MapPin,
+  CreditCard,
+  Settings,
+  LogOut,
+} from "lucide-react";
+
+import AddressBookModal from "./AddressBookModal";
+import SettingsModal from "./SettingsModal";
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
-  const navigate = useNavigate();
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
-  const navLinks = [
+  const [isAddressBookOpen, setIsAddressBookOpen] = useState(false);
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+
+  const navigate = useNavigate();
+  const dispatch = useAppDispatch();
+
+  const user = useAppSelector((state) => state.auth.user);
+  console.log(user, "USER INFO")
+  const isAuthenticated = useAppSelector((state) => state.auth.isAuthenticated);
+
+  const [logout] = useLogoutMutation();
+
+  const handleLogout = async () => {
+    try {
+      await logout({
+        refreshToken: localStorage.getItem("refreshToken"),
+      }).unwrap();
+    } catch (error) {
+      console.warn("Logout API failed, forcing client logout.", error);
+    }
+
+    dispatch(logoutSlice());
+    localStorage.removeItem("authToken");
+    localStorage.removeItem("user");
+    localStorage.removeItem("refreshToken");
+
+    navigate("/login");
+  };
+
+  const commonLinks = [
     { name: "Home", path: "/" },
     { name: "Sellers", path: "/seller" },
     { name: "Live", path: "/live" },
     { name: "Feed", path: "/feed" },
   ];
 
-  // close mobile menu on route change if you navigate programmatically, or when viewport becomes lg+
+  const sellerExtraLinks = [
+    { name: "Products", path: "/seller/products" },
+    { name: "Promotions", path: "/seller/promotions" },
+  ];
+
+  const navLinks =
+    isAuthenticated && user?.role === "seller"
+      ? [...commonLinks, ...sellerExtraLinks]
+      : commonLinks;
+
   useEffect(() => {
     const handleResize = () => {
-      // when viewport becomes >= lg (1024px) close the mobile menu
-      if (window.innerWidth >= 1024) {
-        setIsOpen(false);
-      }
+      if (window.innerWidth >= 1024) setIsOpen(false);
     };
-
     const handleKey = (e: KeyboardEvent) => {
       if (e.key === "Escape") setIsOpen(false);
     };
-
     window.addEventListener("resize", handleResize);
     window.addEventListener("keydown", handleKey);
     return () => {
@@ -38,18 +87,65 @@ const Navbar = () => {
     };
   }, []);
 
+  const sellerDropdownLinks = [
+    { icon: User, label: "Profile", path: "/seller/profile" },
+    { icon: Bookmark, label: "Saved Items", path: "/seller/saved-items" },
+    {
+      icon: MapPin,
+      label: "Address Book",
+      action: () => setIsAddressBookOpen(true),
+    },
+    {
+      icon: CreditCard,
+      label: "Payment Method",
+      path: "/seller/payment-method",
+    },
+    {
+      icon: Settings,
+      label: "Settings",
+      action: () => setIsSettingsOpen(true),
+    },
+  ];
+
+  const buyerDropdownLinks = [
+    { icon: User, label: "Profile", path: "/profile" },
+    { icon: ShoppingBag, label: "My Orders", path: "/orders" },
+    { icon: Bookmark, label: "Saved Items", path: "/saved-items" },
+    {
+      icon: MapPin,
+      label: "Address Book",
+      action: () => setIsAddressBookOpen(true),
+    },
+    {
+      icon: CreditCard,
+      label: "Payment Method",
+      path: "/payment-method",
+    },
+    {
+      icon: Settings,
+      label: "Settings",
+      action: () => setIsSettingsOpen(true),
+    },
+  ];
+
+  const dropdownLinks =
+    user?.role === "seller" ? sellerDropdownLinks : buyerDropdownLinks;
+
   return (
     <nav className="bg-white shadow-md z-40">
       <Wrapper>
         <div className="flex items-center justify-between py-4">
-          {/* LEFT: Logo + Desktop Links (desktop only at lg+) */}
+          {/* LEFT */}
           <div className="flex items-center gap-8">
             <NavLink to="/" className="flex items-center">
-              {/* React serves files from public/ at root path */}
-              <img src="/logoDestash.png" alt="DTFdestash" className="w-14 h-auto" />
+              <img
+                src="/logoDestash.png"
+                alt="DTFdestash"
+                className="w-14 h-auto"
+              />
             </NavLink>
 
-            {/* Desktop Nav Links: show only at lg and above */}
+            {/* Desktop Nav */}
             <div className="hidden lg:flex lg:space-x-6">
               {navLinks.map((link) => (
                 <NavLink
@@ -67,23 +163,98 @@ const Navbar = () => {
             </div>
           </div>
 
-          {/* RIGHT: Search + Buttons (desktop only at lg+) */}
-          <div className="hidden lg:flex items-center gap-4">
+          {/* RIGHT (Desktop) */}
+          <div className="hidden lg:flex items-center gap-5">
             <SearchInput
               placeholder="Search listings, sellers..."
               onSearch={(e) => console.log(e)}
             />
-            <PrimaryButton type="Outline" title="Log In" onClick={() => navigate("/login")} />
-            <PrimaryButton type="Primary" title="Sign Up" onClick={() => navigate("/sign-up")} />
+
+            {isAuthenticated && (
+              <div className="relative">
+                <button
+                  onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+                  className="w-10 h-10 rounded-full overflow-hidden border-2 border-gray-200 hover:border-pink-500 transition"
+                >
+                  <img
+                    src={
+                      user?.img ||
+                      `https://api.dicebear.com/7.x/avataaars/svg?seed=${user?.name}`
+                    }
+                    alt={user?.name || "User"}
+                    className="w-full h-full object-cover"
+                  />
+                </button>
+
+                {isDropdownOpen && (
+                  <div className="absolute right-0 mt-2 w-64 bg-white rounded-2xl shadow-lg border-2 border-pink-500 z-50">
+                    <div className="p-4 space-y-3 text-center">
+                      {/* Show Name under Image */}
+                      <div className="flex flex-col items-center">
+                        <img
+                          src={
+                            user?.img ||
+                            `https://api.dicebear.com/7.x/avataaars/svg?seed=${user?.name}`
+                          }
+                          alt={user?.name || "User"}
+                          className="w-16 h-16 rounded-full object-cover mb-2"
+                        />
+                        <span className="font-semibold text-gray-800">{user?.fullName}</span>
+                      </div>
+
+                      {/* Dropdown links */}
+                      <div className="space-y-1 mt-2">
+                        {dropdownLinks.map(({ icon: Icon, label, path, action }) => (
+                          <button
+                            key={label}
+                            onClick={() => {
+                              setIsDropdownOpen(false);
+                              if (action) action();
+                              else if (path) navigate(path);
+                            }}
+                            className="w-full flex items-center space-x-3 px-3 py-2 hover:bg-gray-50 rounded-lg text-left"
+                          >
+                            <Icon className="w-5 h-5 text-gray-700" />
+                            <span className="text-gray-800">{label}</span>
+                          </button>
+                        ))}
+
+                        <button
+                          onClick={handleLogout}
+                          className="w-full flex items-center space-x-3 px-3 py-2 hover:bg-gray-50 rounded-lg text-left mt-2 pt-3 border-t border-gray-200"
+                        >
+                          <LogOut className="w-5 h-5 text-pink-500" />
+                          <span className="text-pink-500 font-medium">Logout</span>
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {!isAuthenticated && (
+              <>
+                <PrimaryButton
+                  type="Outline"
+                  title="Log In"
+                  onClick={() => navigate("/login")}
+                />
+                <PrimaryButton
+                  type="Primary"
+                  title="Sign Up"
+                  onClick={() => navigate("/sign-up")}
+                />
+              </>
+            )}
           </div>
 
-          {/* MOBILE / TABLET MENU BUTTON: visible below lg (i.e. up to 1023px) */}
+          {/* MOBILE BUTTON */}
           <div className="lg:hidden flex items-center">
             <button
               aria-label={isOpen ? "Close menu" : "Open menu"}
-              aria-expanded={isOpen}
               onClick={() => setIsOpen((s) => !s)}
-              className="text-gray-700 focus:outline-none"
+              className="text-gray-700"
             >
               {isOpen ? <HiX size={28} /> : <HiMenu size={28} />}
             </button>
@@ -91,59 +262,68 @@ const Navbar = () => {
         </div>
       </Wrapper>
 
-      {/* MOBILE / TABLET MENU CONTENT (visible below lg) */}
+      {/* MOBILE MENU */}
       {isOpen && (
-        <div
-          className="lg:hidden bg-white border-t border-gray-100 p-4 space-y-4"
-          role="dialog"
-          aria-modal="true"
-        >
+        <div className="lg:hidden bg-white border-t border-gray-100 p-4 space-y-4">
           <div className="flex flex-col gap-2">
             {navLinks.map((link) => (
               <NavLink
                 key={link.path}
                 to={link.path}
+                onClick={() => setIsOpen(false)}
                 className={({ isActive }) =>
                   isActive
                     ? "block text-pink-600 font-semibold py-2"
                     : "block text-gray-700 hover:text-pink-600 py-2 transition"
                 }
-                onClick={() => setIsOpen(false)}
               >
                 {link.name}
               </NavLink>
             ))}
           </div>
 
-          {/* Mobile Search */}
-          <div>
-            <SearchInput
-              placeholder="Search listings, sellers..."
-              onSearch={(e) => console.log(e)}
-            />
-          </div>
+          <SearchInput
+            placeholder="Search listings, sellers..."
+            onSearch={(e) => console.log(e)}
+          />
 
-          {/* Mobile Buttons */}
           <div className="flex flex-col gap-3">
-            <PrimaryButton
-              type="Outline"
-              title="Log In"
-              onClick={() => {
-                navigate("/login");
-                setIsOpen(false);
-              }}
-            />
-            <PrimaryButton
-              type="Primary"
-              title="Sign Up"
-              onClick={() => {
-                navigate("/sign-up");
-                setIsOpen(false);
-              }}
-            />
+            {isAuthenticated ? (
+              <PrimaryButton
+                type="Outline"
+                title="Logout"
+                onClick={() => {
+                  handleLogout();
+                  setIsOpen(false);
+                }}
+              />
+            ) : (
+              <>
+                <PrimaryButton
+                  type="Outline"
+                  title="Log In"
+                  onClick={() => {
+                    navigate("/login");
+                    setIsOpen(false);
+                  }}
+                />
+                <Button
+                  onClick={() => {
+                    navigate("/sign-up");
+                    setIsOpen(false);
+                  }}
+                >
+                  Sign Up
+                </Button>
+              </>
+            )}
           </div>
         </div>
       )}
+
+      {/* MODALS */}
+      {isAddressBookOpen && <AddressBookModal onClose={() => setIsAddressBookOpen(false)} />}
+      {isSettingsOpen && <SettingsModal onClose={() => setIsSettingsOpen(false)} />}
     </nav>
   );
 };

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
@@ -75,9 +76,10 @@ const Login = () => {
       }).unwrap();
 
 
-      if (result) navigate("/feed");
+      if (result) navigate("/");
     } catch (err: any) {
       // Handle API errors
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const errorMessage =
         err?.data?.message ||
         err?.message ||

@@ -11,7 +11,6 @@ import sideImgB from "../../assets/pofileImg/profileR2.png";
 import sideImgC from "../../assets/pofileImg/profSide3.png";
 import sideImgD from "../../assets/pofileImg/profSide4.png";
 import Footer from "@/components/layout/Footer";
-import UserNavbar from "@/components/layout/UserNavbar";
 
 // Sample product data
 const products = [
@@ -46,7 +45,6 @@ export default function SellerProfile() {
 
   return (
     <>
-    <UserNavbar/>
       <div className="min-h-screen bg-gray-50 mb-10">
       {/* === Cover Banner === */}
       <div className="relative h-56 bg-gray-200">
