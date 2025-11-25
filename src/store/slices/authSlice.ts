@@ -1,144 +1,169 @@
-import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { authApi } from '../services/authApi';
-import type { User } from '../services/authApi';
+// src/store/slices/authSlice.ts
+import { createSlice, PayloadAction } from "@reduxjs/toolkit";
+import type { RootState } from "../index";
 
-interface AuthState {
-    user: User | null;
-    token: string | null;
-    isAuthenticated: boolean;
-    isLoading: boolean;
+// Matches backend payload shape and stays permissive to avoid runtime type errors
+export interface User {
+  _id?: string;
+  id?: string;
+  email?: string;
+  name?: string;
+  fullName?: string;
+  role?: string;
+  img?: string | null;
+  isDeleted?: boolean;
+  isBlocked?: boolean;
+  isLoggedIn?: boolean;
+  isVerified?: boolean;
+  agreedToTerms?: boolean;
+  following?: string[];
+  savedProducts?: string[];
+  wishlist?: string[];
+  recentLoginDevices?: string[];
+  twoFactorAuthEnabled?: boolean;
+  createdAt?: string;
+  updatedAt?: string;
+  __v?: number;
 }
 
-// Load initial state from localStorage
-const loadAuthFromStorage = (): Pick<AuthState, 'user' | 'token' | 'isAuthenticated'> => {
-    try {
-        const token = localStorage.getItem('authToken');
-        const userStr = localStorage.getItem('user');
-        const user = userStr ? JSON.parse(userStr) : null;
+interface AuthState {
+  user: User | null;
+  accessToken: string | null;
+  refreshToken: string | null;
+  isAuthenticated: boolean;
+  isLoading: boolean;
+}
 
-        return {
-            token,
-            user,
-            isAuthenticated: !!token && !!user,
-        };
-    } catch (error) {
-        console.error('Error loading auth from storage:', error);
-        return {
-            token: null,
-            user: null,
-            isAuthenticated: false,
-        };
-    }
+// LocalStorage helpers (guarded for SSR/sandbox)
+const safeGetItem = (key: string) =>
+  typeof window !== "undefined" ? window.localStorage.getItem(key) : null;
+
+const safeSetItem = (key: string, value: string) => {
+  if (typeof window !== "undefined") {
+    window.localStorage.setItem(key, value);
+  }
 };
 
-const initialState: AuthState = {
-    ...loadAuthFromStorage(),
-    isLoading: false,
+const safeRemoveItem = (key: string) => {
+  if (typeof window !== "undefined") {
+    window.localStorage.removeItem(key);
+  }
 };
 
+const bootstrapAuth = (): AuthState => {
+  try {
+    const storedUser = safeGetItem("auth.user");
+    const accessToken = safeGetItem("auth.accessToken");
+    const refreshToken = safeGetItem("auth.refreshToken");
+
+    const user = storedUser ? (JSON.parse(storedUser) as User) : null;
+    const isAuthenticated = Boolean(user && accessToken);
+
+    return {
+      user,
+      accessToken,
+      refreshToken,
+      isAuthenticated,
+      isLoading: false,
+    };
+  } catch {
+    return {
+      user: null,
+      accessToken: null,
+      refreshToken: null,
+      isAuthenticated: false,
+      isLoading: false,
+    };
+  }
+};
+
+const initialState: AuthState = bootstrapAuth();
 
 const authSlice = createSlice({
-    name: 'auth',
-    initialState,
-    reducers: {
-        /**
-         * Set credentials (user and token)
-         */
-        setCredentials: (state, action: PayloadAction<{ user: User; token: string }>) => {
-            state.user = action.payload.user;
-            state.token = action.payload.token;
-            state.isAuthenticated = true;
+  name: "auth",
+  initialState,
+  reducers: {
+    setCredentials: (
+      state,
+      action: PayloadAction<{
+        user: User;
+        accessToken?: string;
+        approvalToken?: string;
+        refreshToken?: string;
+        token?: string;
+      }>
+    ) => {
+      const {
+        user,
+        accessToken,
+        approvalToken,
+        refreshToken,
+        token,
+      } = action.payload;
 
-            // Persist to localStorage
-            localStorage.setItem('authToken', action.payload.token);
-            localStorage.setItem('user', JSON.stringify(action.payload.user));
-        },
+      // Prefer explicit accessToken/approvalToken, fall back to generic token key
+      state.accessToken = accessToken || approvalToken || token || null;
+      state.refreshToken = refreshToken || null;
+      state.user = user;
+      state.isAuthenticated = Boolean(state.accessToken && state.user);
 
-        /**
-         * Update user info
-         */
-        updateUser: (state, action: PayloadAction<Partial<User>>) => {
-            if (state.user) {
-                state.user = { ...state.user, ...action.payload };
-                localStorage.setItem('user', JSON.stringify(state.user));
-            }
-        },
-
-        /**
-         * Logout and clear auth state
-         */
-        logout: (state) => {
-            state.user = null;
-            state.token = null;
-            state.isAuthenticated = false;
-
-            // Clear localStorage
-            localStorage.removeItem('authToken');
-            localStorage.removeItem('user');
-        },
+      // Persist manually to localStorage so refresh survives even if redux-persist fails
+      if (state.accessToken) {
+        safeSetItem("auth.accessToken", state.accessToken);
+      }
+      if (state.refreshToken) {
+        safeSetItem("auth.refreshToken", state.refreshToken);
+      }
+      if (state.user) {
+        safeSetItem("auth.user", JSON.stringify(state.user));
+      }
     },
 
-    // Handle auth API responses
-    extraReducers: (builder) => {
-        builder
-            // Login
-            .addMatcher(authApi.endpoints.login.matchPending, (state) => {
-                state.isLoading = true;
-            })
-            .addMatcher(authApi.endpoints.login.matchFulfilled, (state, action) => {
-                state.user = action.payload.user;
-                state.token = action.payload.approvalToken;
-                state.isAuthenticated = true;
-                state.isLoading = false;
-
-                localStorage.setItem('authToken', action.payload.approvalToken);
-                localStorage.setItem('user', JSON.stringify(action.payload.user));
-            })
-            .addMatcher(authApi.endpoints.login.matchRejected, (state) => {
-                state.isLoading = false;
-            })
-
-            // Signup
-            .addMatcher(authApi.endpoints.verifyEmail.matchPending, (state) => {
-                console.log(" Verify Email: PENDING");
-                state.isLoading = true;
-            })
-            .addMatcher(authApi.endpoints.verifyEmail.matchFulfilled, (state, action) => {
-                console.log(" Verify Email: FULFILLED", action.payload);
-                console.log(" User:", action.payload.user);
-                console.log(" Token:", action.payload.approvalToken);
-                
-                state.user = action.payload.user;
-                state.token = action.payload.approvalToken;
-                state.isAuthenticated = true;
-                state.isLoading = false;
-
-                localStorage.setItem('authToken', action.payload.approvalToken);
-                localStorage.setItem('user', JSON.stringify(action.payload.user));
-                
-                console.log(" Saved to localStorage");
-                console.log(" New Auth State:", {
-                    user: state.user,
-                    token: state.token,
-                    isAuthenticated: state.isAuthenticated
-                });
-            })
-            .addMatcher(authApi.endpoints.verifyEmail.matchRejected, (state, action) => {
-                console.log(" Verify Email: REJECTED", action);
-                state.isLoading = false;
-            })
-
-            // Logout
-            .addMatcher(authApi.endpoints.logout.matchFulfilled, (state) => {
-                state.user = null;
-                state.token = null;
-                state.isAuthenticated = false;
-
-                localStorage.removeItem('authToken');
-                localStorage.removeItem('user');
-            });
+    updateUser: (state, action: PayloadAction<Partial<User>>) => {
+      if (state.user) {
+        state.user = { ...state.user, ...action.payload };
+      }
     },
+
+    logout: (state) => {
+      state.user = null;
+      state.accessToken = null;
+      state.refreshToken = null;
+      state.isAuthenticated = false;
+
+       // Clear manual localStorage copies
+      safeRemoveItem("auth.accessToken");
+      safeRemoveItem("auth.refreshToken");
+      safeRemoveItem("auth.user");
+    },
+  },
 });
 
 export const { setCredentials, updateUser, logout } = authSlice.actions;
+
+const readUserFromStorage = (): User | null => {
+  try {
+    const raw = safeGetItem("auth.user");
+    return raw ? (JSON.parse(raw) as User) : null;
+  } catch {
+    return null;
+  }
+};
+
+const readAccessTokenFromStorage = () => safeGetItem("auth.accessToken");
+const readRefreshTokenFromStorage = () => safeGetItem("auth.refreshToken");
+
+export const selectCurrentUser = (state: RootState["auth"]) =>
+  state.user ?? readUserFromStorage();
+
+export const selectAccessToken = (state: RootState["auth"]) =>
+  state.accessToken ?? readAccessTokenFromStorage();
+
+export const selectRefreshToken = (state: RootState["auth"]) =>
+  state.refreshToken ?? readRefreshTokenFromStorage();
+
+export const selectIsAuthenticated = (state: RootState["auth"]) =>
+  state.isAuthenticated ||
+  Boolean((state.user ?? readUserFromStorage()) && (state.accessToken ?? readAccessTokenFromStorage()));
+
 export default authSlice.reducer;

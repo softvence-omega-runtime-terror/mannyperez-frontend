@@ -1,16 +1,11 @@
-/**
- * Redux Store Configuration
- *
- * This is the main store configuration file that combines all reducers
- * and middleware for the application.
- */
 
 import { configureStore } from "@reduxjs/toolkit";
 import { setupListeners } from "@reduxjs/toolkit/query";
+import { persistReducer, persistStore } from "redux-persist";
+import storage from "redux-persist/lib/storage";
 
 // Import API services
-import { productsApi } from "./services/productsApi";
-import { authApi } from "./services/authApi";
+import { baseApi } from "./services/baseApi";
 import { sellersApi } from "./services/sellersApi";
 
 // Import slices
@@ -21,16 +16,23 @@ import liveChatReducer from "./slices/live-stream-slice";
 /**
  * Configure the Redux store
  */
+const persistConfig = {
+  key: "root",
+  storage,
+  whitelist: ["auth"],
+};
+
+const persistedAuthReducer = persistReducer(persistConfig, authReducer);
+
 export const store = configureStore({
   reducer: {
-    // RTK Query API reducers
-    [productsApi.reducerPath]: productsApi.reducer,
-    [authApi.reducerPath]: authApi.reducer,
+    // RTK Query API reducers (single baseApi + standalone sellersApi)
+    [baseApi.reducerPath]: baseApi.reducer,
     [sellersApi.reducerPath]: sellersApi.reducer,
     
 
     // Regular slices
-    auth: authReducer,
+    auth: persistedAuthReducer,
     selectedConversation: selectedConversationReducer,
     liveStreamConfig: liveChatReducer
   },
@@ -41,10 +43,8 @@ export const store = configureStore({
         ignoredActions: ["persist/PERSIST", "persist/REHYDRATE"],
       },
     }).concat(
-      productsApi.middleware,
-      authApi.middleware,
+      baseApi.middleware,
       sellersApi.middleware,
-      
     ),
 
   // Enable Redux DevTools in development
@@ -56,3 +56,5 @@ setupListeners(store.dispatch);
 
 export type RootState = ReturnType<typeof store.getState>;
 export type AppDispatch = typeof store.dispatch;
+
+export const persistor = persistStore(store);

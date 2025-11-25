@@ -1,22 +1,22 @@
-import { useEffect, useState } from "react";
-import { NavLink, useNavigate } from "react-router-dom";
-import Wrapper from "./Wrapper";
-import SearchInput from "../landing/SectionComponents/SearchInput";
 import PrimaryButton from "@/reuseableComponents/PrimaryButton";
-import { HiMenu, HiX } from "react-icons/hi";
-import { Button } from "../ui/button";
+import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { useLogoutMutation } from "@/store/services/authApi";
-import { useAppSelector, useAppDispatch } from "@/store/hooks";
 import { logout as logoutSlice } from "@/store/slices/authSlice";
+import { useEffect, useState } from "react";
+import { HiMenu, HiX } from "react-icons/hi";
+import { NavLink, useNavigate } from "react-router-dom";
+import SearchInput from "../landing/SectionComponents/SearchInput";
+import { Button } from "../ui/button";
+import Wrapper from "./Wrapper";
 
 import {
-  User,
-  ShoppingBag,
   Bookmark,
-  MapPin,
   CreditCard,
-  Settings,
   LogOut,
+  MapPin,
+  Settings,
+  ShoppingBag,
+  User,
 } from "lucide-react";
 
 import AddressBookModal from "./AddressBookModal";
@@ -32,25 +32,20 @@ const Navbar = () => {
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
 
-  const user = useAppSelector((state) => state.auth.user);
-  console.log(user, "USER INFO")
-  const isAuthenticated = useAppSelector((state) => state.auth.isAuthenticated);
+  const { user, isAuthenticated, accessToken } = useAppSelector((state) => state.auth);
+ 
+
 
   const [logout] = useLogoutMutation();
 
   const handleLogout = async () => {
     try {
-      await logout({
-        refreshToken: localStorage.getItem("refreshToken"),
-      }).unwrap();
+      await logout(accessToken ? { token: accessToken } : undefined).unwrap();
     } catch (error) {
       console.warn("Logout API failed, forcing client logout.", error);
     }
 
     dispatch(logoutSlice());
-    localStorage.removeItem("authToken");
-    localStorage.removeItem("user");
-    localStorage.removeItem("refreshToken");
 
     navigate("/login");
   };

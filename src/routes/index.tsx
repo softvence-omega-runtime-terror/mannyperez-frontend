@@ -1,30 +1,30 @@
-import { createBrowserRouter, redirect } from "react-router-dom";
 import App from "@/App";
-import Landing from "@/pages/Landing";
-import Seller from "@/pages/Seller";
 import Login from "@/pages/Auth/Login";
 import SignUp from "@/pages/Auth/SignUp";
 import Feed from "@/pages/Feed";
 import FeedHome from "@/pages/FeedHome";
+import Landing from "@/pages/Landing";
+import Seller from "@/pages/Seller";
+import { createBrowserRouter, redirect } from "react-router-dom";
 
-import Live from "@/pages/Live";
-import Products from "@/pages/Products";
-import NewListingSteps from "@/components/ProductsComponent/CreateNewListing/NewListingStepsContainer";
-import VerifyEmail from "@/pages/Auth/VerifyEmail";
-import Unauthorized from "@/pages/Auth/Unauthorized";
-import CheckoutPage from "@/pages/CheckoutPage";
-import { store } from "@/store";
-import BuyerProfile from "@/pages/profile/BuyerProfile";
-import SellerProfile from "@/pages/profile/SellerProfile";
-import Profile from "@/pages/profile/Profile";
-import Promotions from "@/components/SellersComponent/Promotions";
 import Orders from "@/components/BuyerCompnents/Orders";
 import SavedItems from "@/components/BuyerCompnents/SavedItems";
+import NewListingSteps from "@/components/ProductsComponent/CreateNewListing/NewListingStepsContainer";
 import OrdersList from "@/components/SellersComponent/OrdersList";
-import SellerMessagePage from "@/pages/messages/seller/SellerMessagePage";
-import MessagingPage from "@/pages/messages/buyer/MessagePage";
-import LivePage from "@/pages/live-events/LivePage";
+import Promotions from "@/components/SellersComponent/Promotions";
+import Unauthorized from "@/pages/Auth/Unauthorized";
+import VerifyEmail from "@/pages/Auth/VerifyEmail";
+import CheckoutPage from "@/pages/CheckoutPage";
 import ErrorPage from "@/pages/ErrorPage";
+import Live from "@/pages/Live";
+import LivePage from "@/pages/live-events/LivePage";
+import MessagingPage from "@/pages/messages/buyer/MessagePage";
+import SellerMessagePage from "@/pages/messages/seller/SellerMessagePage";
+import Products from "@/pages/Products";
+import BuyerProfile from "@/pages/profile/BuyerProfile";
+import Profile from "@/pages/profile/Profile";
+import SellerProfile from "@/pages/profile/SellerProfile";
+import { store } from "@/store";
 
 // Simple auth check function
 const checkAuth = (options?: {
@@ -98,6 +98,7 @@ const routes = createBrowserRouter([
       {
         path: "/seller/products",
         element: <Products />,
+        
         loader: () => checkAuth({ requireAuth: false, requireVerified: false }),
       },
 
@@ -112,7 +113,7 @@ const routes = createBrowserRouter([
         loader: () => checkAuth({ requireAuth: false, requireVerified: false }),
       },
       {
-        path: "/prfile",
+        path: "/profile",
         element: <Profile />,
         loader: () => checkAuth({ requireAuth: false, requireVerified: false }),
       },

@@ -17,6 +17,7 @@ function Landing() {
     <div className="sticky top-0 z-99">
       </div>
         <Hero/>
+         {/* <GlassBottomNav/> */}
         <SalesEvent/>
         <TrendingListing/>
         <ShopByCategory/> 

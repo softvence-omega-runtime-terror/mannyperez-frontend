@@ -1,96 +1,115 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { Button } from "@/components/ui/button";
-import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useAppDispatch, useAppSelector } from "@/store/hooks";
+import { useLoginMutation, useSellerLoginMutation } from "@/store/services/authApi";
+import { setCredentials } from "@/store/slices/authSlice";
 import { Eye, EyeOff } from "lucide-react";
-import { FcGoogle } from "react-icons/fc";
-import { FaApple } from "react-icons/fa";
-import { useLoginMutation } from "@/store/services/authApi";
-import { useAppSelector } from "@/store/hooks";
+import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { Link, useNavigate } from "react-router-dom";
+import { toast } from "sonner";
+
+type LoginForm = {
+  email: string;
+  password: string;
+  rememberPassword: boolean;
+};
 
 const Login = () => {
   const navigate = useNavigate();
-  const [login, { isLoading }] = useLoginMutation();
+  const dispatch = useAppDispatch();
+
+  const [loginBuyer, { isLoading: isBuyerLoading }] = useLoginMutation();
+  const [loginSeller, { isLoading: isSellerLoading }] = useSellerLoginMutation();
+
   const { user, isAuthenticated } = useAppSelector((state) => state.auth);
 
-  // Form state
-  const [formData, setFormData] = useState({
-    email: "",
-    password: "",
+  const [loginMode, setLoginMode] = useState<"buyer" | "seller">("buyer");
+  const [showPassword, setShowPassword] = useState(false);
+
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+    setError,
+    clearErrors,
+  } = useForm<LoginForm>({
+    defaultValues: {
+      email: "",
+      password: "",
+      rememberPassword: false,
+    },
   });
 
-  // UI state
-  const [showPassword, setShowPassword] = useState(false);
-  const [rememberPassword, setRememberPassword] = useState(false);
+  const isLoading = isBuyerLoading || isSellerLoading;
 
-  // Validation errors
-  const [errors, setErrors] = useState<Record<string, string>>({});
 
-  // Handle input changes
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
-    // Clear error when user types
-    if (errors[name]) {
-      setErrors((prev) => ({ ...prev, [name]: "" }));
-    }
-  };
-
-  // Validate form
-  const validateForm = () => {
-    const newErrors: Record<string, string> = {};
-
-    // Email validation
-    if (!formData.email.trim()) {
-      newErrors.email = "Email is required";
-    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
-      newErrors.email = "Please enter a valid email address";
-    }
-
-    // Password validation
-    if (!formData.password) {
-      newErrors.password = "Password is required";
-    }
-
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
-
-  // Handle form submission
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-
-    // Validate form
-    if (!validateForm()) {
-      return;
-    }
-
+  const onSubmit = async (data: LoginForm) => {
     try {
-      // Call login API
-      const result = await login({
-        email: formData.email.trim().toLowerCase(),
-        password: formData.password,
-      }).unwrap();
+      const input = {
+        email: data.email.trim().toLowerCase(),
+        password: data.password,
+      };
+
+      let result;
+
+      if (loginMode === "buyer") {
+        result = await loginBuyer(input).unwrap();
+      } else {
+        result = await loginSeller(input).unwrap();
+      }
+
+ 
+
+      const payload = (result as any)?.data ?? result;
+ 
+
+      const accessToken = payload?.approvalToken ?? payload?.token;
+      const refreshToken = payload?.refreshToken ?? null;
+
+      if (payload.user && accessToken) {
+        // also drop tokens into localStorage for manual fallback
+        if (accessToken) localStorage.setItem("auth.accessToken", accessToken);
+        if (refreshToken) localStorage.setItem("auth.refreshToken", refreshToken);
+        localStorage.setItem("auth.user", JSON.stringify(payload.user));
+
+        dispatch(
+          setCredentials({
+            user: payload.user,
+            accessToken,
+            refreshToken,
+            approvalToken: payload?.approvalToken,
+          })
+        );
+        toast.success("Logged in successfully!");
+           navigate("/");
+        return;
+      }
+
+    
 
 
-      if (result) navigate("/");
+  
+   
     } catch (err: any) {
-      // Handle API errors
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      const errorMessage =
+      console.log("Error:", err);
+
+      const message =
         err?.data?.message ||
         err?.message ||
         "Login failed. Please check your credentials.";
+
+      toast.error(message);
+
+      // show error in UI field
+      setError("email", { message });
     }
   };
 
-  // If already authenticated, show welcome message
+  // Already authenticated UI
   if (isAuthenticated && user) {
     return (
-      <div className="flex items-center justify-center min-h-screen bg-secondary">
+      <div className="flex items-center justify-center min-h-[80dvh] bg-secondary">
         <div className="max-w-md mx-auto p-12 bg-[#F9ECF3] rounded-3xl shadow-xl border-2 border-white text-center">
           <h1 className="text-4xl font-bold mb-4">
             Welcome, <span className="text-primary">{user.name}!</span>
@@ -111,118 +130,132 @@ const Login = () => {
           Welcome Back, <span className="text-primary">Login!</span>
         </h1>
 
-        <form onSubmit={handleSubmit} className="space-y-6">
+        {/* Login Tabs */}
+        <div className="flex mb-6 bg-white/60 p-1 gap-2 rounded-lg w-full">
+          <button
+            type="button"
+            onClick={() => setLoginMode("buyer")}
+            className={`flex-1 py-3 cursor-pointer rounded-lg font-semibold transition ${
+              loginMode === "buyer"
+                ? "bg-primary text-white"
+                : "bg-transparent text-gray-700"
+            }`}
+          >
+            Buyer Login
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setLoginMode("seller")}
+            className={`flex-1 py-3 cursor-pointer rounded-lg font-semibold transition ${
+              loginMode === "seller"
+                ? "bg-primary text-white"
+                : "bg-transparent text-gray-700"
+            }`}
+          >
+            Seller Login
+          </button>
+        </div>
+
+        {/* FORM (HOOK FORM) */}
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+          {/* Email */}
           <div>
             <label className="block font-medium text-gray-800 mb-2">
               Email Address <span className="text-red-500">*</span>
             </label>
             <input
               type="email"
-              name="email"
-              value={formData.email}
-              onChange={handleChange}
               placeholder="you@example.com"
-              className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-transparent ${errors.email ? "border-red-500" : "border-gray-300"
-                }`}
+              className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500 ${
+                errors.email ? "border-red-500" : "border-gray-300"
+              }`}
               disabled={isLoading}
+              {...register("email", {
+                required: "Email is required",
+                pattern: {
+                  value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
+                  message: "Enter a valid email address",
+                },
+                onChange: () => clearErrors("email"),
+              })}
             />
+
             {errors.email && (
-              <p className="text-red-500 text-sm mt-1">{errors.email}</p>
+              <p className="text-red-500 text-sm mt-1">
+                {errors.email.message}
+              </p>
             )}
           </div>
 
+          {/* Password */}
           <div>
             <label className="block font-medium text-gray-800 mb-2">
               Password <span className="text-red-500">*</span>
             </label>
+
             <div className="relative">
               <input
                 type={showPassword ? "text" : "password"}
-                name="password"
-                value={formData.password}
-                onChange={handleChange}
-                placeholder="••••••••••••••"
-                className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-transparent pr-12 ${errors.password ? "border-red-500" : "border-gray-300"
-                  }`}
+                placeholder="••••••••••••"
+                className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500 pr-12 ${
+                  errors.password ? "border-red-500" : "border-gray-300"
+                }`}
                 disabled={isLoading}
+                {...register("password", {
+                  required: "Password is required",
+                })}
               />
+
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
-                disabled={isLoading}
+                className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500"
               >
                 {showPassword ? <Eye size={20} /> : <EyeOff size={20} />}
               </button>
             </div>
+
             {errors.password && (
-              <p className="text-red-500 text-sm mt-1">{errors.password}</p>
+              <p className="text-red-500 text-sm mt-1">
+                {errors.password.message}
+              </p>
             )}
           </div>
 
+          {/* Remember Password */}
           <div className="flex items-center justify-between">
             <label className="flex items-center cursor-pointer">
               <input
                 type="checkbox"
-                checked={rememberPassword}
-                onChange={(e) => setRememberPassword(e.target.checked)}
-                className="w-4 h-4 text-pink-500 border-gray-300 rounded focus:ring-pink-500"
-                disabled={isLoading}
+                className="w-4 h-4 text-pink-500 border-gray-300 rounded"
+                {...register("rememberPassword")}
               />
-              <span className="ml-2 text-sm text-gray-700">Remember Password</span>
+              <span className="ml-2 text-sm text-gray-700">
+                Remember Password
+              </span>
             </label>
-            <Link to="/forgot-password" className="text-sm text-gray-700 hover:text-pink-500">
+
+            <Link
+              to="/forgot-password"
+              className="text-sm text-gray-700 hover:text-pink-500"
+            >
               Forgot Password?
             </Link>
           </div>
 
+          {/* Login Button */}
           <Button
             type="submit"
             className="w-full text-white py-6 rounded-lg text-base font-medium"
             disabled={isLoading}
           >
-            {isLoading ? (
-              <span className="flex items-center justify-center gap-2">
-                <span className="animate-spin rounded-full h-5 w-5 border-2 border-white border-t-transparent"></span>
-                Logging in...
-              </span>
-            ) : (
-              "Login"
-            )}
+            {isLoading ? "Logging in..." : "Login"}
           </Button>
 
-          <div className="relative my-6">
-            <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-gray-300"></div>
-            </div>
-            <div className="relative flex justify-center text-sm">
-              <span className="px-4 bg-white/70 text-gray-500">Or Continue With</span>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-2 gap-4">
-            <button
-              type="button"
-              className="flex items-center justify-center px-4 py-3 border border-gray-300 rounded-lg bg-white hover:bg-gray-50 transition"
-              disabled={isLoading}
-            >
-              <FcGoogle className="w-5 h-5 mr-2" />
-              <span className="text-sm font-medium text-gray-700">Log In with Google</span>
-            </button>
-
-            <button
-              type="button"
-              className="flex items-center justify-center px-4 py-3 border border-gray-300 rounded-lg bg-white hover:bg-gray-50 transition"
-              disabled={isLoading}
-            >
-              <FaApple className="w-5 h-5 mr-2" />
-              <span className="text-sm font-medium text-gray-700">Log In with Apple</span>
-            </button>
-          </div>
-
           <p className="text-center text-gray-800 mt-6">
-            Don't have an account?{" "}
-            <Link to="/sign-up" className="font-bold hover:text-primary transition">
+            Don’t have an account?{" "}
+            <Link to="/sign-up" className="font-bold hover:text-primary">
               Sign Up
             </Link>
           </p>

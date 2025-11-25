@@ -7,11 +7,12 @@ import Navbar from "@/components/layout/Navbar";
 function App() {
   const { isAuthenticated } = useAppSelector((state) => state.auth);
   const location = useLocation();
+  const { accessToken } = useAppSelector((state) => state.auth);
 
   useEffect(() => {
     if (!isAuthenticated) return;
 
-    const token = localStorage.getItem("authToken");
+    const token = accessToken;
 
     socket.auth = { token };
     socket.connect();
@@ -20,7 +21,7 @@ function App() {
     return () => {
       socket.disconnect();
     };
-  }, [isAuthenticated]);
+  }, [isAuthenticated, accessToken]);
 
   // List of paths where you **do not want** the global Navbar
   const hideNavbarPaths = [""];

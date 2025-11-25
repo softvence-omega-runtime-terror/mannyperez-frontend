@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /**
  * Sellers API Service
  * 
@@ -46,7 +47,7 @@ export const sellersApi = createApi({
   baseQuery: fetchBaseQuery({
     baseUrl: import.meta.env.VITE_API_BASE_URL || 'https://api.example.com',
     prepareHeaders: (headers, { getState }) => {
-      const token = (getState() as RootState).auth.token;
+      const token = (getState() as RootState).auth.accessToken;
       if (token) {
         headers.set('authorization', `Bearer ${token}`);
       }
