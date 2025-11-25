@@ -8,9 +8,17 @@ interface ProductInformationStepProps {
   title?: string;
   description?: string;
   tags?: string;
+  category?: string;
   onTitleChange?: (value: string) => void;
   onDescriptionChange?: (value: string) => void;
   onTagsChange?: (value: string) => void;
+  onCategoryChange?: (value: string) => void;
+  errors?: {
+    title?: string;
+    description?: string;
+    tags?: string;
+    category?: string;
+  };
 }
 
 export function ProductInformationStep({
@@ -18,9 +26,12 @@ export function ProductInformationStep({
   title = '',
   description = '',
   tags = '',
+  category = '',
   onTitleChange,
   onDescriptionChange,
   onTagsChange,
+  onCategoryChange,
+  errors = {},
 }: ProductInformationStepProps) {
   return (
     <StepCard
@@ -41,6 +52,28 @@ export function ProductInformationStep({
             onChange={(e) => onTitleChange?.(e.target.value)}
             className="h-11 border border-border placeholder:text-gray-300"
           />
+          {errors.title && <p className="text-sm text-red-600 mt-1">{errors.title}</p>}
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="category" className="text-sm font-medium">
+            Category<span className="">*</span>
+          </Label>
+          <select
+            name="category"
+            id="category"
+            value={category}
+            onChange={(e) => onCategoryChange?.(e.target.value)}
+            className="w-full h-11 border border-border rounded-md px-3 bg-white placeholder:text-gray-300"
+          >
+            <option value="">Select category</option>
+            <option value="DTF">DTF</option>
+            <option value="UV">UV</option>
+            <option value="SUB">SUB</option>
+            <option value="Screen">Screen</option>
+            <option value="Finished">Finished</option>
+          </select>
+          {errors.category && <p className="text-sm text-red-600 mt-1">{errors.category}</p>}
         </div>
 
         <div className="space-y-2">
@@ -54,6 +87,7 @@ export function ProductInformationStep({
             onChange={(e) => onDescriptionChange?.(e.target.value)}
             className="min-h-[120px] border border-border placeholder:text-gray-300"
           />
+          {errors.description && <p className="text-sm text-red-600 mt-1">{errors.description}</p>}
           <p className="text-xs text-muted-foreground">
             Describe quality, uses, and any special offers
           </p>
@@ -70,6 +104,7 @@ export function ProductInformationStep({
             onChange={(e) => onTagsChange?.(e.target.value)}
             className="h-11 border border-border placeholder:text-gray-300"
           />
+          {errors.tags && <p className="text-sm text-red-600 mt-1">{errors.tags}</p>}
         </div>
       </div>
     </StepCard>

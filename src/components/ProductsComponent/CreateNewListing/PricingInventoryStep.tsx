@@ -8,6 +8,7 @@ interface PricingInventoryStepProps {
   quantity?: string;
   onPriceChange?: (value: string) => void;
   onQuantityChange?: (value: string) => void;
+  errors?: { price?: string; quantity?: string };
 }
 
 export function PricingInventoryStep({
@@ -16,6 +17,7 @@ export function PricingInventoryStep({
   quantity = '',
   onPriceChange,
   onQuantityChange,
+  errors = {},
 }: PricingInventoryStepProps) {
   return (
     <StepCard
@@ -37,6 +39,7 @@ export function PricingInventoryStep({
             onChange={(e) => onPriceChange?.(e.target.value)}
             className="h-11 border border-border placeholder:text-gray-300"
           />
+          {errors.price && <p className="text-sm text-red-600 mt-1">{errors.price}</p>}
         </div>
 
         <div className="space-y-2">
@@ -51,6 +54,7 @@ export function PricingInventoryStep({
             onChange={(e) => onQuantityChange?.(e.target.value)}
             className="h-11 border border-border placeholder:text-gray-300"
           />
+          {errors.quantity && <p className="text-sm text-red-600 mt-1">{errors.quantity}</p>}
         </div>
       </div>
     </StepCard>

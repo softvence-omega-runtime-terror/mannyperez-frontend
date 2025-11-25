@@ -11,6 +11,7 @@ interface UploadPhotoStepProps {
   acceptedFormats?: string[];
   maxSize?: number;
   selectedFiles?: File[];
+  error?: string;
 }
 
 export function UploadPhotoStep({
@@ -20,6 +21,7 @@ export function UploadPhotoStep({
   acceptedFormats = ['PNG', 'JPG'],
   maxSize = 10,
   selectedFiles = [],
+  error,
 }: UploadPhotoStepProps) {
   const [files, setFiles] = useState<File[]>(selectedFiles);
   const [previews, setPreviews] = useState<string[]>([]);
@@ -125,6 +127,7 @@ export function UploadPhotoStep({
 
             <input
               ref={fileInputRef}
+              required
               type="file"
               accept="image/*"
               multiple
@@ -135,6 +138,8 @@ export function UploadPhotoStep({
             />
           </div>
         </div>
+
+        {error && <p className="text-sm text-red-600 mt-2">{error}</p>}
 
         {files.length > 0 && (
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
