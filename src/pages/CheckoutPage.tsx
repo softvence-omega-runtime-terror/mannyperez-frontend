@@ -9,6 +9,7 @@ import CheckoutSidebar from "@/components/CheckoutComponent/CheckoutSidebar";
 
 const CheckoutPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
+  console.log(id, "chekcout product")
 
   // TODO: Replace with API fetch by ID
   const product = {

@@ -19,61 +19,39 @@ import MessageRightSidebar from "./messages/buyer/MessageRightSidebar";
 import { useGetProductByIdQuery } from "@/store/services/productsApi";
 import { MessageProduct } from "./messages/buyer/MessagePage";
 
-// --- Types ---
-export interface ProductType {
-  id: string;
-  title: string;
-  price: string;
-  imageUrls: string[];
-  description: string;
-}
-
-// --- Dummy Product ---
-const DUMMY_PRODUCT: ProductType = {
-  id: "dummy-01",
-  title: "Glitter DTF Transfers - A4 Sheets",
-  price: "$15.00",
-  imageUrls: ["/dummy/image_d19c84.png"],
-  description: "High-quality glitter DTF transfers on A4 sheets.",
-};
-
-interface CurrentPackageProps {
-  onBuyNow?: (product: any) => void;
-  onSendMessage?: (message: string) => void;
-}
-
-const CurrentPackage: React.FC<CurrentPackageProps> = ({ onBuyNow }) => {
+// Component to show selected product inside messaging
+const CurrentPackage: React.FC<{ onBuyNow?: (product: any) => void }> = ({
+  onBuyNow,
+}) => {
   const { productId } = useParams();
 
-  const { data: productData, isLoading } = useGetProductByIdQuery(productId, {
+  const { data: productData, isLoading } = useGetProductByIdQuery(productId as any, {
     skip: !productId,
   });
 
-  // --- Show loading state ---
-  if (isLoading || !productData?.data) {
-    return <div>Loading...</div>;
-  }
+  if (isLoading || !productData?.data) return <div>Loading...</div>;
 
-  // --- Safe product object ---
-  const product = productData.data as MessageProduct;
+  const product = productData.data;
 
+  // --- Calculate price ---
   const renderPrice = () => {
-    const prices = product.pricingAndInventory?.map((p) => p.price);
-    if (!prices || prices.length === 0) return null;
+    const prices = product.pricingAndInventory?.map((p: any) => Number(p.price));
 
-    if (product.extraOptions?.productVariants && prices.length > 1) {
+    if (!prices?.length) return null;
+
+    if (prices.length > 1) {
       const min = Math.min(...prices);
       const max = Math.max(...prices);
       return (
         <p className="text-xl font-bold text-pink-600">
-          ${min.toFixed(2)}
-          {min !== max && ` - $${max.toFixed(2)}`}
+          ${min.toFixed(2)} - ${max.toFixed(2)}
         </p>
       );
     }
+
     return (
       <p className="text-xl font-bold text-pink-600">
-        ${prices[0]?.toFixed(2)}
+        ${prices[0].toFixed(2)}
       </p>
     );
   };
@@ -89,14 +67,15 @@ const CurrentPackage: React.FC<CurrentPackageProps> = ({ onBuyNow }) => {
           />
           <div>
             <p className="text-lg font-semibold">
-              {product.productInformation?.title || "Product Title"}
+              {product.productInformation?.title}
             </p>
             <p className="text-sm text-gray-500">
-              {product.productInformation?.description || "Product Description"}
+              {product.productInformation?.description}
             </p>
-            <div className="mt-1 flex-shrink-0">{renderPrice()}</div>
+            <div className="mt-1">{renderPrice()}</div>
           </div>
         </div>
+
         {onBuyNow && (
           <button
             className="bg-pink-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-pink-700 transition"
@@ -110,7 +89,7 @@ const CurrentPackage: React.FC<CurrentPackageProps> = ({ onBuyNow }) => {
   );
 };
 
-// --- Main Feed Component ---
+// --- MAIN FEED COMPONENT ---
 const Feed: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
@@ -119,15 +98,9 @@ const Feed: React.FC = () => {
   const [checkoutProduct, setCheckoutProduct] = useState<any | null>(null);
   const [selectedShipping, setSelectedShipping] = useState<number | null>(null);
 
-  // --- Handle Buy Now ---
   const handleBuyNow = (product: any) => {
     setCheckoutProduct(product);
     navigate(`/checkout/${product._id}`);
-  };
-
-  // --- Placeholder for sending message ---
-  const handleSendMessage = (message: string) => {
-    console.log("Send message:", message);
   };
 
   if (checkoutProduct) {
@@ -138,9 +111,7 @@ const Feed: React.FC = () => {
             <OrderSummary product={checkoutProduct} />
             <BuyerInformation />
             <ShippingAddress />
-            <ShippingMethod
-              onShippingSelect={(id: number) => setSelectedShipping(id)}
-            />
+            <ShippingMethod onShippingSelect={(id) => setSelectedShipping(id)} />
             <PaymentMethod />
           </div>
         </div>
@@ -149,47 +120,45 @@ const Feed: React.FC = () => {
   }
 
   return (
-    <>
-      <div className="container mx-auto px-4 py-6">
-        <div className="grid grid-cols-1 gap-6 lg:grid-cols-12">
-          {isMessagesRoute ? (
-            <>
-              <div className="lg:col-span-3">
-                <MessageLeftSidebar />
-              </div>
-              <div className="lg:col-span-6">
-                <CurrentPackage onBuyNow={handleBuyNow} />
-                <div className="bg-white p-4 shadow min-h-[calc(100vh-220px)] rounded-xl border border-gray-100">
-                  <Outlet />
-                </div>
-              </div>
-              <div className="lg:col-span-3">
-                <MessageRightSidebar />
-              </div>
-            </>
-          ) : (
-            <>
-              {/* Main Feed Content */}
-              <div className="lg:col-span-9 space-y-6">
-                <DestashAdmin />
-                <FeedSpotlight />
-                <LiveStream />
-                <FeaturedPost onBuyNow={handleBuyNow} />
-                <DiamondPost onBuyNow={handleBuyNow} />
-                <GoldPost onBuyNow={handleBuyNow} />
-              </div>
+    <div className="container mx-auto px-4 py-6">
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-12">
+        {isMessagesRoute ? (
+          <>
+            <div className="lg:col-span-3">
+              <MessageLeftSidebar />
+            </div>
 
-              {/* Fixed Sidebar */}
-              <div className="lg:col-span-3 relative">
-                <div className="sticky top-6">
-                  <FeedSidbar />
-                </div>
+            <div className="lg:col-span-6">
+              <CurrentPackage onBuyNow={handleBuyNow} />
+              <div className="bg-white p-4 shadow min-h-[calc(100vh-220px)] rounded-xl border">
+                <Outlet />
               </div>
-            </>
-          )}
-        </div>
+            </div>
+
+            <div className="lg:col-span-3">
+              <MessageRightSidebar />
+            </div>
+          </>
+        ) : (
+          <>
+            <div className="lg:col-span-9 space-y-6">
+              <DestashAdmin />
+              <FeedSpotlight />
+              <LiveStream />
+              <FeaturedPost onBuyNow={handleBuyNow} />
+              <DiamondPost onBuyNow={handleBuyNow} />
+              <GoldPost onBuyNow={handleBuyNow} />
+            </div>
+
+            <div className="lg:col-span-3 relative">
+              <div className="sticky top-6">
+                <FeedSidbar />
+              </div>
+            </div>
+          </>
+        )}
       </div>
-    </>
+    </div>
   );
 };
 

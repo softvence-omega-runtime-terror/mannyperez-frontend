@@ -104,7 +104,7 @@ const Navbar = () => {
 
   const buyerDropdownLinks = [
     { icon: User, label: "Profile", path: "/profile" },
-    { icon: ShoppingBag, label: "My Orders", path: "/orders" },
+    { icon: ShoppingBag, label: "My Orders", path: "/buyer/orders" },
     { icon: Bookmark, label: "Saved Items", path: "/saved-items" },
     {
       icon: MapPin,

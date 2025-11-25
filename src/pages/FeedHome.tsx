@@ -1,5 +1,4 @@
 import DestashAdmin from '@/components/FeedComponents/DestashAdmin'
-import React from 'react'
 
 function FeedHome() {
   return (

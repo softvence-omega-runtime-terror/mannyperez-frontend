@@ -1,5 +1,4 @@
 import { baseApi } from "./baseApi";
-import { RootState } from "@/redux/store"; // Adjust path if needed
 
 // Product types
 export interface Product {
