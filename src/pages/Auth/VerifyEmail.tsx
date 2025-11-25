@@ -1,13 +1,16 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable react-hooks/rules-of-hooks */
 import { Button } from "@/components/ui/button";
+import { useAppDispatch, useAppSelector } from "@/store/hooks";
+import { useVerifyEmailMutation } from "@/store/services/authApi";
+import { setCredentials } from "@/store/slices/authSlice";
 import { useEffect, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { useVerifyEmailMutation } from "@/store/services/authApi";
-import { useAppSelector } from "@/store/hooks";
 
 const verifyEmail = () => {
     const [verifyEmail, { isLoading }] = useVerifyEmailMutation();
     const { user, isAuthenticated } = useAppSelector((state) => state.auth);
+    const dispatch = useAppDispatch();
 
     const location = useLocation();
     const navigate = useNavigate();
@@ -68,16 +71,23 @@ const verifyEmail = () => {
         }
 
         try {
-            // Call verify email API
             const result = await verifyEmail({
                 email: email || "",
                 code: formData.code,
             }).unwrap();
 
+            if (result) {
+                const payload = (result as any)?.data ?? result;
+                const token = payload?.approvalToken ?? payload?.token;
+                const refreshToken = payload?.refreshToken ?? null;
+                const verifiedUser = payload?.user;
+                if (verifiedUser && token) {
+                    dispatch(setCredentials({ user: verifiedUser, accessToken: token, approvalToken: payload?.approvalToken, refreshToken }));
+                }
+                navigate("/feed");
+            }
 
-            if (result) navigate("/feed");
-
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+         
         } catch (err: any) {
             // eslint-disable-next-line @typescript-eslint/no-unused-vars
             const errorMessage =

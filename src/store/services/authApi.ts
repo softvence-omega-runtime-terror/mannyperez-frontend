@@ -34,13 +34,13 @@ export const authApi = baseApi.injectEndpoints({
       }),
     }),
 
-    logout: builder.mutation({
-      query: () => ({
+    logout: builder.mutation<void, { token?: string } | void>({
+      query: (body) => ({
         url: "/auth/logout",
         method: "POST",
-        body: {
-          refresh_token: localStorage.getItem("refreshToken"),
-        },
+        body: body && (body as { token?: string }).token
+          ? { token: (body as { token?: string }).token }
+          : undefined,
       }),
     }),
   }),
