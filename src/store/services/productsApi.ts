@@ -51,16 +51,13 @@ export const productsApi = baseApi.injectEndpoints({
     }),
 
     // Create product mutation
-    createProduct: builder.mutation<Product, Omit<CreateProductRequest, "sellerId"> & { userId: string }>({
+    createProduct: builder.mutation<void, FormData>({
       query: (payload) => {
-        const { userId, ...rest } = payload;
+        console.log("Payload in createProduct:", payload);
         return {
           url: `/products/create`,
           method: "POST",
-          body: {
-            ...rest,
-            sellerId: userId, // attach sellerId from auth state
-          },
+          body: payload,
         };
       },
       invalidatesTags: ["Products"],
