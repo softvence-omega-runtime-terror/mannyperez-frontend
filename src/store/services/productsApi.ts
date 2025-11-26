@@ -50,6 +50,46 @@ export const productsApi = baseApi.injectEndpoints({
       providesTags: ["Products"],
     }),
 
+    getMyProducts: builder.query<ProductsResponse, void>({
+      query: () => ({
+        url: `/products/seller/my-products`,
+        method: "GET",
+      }),
+      providesTags: ["Products"],
+
+    })
+    ,
+    likeProduct: builder.mutation<void, string>({
+      query: (id) => ({
+        url: `/products/${id}/like`,
+        method: "POST",
+      }),
+      invalidatesTags: ["Products"],
+    }),
+    likeComment: builder.mutation<void, string>({
+      query: (id) => ({
+        url: `/products/${id}/comment-like`,
+        method: "POST",
+      }),
+      invalidatesTags: ["Products"],
+    }),
+    commentOnProduct: builder.mutation<void, { id: string; comment: string }>({
+      query: ({ id, comment }) => ({
+        url: `/products/${id}/comment`,
+        method: "POST",
+        body: { 'message': comment },
+      }),
+      invalidatesTags: ["Products"],
+    }),
+    commentReply: builder.mutation<void, { id: string; comment: string }>({
+      query: ({ id, comment }) => ({
+        url: `/products/${id}/comment-reply`,
+        method: "POST",
+        body: { 'message': comment },
+      }),
+      invalidatesTags: ["Products"],
+    }),
+
     // Create product mutation
     createProduct: builder.mutation<void, FormData>({
       query: (payload) => {
@@ -92,6 +132,11 @@ export const productsApi = baseApi.injectEndpoints({
 
 export const {
   useGetProductsQuery,
+  useGetMyProductsQuery,
+  useLikeProductMutation,
+  useLikeCommentMutation,
+  useCommentOnProductMutation,
+  useCommentReplyMutation,
   useCreateProductMutation,
   useUpdateProductMutation,
   useDeleteProductsMutation,
