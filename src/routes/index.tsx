@@ -26,7 +26,18 @@ import Profile from "@/pages/profile/Profile";
 import SellerProfile from "@/pages/profile/SellerProfile";
 import { store } from "@/store";
 
-// Simple auth check function
+// NEW — ADMIN LAYOUT
+import AdminLayout from "@/pages/admin/AdminLayout";
+import AdminDashboard from "@/pages/admin/AdminDashboard";
+import AdminUsers from "@/pages/admin/AdminUsers";
+import AdminListings from "@/pages/admin/AdminListings";
+import AdminIncidents from "@/pages/admin/AdminIncidents";
+import AdminSettings from "@/pages/admin/AdminSettings";
+import AdminPayout from "@/pages/admin/AdminPayout";
+import AdminReports from "@/pages/admin/AdminReports";
+import AdminCategories from "@/pages/admin/AdminCategories";
+
+// --------------------- AUTH CHECK ---------------------
 const checkAuth = (options?: {
   requireAuth?: boolean;
   requireGuest?: boolean;
@@ -35,56 +46,48 @@ const checkAuth = (options?: {
 }) => {
   const { user, isAuthenticated } = store.getState().auth;
 
-  if (options?.requireGuest && isAuthenticated) {
-    return redirect("/");
-  }
+  if (options?.requireGuest && isAuthenticated) return redirect("/");
 
-  if (options?.requireAuth && !isAuthenticated) {
-    return redirect("/login");
-  }
+  if (options?.requireAuth && !isAuthenticated) return redirect("/login");
 
   if (isAuthenticated && user) {
-    if (user.isBlocked || user.isDeleted) {
-      return redirect("/login");
-    }
+    if (user.isBlocked || user.isDeleted) return redirect("/login");
 
-    if (options?.allowedRoles && !options.allowedRoles.includes(user.role as unknown as string)) {
+    if (
+      options?.allowedRoles &&
+      !options.allowedRoles.includes(user.role as any)
+    ) {
       return redirect("/unauthorized");
     }
 
-    if (options?.requireVerified && !user.isVerified) {
+    if (options?.requireVerified && !user.isVerified)
       return redirect("/verify-email");
-    }
   }
 
   return null;
 };
 
+// --------------------- ROUTES ---------------------
 const routes = createBrowserRouter([
   {
     path: "/",
     element: <App />,
-     errorElement: <ErrorPage />,
-     children: [
+    errorElement: <ErrorPage />,
+
+    children: [
       { path: "/", element: <Landing /> },
-      {
-        path: "/login",
-        element: <Login />,
-        loader: () => checkAuth({ requireGuest: false }),
-      },
-      {
-        path: "/sign-up",
-        element: <SignUp />,
-        loader: () => checkAuth({ requireGuest: false }),
-      },
+
+      // Auth Pages
+      { path: "/login", element: <Login />, loader: () => checkAuth({}) },
+      { path: "/sign-up", element: <SignUp />, loader: () => checkAuth({}) },
       { path: "/verify-email", element: <VerifyEmail /> },
       { path: "/unauthorized", element: <Unauthorized /> },
 
-      // Protected sections
+      // Feed
       {
         path: "/feed",
         element: <Feed />,
-        loader: () => checkAuth({ requireAuth: false }),
+        loader: () => checkAuth({}),
         children: [
           { path: "", element: <FeedHome /> },
           {
@@ -95,92 +98,108 @@ const routes = createBrowserRouter([
         ],
       },
 
+      // Seller Routes
       {
         path: "/seller/products",
         element: <Products />,
-        
-        loader: () => checkAuth({ requireAuth: false, requireVerified: false }),
+        loader: () => checkAuth({}),
       },
-
       {
         path: "/seller/promotions",
         element: <Promotions />,
-        loader: () => checkAuth({ requireAuth: false, requireVerified: false }),
+        loader: () => checkAuth({}),
       },
       {
         path: "/seller/orders",
         element: <OrdersList />,
-        loader: () => checkAuth({ requireAuth: false, requireVerified: false }),
+        loader: () => checkAuth({}),
       },
-      {
-        path: "/profile",
-        element: <Profile />,
-        loader: () => checkAuth({ requireAuth: false, requireVerified: false }),
-      },
-
       {
         path: "/seller",
         element: <Seller />,
         loader: () =>
-          checkAuth({ requireAuth: false, allowedRoles: ["seller", "admin"] }),
+          checkAuth({ allowedRoles: ["seller", "admin"] }),
       },
-
       {
         path: "/new-listing",
         element: <NewListingSteps />,
         loader: () =>
           checkAuth({
-            requireAuth: false,
             allowedRoles: ["seller", "admin"],
-            requireVerified: false,
           }),
       },
 
+      // Buyer Routes
       {
         path: "/buyer/profile",
         element: <BuyerProfile />,
-        loader: () =>
-          checkAuth({ requireAuth: false, allowedRoles: ["buyer"] }),
+        loader: () => checkAuth({ allowedRoles: ["buyer"] }),
       },
       {
         path: "/buyer/orders",
         element: <Orders />,
-        loader: () => checkAuth({ requireAuth: false, requireVerified: false }),
+        loader: () => checkAuth({}),
       },
       {
         path: "/buyer/saved-items",
         element: <SavedItems />,
-        loader: () => checkAuth({ requireAuth: false, requireVerified: false }),
+        loader: () => checkAuth({}),
+      },
+
+      // Profiles
+      {
+        path: "/profile",
+        element: <Profile />,
+        loader: () => checkAuth({}),
       },
       {
         path: "/seller/profile",
         element: <SellerProfile />,
         loader: () =>
-          checkAuth({ requireAuth: false, allowedRoles: ["seller", "admin"] }),
+          checkAuth({ allowedRoles: ["seller", "admin"] }),
       },
       {
-        path: "seller/messages",
+        path: "/seller/messages",
         element: <SellerMessagePage />,
         loader: () =>
-          checkAuth({ requireAuth: false, allowedRoles: ["seller", "admin"] }),
-      },
-      {
-       path: "/live",
-       element: <LivePage/>,
-       loader: ()=> checkAuth({requireAuth:  false})
+          checkAuth({ allowedRoles: ["seller", "admin"] }),
       },
 
-      {
-        path: "/live/:eventId",
-        element: <Live />,
-        loader: () => checkAuth({ requireAuth: false }),
-      },
+      // Live
+      { path: "/live", element: <LivePage />, loader: () => checkAuth({}) },
+      { path: "/live/:eventId", element: <Live />, loader: () => checkAuth({}) },
 
+      // Checkout
       {
         path: "/checkout/:id",
         element: <CheckoutPage />,
-        loader: () => checkAuth({ requireAuth: false }),
+        loader: () => checkAuth({}),
       },
+
+      // ------------------------------------------------------------------
+      //                     ADMIN ROUTES 
+      // ------------------------------------------------------------------
+      {
+        path: "/admin",
+        element: <AdminLayout />, // OUTLET WRAPPER
+        loader: () =>
+          checkAuth({
+            requireAuth: true,
+            allowedRoles: ["admin"],
+          }),
+
+        children: [
+          { path: "", element: <AdminDashboard /> },
+          { path: "users", element: <AdminUsers /> },
+          { path: "listings", element: <AdminListings /> },
+          { path: "incidents", element: <AdminIncidents /> },
+          { path: "settings", element: <AdminSettings /> },
+          { path: "payouts", element: <AdminPayout /> },
+          { path: "reports", element: <AdminReports /> },
+          { path: "categories", element: <AdminCategories /> },
+        ],
+      },
+      // ------------------------------------------------------------------
     ],
   },
 ]);

@@ -33,8 +33,6 @@ const Navbar = () => {
   const dispatch = useAppDispatch();
 
   const { user, isAuthenticated, accessToken } = useAppSelector((state) => state.auth);
- 
-
 
   const [logout] = useLogoutMutation();
 
@@ -83,18 +81,14 @@ const Navbar = () => {
   }, []);
 
   const sellerDropdownLinks = [
-    { icon: User, label: "Profile", path: "/seller/profile" },
+    { icon: User, label: "Profile", path: "/seller/profile", },
     { icon: Bookmark, label: "Saved Items", path: "/seller/saved-items" },
     {
       icon: MapPin,
       label: "Address Book",
       action: () => setIsAddressBookOpen(true),
     },
-    {
-      icon: CreditCard,
-      label: "Payment Method",
-      path: "/seller/payment-method",
-    },
+ 
     {
       icon: Settings,
       label: "Settings",
@@ -110,11 +104,6 @@ const Navbar = () => {
       icon: MapPin,
       label: "Address Book",
       action: () => setIsAddressBookOpen(true),
-    },
-    {
-      icon: CreditCard,
-      label: "Payment Method",
-      path: "/payment-method",
     },
     {
       icon: Settings,
@@ -142,6 +131,19 @@ const Navbar = () => {
 
             {/* Desktop Nav */}
             <div className="hidden lg:flex lg:space-x-6">
+              {user?.role === "admin" && (
+                          <button
+                            onClick={() => {
+                              setIsDropdownOpen(false);
+                              navigate("/admin");
+                            }}
+                            className="w-full cursor-pointer flex items-center hover:bg-gray-50 rounded-lg text-left"
+                          >
+                            
+                            <span className="text-gray-800">Dashboard</span>
+                          </button>
+                        )}
+
               {navLinks.map((link) => (
                 <NavLink
                   key={link.path}
@@ -153,12 +155,13 @@ const Navbar = () => {
                   }
                 >
                   {link.name}
+                  
                 </NavLink>
               ))}
             </div>
           </div>
 
-          {/* RIGHT (Desktop) */}
+          {/* RIGHT */}
           <div className="hidden lg:flex items-center gap-5">
             <SearchInput
               placeholder="Search listings, sellers..."
@@ -169,7 +172,7 @@ const Navbar = () => {
               <div className="relative">
                 <button
                   onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-                  className="w-10 h-10 rounded-full overflow-hidden border-2 border-gray-200 hover:border-pink-500 transition"
+                  className="w-10 cursor-pointer h-10 rounded-full overflow-hidden border-2 border-gray-200 hover:border-pink-500 transition"
                 >
                   <img
                     src={
@@ -184,7 +187,7 @@ const Navbar = () => {
                 {isDropdownOpen && (
                   <div className="absolute right-0 mt-2 w-64 bg-white rounded-2xl shadow-lg border-2 border-pink-500 z-50">
                     <div className="p-4 space-y-3 text-center">
-                      {/* Show Name under Image */}
+                      {/* Avatar */}
                       <div className="flex flex-col items-center">
                         <img
                           src={
@@ -194,11 +197,28 @@ const Navbar = () => {
                           alt={user?.name || "User"}
                           className="w-16 h-16 rounded-full object-cover mb-2"
                         />
-                        <span className="font-semibold text-gray-800">{user?.fullName}</span>
+                        <span className="font-semibold text-gray-800">
+                          {user?.fullName}
+                        </span>
                       </div>
 
-                      {/* Dropdown links */}
                       <div className="space-y-1 mt-2">
+
+                        {/*  ADDED ADMIN DASHBOARD BUTTON */}
+                        {user?.role === "admin" && (
+                          <button
+                            onClick={() => {
+                              setIsDropdownOpen(false);
+                              navigate("/admin");
+                            }}
+                            className="w-full cursor-pointer flex items-center space-x-3 px-3 py-2 hover:bg-gray-50 rounded-lg text-left"
+                          >
+                            <Settings className="w-5 h-5 text-gray-700" />
+                            <span className="text-gray-800">Dashboard</span>
+                          </button>
+                        )}
+
+                        {/* Original dropdown links */}
                         {dropdownLinks.map(({ icon: Icon, label, path, action }) => (
                           <button
                             key={label}
@@ -316,7 +336,6 @@ const Navbar = () => {
         </div>
       )}
 
-      {/* MODALS */}
       {isAddressBookOpen && <AddressBookModal onClose={() => setIsAddressBookOpen(false)} />}
       {isSettingsOpen && <SettingsModal onClose={() => setIsSettingsOpen(false)} />}
     </nav>
