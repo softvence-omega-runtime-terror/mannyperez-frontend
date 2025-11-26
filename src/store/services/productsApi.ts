@@ -73,6 +73,13 @@ export const productsApi = baseApi.injectEndpoints({
       }),
       invalidatesTags: ["Products"],
     }),
+    viewProduct: builder.mutation<void, string>({
+      query: (id) => ({
+        url: `/products/${id}/view`,
+        method: "POST",
+      }),
+      invalidatesTags: ["Products"],
+    }),
     commentOnProduct: builder.mutation<void, { id: string; comment: string }>({
       query: ({ id, comment }) => ({
         url: `/products/${id}/comment`,
@@ -137,6 +144,7 @@ export const {
   useLikeCommentMutation,
   useCommentOnProductMutation,
   useCommentReplyMutation,
+  useViewProductMutation,
   useCreateProductMutation,
   useUpdateProductMutation,
   useDeleteProductsMutation,

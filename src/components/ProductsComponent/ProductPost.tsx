@@ -3,10 +3,10 @@ import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Input } from '@/components/ui/input';
 import { MoreHorizontal, Eye, Heart, MessageCircle, ShoppingBag, Send } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useAppSelector } from '@/store/hooks';
 import PrimaryButton from '@/reuseableComponents/PrimaryButton';
-import { useCommentOnProductMutation, useCommentReplyMutation, useGetMyProductsQuery, useLikeCommentMutation, useLikeProductMutation } from '@/store/services/productsApi';
+import { useCommentOnProductMutation, useCommentReplyMutation, useGetMyProductsQuery, useLikeCommentMutation, useLikeProductMutation, useViewProductMutation } from '@/store/services/productsApi';
 
 interface Comment {
   id: string;
@@ -96,10 +96,13 @@ export default function ProductPost({
   const { user } = useAppSelector((state) => state.auth);
   const [commentOnProduct] = useCommentOnProductMutation();
   const [commentReply] = useCommentReplyMutation();
+  const [viewProduct] = useViewProductMutation();
   const [commentText, setCommentText] = useState<Record<string, string>>({});
   const [replyOpen, setReplyOpen] = useState<Record<string, boolean>>({});
   const [replyText, setReplyText] = useState<Record<string, string>>({});
   const [commentLikeLoading, setCommentLikeLoading] = useState<Record<string, boolean>>({});
+  const viewedRef = useRef<Record<string, boolean>>({});
+  const observerRef = useRef<IntersectionObserver | null>(null);
 
   const handleLike = async (id?: string) => {
     if (!id) return;
@@ -177,6 +180,43 @@ export default function ProductPost({
       console.error('Like comment failed', err);
     } finally {
       setCommentLikeLoading((prev) => ({ ...prev, [commentId]: false }));
+    }
+  };
+
+  const initObserver = () => {
+    if (observerRef.current) return;
+    observerRef.current = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (!entry.isIntersecting) return;
+        const id = (entry.target as HTMLElement).dataset.productId;
+        if (!id) return;
+        if (viewedRef.current[id]) return;
+        viewedRef.current[id] = true;
+        // Fire view API; swallow errors
+        viewProduct(id).catch((e) => console.error('View API failed', e));
+      });
+    }, { threshold: 0.5 });
+  };
+
+  useEffect(() => {
+    initObserver();
+    return () => {
+      if (observerRef.current) {
+        observerRef.current.disconnect();
+        observerRef.current = null;
+      }
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const handleCardRef = (id: string) => (el: HTMLElement | null) => {
+    if (!el) return;
+    // ensure observer exists
+    initObserver();
+    try {
+      observerRef.current?.observe(el);
+    } catch (err) {
+      // ignore
     }
   };
 
@@ -277,7 +317,8 @@ export default function ProductPost({
   return (
     <div className="space-y-6">
       {items.map((p: any, idx: number) => (
-        <Card key={p.id || idx} className="w-full shadow-md">
+        <div key={p.id || idx} data-product-id={p.id} ref={handleCardRef(p.id)}>
+          <Card className="w-full shadow-md">
           <CardHeader className="">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
@@ -468,7 +509,8 @@ export default function ProductPost({
             </div>
           </CardContent>
 
-        </Card>
+          </Card>
+        </div>
       ))}
     </div>
   );
