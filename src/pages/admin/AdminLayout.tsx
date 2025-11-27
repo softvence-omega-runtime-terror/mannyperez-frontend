@@ -1,6 +1,6 @@
 import { useAppSelector } from "@/store/hooks";
-import React, { useState } from "react";
-import { NavLink, Outlet } from "react-router-dom";
+import  { useState } from "react";
+import { Link, NavLink, Outlet } from "react-router-dom";
 
 export default function AdminLayout() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -28,7 +28,9 @@ export default function AdminLayout() {
         `}
       >
         <div className="mb-8">
+          <Link to={"/"}>
           <h1 className="text-2xl font-bold text-gray-800">Admin</h1>
+          </Link>
           <p className="text-xs text-gray-500">Control Center</p>
         </div>
 
@@ -81,7 +83,7 @@ export default function AdminLayout() {
             {/* MOBILE MENU BUTTON */}
             <button
               onClick={() => setSidebarOpen(true)}
-              className="md:hidden inline-flex items-center justify-center p-2 rounded-md text-gray-700 hover:bg-gray-100"
+              className="md:hidden inline-flex items-center justify-center cursor-pointer p-4 ml-2 rounded-md text-gray-700 hover:bg-gray-100"
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"

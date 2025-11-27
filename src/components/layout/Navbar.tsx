@@ -11,7 +11,6 @@ import Wrapper from "./Wrapper";
 
 import {
   Bookmark,
-  CreditCard,
   LogOut,
   MapPin,
   Settings,
@@ -252,6 +251,7 @@ const Navbar = () => {
               <>
                 <PrimaryButton
                   type="Outline"
+                  className="hover:text-white"
                   title="Log In"
                   onClick={() => navigate("/login")}
                 />

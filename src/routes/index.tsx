@@ -36,6 +36,8 @@ import AdminSettings from "@/pages/admin/AdminSettings";
 import AdminPayout from "@/pages/admin/AdminPayout";
 import AdminReports from "@/pages/admin/AdminReports";
 import AdminCategories from "@/pages/admin/AdminCategories";
+import StreamerLive from "@/pages/live-events/StreamerLive";
+
 
 // --------------------- AUTH CHECK ---------------------
 const checkAuth = (options?: {
@@ -148,7 +150,7 @@ const routes = createBrowserRouter([
 
       // Profiles
       {
-        path: "/profile",
+        path: "/seller/profile",
         element: <Profile />,
         loader: () => checkAuth({}),
       },
@@ -168,6 +170,7 @@ const routes = createBrowserRouter([
       // Live
       { path: "/live", element: <LivePage />, loader: () => checkAuth({}) },
       { path: "/live/:eventId", element: <Live />, loader: () => checkAuth({}) },
+      { path: "/live/feature", element: < LivePage />, loader: () => checkAuth({}) },
 
       // Checkout
       {
