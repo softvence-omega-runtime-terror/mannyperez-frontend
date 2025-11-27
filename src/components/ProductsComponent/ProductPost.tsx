@@ -7,6 +7,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useAppSelector } from '@/store/hooks';
 import PrimaryButton from '@/reuseableComponents/PrimaryButton';
 import { useCommentOnProductMutation, useCommentReplyMutation, useGetMyProductsQuery, useLikeCommentMutation, useLikeProductMutation, useViewProductMutation } from '@/store/services/productsApi';
+import { useNavigate } from 'react-router-dom';
 
 interface Comment {
   id: string;
@@ -103,6 +104,8 @@ export default function ProductPost({
   const [commentLikeLoading, setCommentLikeLoading] = useState<Record<string, boolean>>({});
   const viewedRef = useRef<Record<string, boolean>>({});
   const observerRef = useRef<IntersectionObserver | null>(null);
+
+  const navigate = useNavigate();
 
   const handleLike = async (id?: string) => {
     if (!id) return;
@@ -247,21 +250,21 @@ export default function ProductPost({
       const rawReplies = c.replays || c.replies || [];
       const replies = Array.isArray(rawReplies)
         ? rawReplies.map((r: any, rIdx: number) => {
-            const rUser = r.userId || r.author || {};
-            const rAuthor = rUser.name || rUser.userName || rUser.fullName || r.author || 'User';
-            const rAuthorAvatar = rUser.img || rUser.avatar || undefined;
-            const rContent = r.message || r.content || r.text || '';
-            const rId = r._id || r.id || `${id}-r-${rIdx}`;
-            const rTimestamp = r.createdAt || r.timestamp || '';
-            return {
-              id: rId,
-              author: rAuthor,
-              authorAvatar: rAuthorAvatar,
-              content: rContent,
-              timestamp: rTimestamp,
-              likes: Array.isArray(r.likes) ? r.likes : [],
-            };
-          })
+          const rUser = r.userId || r.author || {};
+          const rAuthor = rUser.name || rUser.userName || rUser.fullName || r.author || 'User';
+          const rAuthorAvatar = rUser.img || rUser.avatar || undefined;
+          const rContent = r.message || r.content || r.text || '';
+          const rId = r._id || r.id || `${id}-r-${rIdx}`;
+          const rTimestamp = r.createdAt || r.timestamp || '';
+          return {
+            id: rId,
+            author: rAuthor,
+            authorAvatar: rAuthorAvatar,
+            content: rContent,
+            timestamp: rTimestamp,
+            likes: Array.isArray(r.likes) ? r.likes : [],
+          };
+        })
         : [];
 
       return {
@@ -314,200 +317,208 @@ export default function ProductPost({
     );
   }
 
+  const handleEdit = (productId?: string) => {
+    console.log('Edit product', productId);
+    if (!productId) return;
+
+    navigate(`/update-product/${productId}`);
+
+  }
+
   return (
     <div className="space-y-6">
       {items.map((p: any, idx: number) => (
         <div key={p.id || idx} data-product-id={p.id} ref={handleCardRef(p.id)}>
           <Card className="w-full shadow-md">
-          <CardHeader className="">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <Avatar className="h-10 w-10">
-                  {p.authorAvatar && isImageUrl(p.authorAvatar) ? (
-                    <AvatarImage src={p.authorAvatar} alt={p.author} />
-                  ) : (
-                    <AvatarFallback>{(p.author || 'U').charAt(0)}</AvatarFallback>
-                  )}
-                </Avatar>
-                <div>
-                  <p className="font-semibold text-sm">{p.author}</p>
-                  <p className="text-xs text-muted-foreground">{formatTimestamp(p.timestamp)}</p>
-                </div>
-              </div>
-              <Button variant="ghost" size="icon">
-                <MoreHorizontal className="h-5 w-5" />
-              </Button>
-            </div>
-          </CardHeader>
-
-          <CardContent className="space-y-4 ">
-            <div className='space-y-2'>
-              <h5 className="font-semibold">{p.title}</h5>
-              <p className="text-lg text-gray-600">{p.description}</p>
-            </div>
-
-            <div className="grid grid-cols-3 gap-2">
-              {p.images.map((image: string, index: number) => (
-                <div key={index} className="aspect-square rounded-lg overflow-hidden">
-                  <img
-                    src={image}
-                    alt={`Product ${index + 1}`}
-                    className="w-full h-full object-cover hover:scale-105 transition-transform duration-200"
-                  />
-                </div>
-              ))}
-            </div>
-
-            <div className="flex flex-wrap gap-2">
-              {p.tags.map((tag: string, index: number) => (
-                <span key={index} className="text-sm text-gray-600 hover:underline cursor-pointer border-border px-4 py-2 rounded-sm bg-gray-100">
-                  {tag}
-                </span>
-              ))}
-            </div>
-
-            <div className="sm:flex space-y-2 sm:space-y-0 items-center justify-between pt-2">
-              <p className="text-2xl font-semibold">{p.price}</p>
-              <div className="flex gap-2">
-                <PrimaryButton type="Outline" title='Edit' className='border border-border text-gray-600 px-4 py-3 rounded-sm font-normal' />
-                <PrimaryButton type="Outline" title='Delete' className='px-4 py-3 rounded-sm font-normal' />
-                <PrimaryButton type="Primary" title='Promote' className='px-4 py-3 rounded-sm bg-[#229ECF] font-normal' />
-              </div>
-            </div>
-
-            <div className="flex items-center gap-6 pt-2 text-sm text-muted-foreground border-t">
-              <button className="flex items-center gap-1.5 hover:text-foreground transition-colors py-2">
-                <Eye className="h-4 w-4" />
-                {formatNumber(p.stats.views)}
-              </button>
-              <button
-                className="flex items-center gap-1.5 hover:text-red-600 transition-colors py-2"
-                onClick={() => handleLike(p.id)}
-                disabled={isLoading}
-              >
-                <Heart className="h-4 w-4" />
-                {formatNumber(p.stats.likes)}
-              </button>
-              <button className="flex items-center gap-1.5 hover:text-foreground transition-colors py-2">
-                <MessageCircle className="h-4 w-4" />
-                {formatNumber(p.stats.comments)}
-              </button>
-              <button className="flex items-center gap-1.5 hover:text-foreground transition-colors py-2">
-                <ShoppingBag className="h-4 w-4" />
-                {p.stats.orders} order
-              </button>
-            </div>
-            <div className="pt-0">
-              <div className="flex items-center w-full gap-2">
-                <Avatar className="h-8 w-8">
-                  {p.authorAvatar && isImageUrl(p.authorAvatar) ? (
-                    <AvatarImage src={p.authorAvatar} alt="You" />
-                  ) : (
-                    <AvatarFallback>Y</AvatarFallback>
-                  )}
-                </Avatar>
-                <div className="flex-1 flex items-center gap-2">
-                  <Input
-                    placeholder="Write a comment..."
-                    value={commentText[p.id] || ''}
-                    onChange={(e) => setCommentText((prev) => ({ ...prev, [p.id]: e.target.value }))}
-                    onKeyDown={(e) => e.key === 'Enter' && handleCommentSubmit(p.id, onComment)}
-                    className="flex-1 border border-border px-4 py-6 rounded-full"
-                  />
-                  <Button
-                    size="icon"
-                    onClick={() => handleCommentSubmit(p.id, onComment)}
-                    disabled={!((commentText[p.id] || '').trim())}
-                  >
-                    <Send className="h-4 w-4" />
-                  </Button>
-                </div>
-              </div>
-            </div>
-            <div className="space-y-3 pt-2">
-              {p.comments.map((comment: Comment) => (
-                <div key={comment.id} className="flex gap-3">
-                  <Avatar className="h-8 w-8">
-                    {comment.authorAvatar && isImageUrl(comment.authorAvatar) ? (
-                      <AvatarImage src={comment.authorAvatar} alt={comment.author} />
+            <CardHeader className="">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <Avatar className="h-10 w-10">
+                    {p.authorAvatar && isImageUrl(p.authorAvatar) ? (
+                      <AvatarImage src={p.authorAvatar} alt={p.author} />
                     ) : (
-                      <AvatarFallback>{comment.author.charAt(0)}</AvatarFallback>
+                      <AvatarFallback>{(p.author || 'U').charAt(0)}</AvatarFallback>
                     )}
                   </Avatar>
-                  <div className="flex-1">
-                    <div className="bg-muted rounded-lg px-3 py-2">
-                      <p className="font-semibold text-sm">{comment.author}</p>
-                      <p className="text-sm">{comment.content}</p>
-                    </div>
-                    <div className="flex gap-4 mt-1 px-3 items-center">
-                      <button className="text-xs text-muted-foreground hover:text-foreground">
-                        {formatTimestamp(comment.timestamp)}
-                      </button>
-                      <button
-                        className={`text-xs flex items-center gap-1 ${comment.likes?.includes(user?._id || user?.id || '') ? 'text-red-600' : 'text-muted-foreground hover:text-foreground'}`}
-                        onClick={() => handleLikeComment(comment.id)}
-                        disabled={!!commentLikeLoading[comment.id]}
-                      >
-                        <Heart className="h-3 w-3" />
-                        <span>{comment.likes?.length ?? 0} </span>
-                      </button>
-                      <button
-                        className="text-xs text-muted-foreground hover:text-foreground"
-                        onClick={() => handleReplyToggle(comment.id)}
-                      >
-                        Reply
-                      </button>
-                    </div>
-                    {replyOpen[comment.id] && (
-                      <div className="mt-2 flex items-center gap-2 px-3">
-                        <Input
-                          size={"sm" as any}
-                          placeholder="Write a reply..."
-                          value={replyText[comment.id] || ''}
-                          onChange={(e) => setReplyText((prev) => ({ ...prev, [comment.id]: e.target.value }))}
-                          onKeyDown={(e) => e.key === 'Enter' && handleReplySubmit(comment.id)}
-                          className="flex-1 border border-border px-3 py-2 rounded-full"
-                        />
-                        <Button size="icon" onClick={() => handleReplySubmit(comment.id)} disabled={!((replyText[comment.id] || '').trim())}>
-                          <Send className="h-4 w-4" />
-                        </Button>
-                      </div>
+                  <div>
+                    <p className="font-semibold text-sm">{p.author}</p>
+                    <p className="text-xs text-muted-foreground">{formatTimestamp(p.timestamp)}</p>
+                  </div>
+                </div>
+                <Button variant="ghost" size="icon">
+                  <MoreHorizontal className="h-5 w-5" />
+                </Button>
+              </div>
+            </CardHeader>
+
+            <CardContent className="space-y-4 ">
+              <div className='space-y-2'>
+                <h5 className="font-semibold">{p.title}</h5>
+                <p className="text-lg text-gray-600">{p.description}</p>
+              </div>
+
+              <div className="grid grid-cols-3 gap-2">
+                {p.images.map((image: string, index: number) => (
+                  <div key={index} className="aspect-square rounded-lg overflow-hidden">
+                    <img
+                      src={image}
+                      alt={`Product ${index + 1}`}
+                      className="w-full h-full object-cover hover:scale-105 transition-transform duration-200"
+                    />
+                  </div>
+                ))}
+              </div>
+
+              <div className="flex flex-wrap gap-2">
+                {p.tags.map((tag: string, index: number) => (
+                  <span key={index} className="text-sm text-gray-600 hover:underline cursor-pointer border-border px-4 py-2 rounded-sm bg-gray-100">
+                    {tag}
+                  </span>
+                ))}
+              </div>
+
+              <div className="sm:flex space-y-2 sm:space-y-0 items-center justify-between pt-2">
+                <p className="text-2xl font-semibold">{p.price}</p>
+                <div className="flex gap-2">
+                  <PrimaryButton type="Outline" title='Edit' className='border border-border text-gray-600 px-4 py-3 rounded-sm font-normal' onClick={() => handleEdit(p.id)} />
+                  <PrimaryButton type="Outline" title='Delete' className='px-4 py-3 rounded-sm font-normal' />
+                  <PrimaryButton type="Primary" title='Promote' className='px-4 py-3 rounded-sm bg-[#229ECF] font-normal' />
+                </div>
+              </div>
+
+              <div className="flex items-center gap-6 pt-2 text-sm text-muted-foreground border-t">
+                <button className="flex items-center gap-1.5 hover:text-foreground transition-colors py-2">
+                  <Eye className="h-4 w-4" />
+                  {formatNumber(p.stats.views)}
+                </button>
+                <button
+                  className="flex items-center gap-1.5 hover:text-red-600 transition-colors py-2"
+                  onClick={() => handleLike(p.id)}
+                  disabled={isLoading}
+                >
+                  <Heart className="h-4 w-4" />
+                  {formatNumber(p.stats.likes)}
+                </button>
+                <button className="flex items-center gap-1.5 hover:text-foreground transition-colors py-2">
+                  <MessageCircle className="h-4 w-4" />
+                  {formatNumber(p.stats.comments)}
+                </button>
+                <button className="flex items-center gap-1.5 hover:text-foreground transition-colors py-2">
+                  <ShoppingBag className="h-4 w-4" />
+                  {p.stats.orders} order
+                </button>
+              </div>
+              <div className="pt-0">
+                <div className="flex items-center w-full gap-2">
+                  <Avatar className="h-8 w-8">
+                    {p.authorAvatar && isImageUrl(p.authorAvatar) ? (
+                      <AvatarImage src={p.authorAvatar} alt="You" />
+                    ) : (
+                      <AvatarFallback>Y</AvatarFallback>
                     )}
-                    {/* Render replies if any */}
-                    {Array.isArray(comment.replies) && comment.replies.length > 0 && (
-                      <div className="mt-3 ml-12 space-y-3">
-                        {comment.replies.map((rep: Comment) => (
-                          <div key={rep.id} className="flex gap-3 items-start">
-                            <Avatar className="h-7 w-7">
-                              {rep.authorAvatar && isImageUrl(rep.authorAvatar) ? (
-                                <AvatarImage src={rep.authorAvatar} alt={rep.author} />
-                              ) : (
-                                <AvatarFallback>{(rep.author || 'U').charAt(0)}</AvatarFallback>
-                              )}
-                            </Avatar>
-                            <div>
-                              <div className="bg-muted rounded-lg px-3 py-2">
-                                <p className="font-semibold text-sm">{rep.author}</p>
-                                <p className="text-sm">{rep.content}</p>
-                              </div>
-                              <div className="flex gap-4 mt-1 px-3">
-                                <button className="text-xs text-muted-foreground hover:text-foreground">
-                                  {formatTimestamp(rep.timestamp)}
-                                </button>
+                  </Avatar>
+                  <div className="flex-1 flex items-center gap-2">
+                    <Input
+                      placeholder="Write a comment..."
+                      value={commentText[p.id] || ''}
+                      onChange={(e) => setCommentText((prev) => ({ ...prev, [p.id]: e.target.value }))}
+                      onKeyDown={(e) => e.key === 'Enter' && handleCommentSubmit(p.id, onComment)}
+                      className="flex-1 border border-border px-4 py-6 rounded-full"
+                    />
+                    <Button
+                      size="icon"
+                      onClick={() => handleCommentSubmit(p.id, onComment)}
+                      disabled={!((commentText[p.id] || '').trim())}
+                    >
+                      <Send className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </div>
+              </div>
+              <div className="space-y-3 pt-2">
+                {p.comments.map((comment: Comment) => (
+                  <div key={comment.id} className="flex gap-3">
+                    <Avatar className="h-8 w-8">
+                      {comment.authorAvatar && isImageUrl(comment.authorAvatar) ? (
+                        <AvatarImage src={comment.authorAvatar} alt={comment.author} />
+                      ) : (
+                        <AvatarFallback>{comment.author.charAt(0)}</AvatarFallback>
+                      )}
+                    </Avatar>
+                    <div className="flex-1">
+                      <div className="bg-muted rounded-lg px-3 py-2">
+                        <p className="font-semibold text-sm">{comment.author}</p>
+                        <p className="text-sm">{comment.content}</p>
+                      </div>
+                      <div className="flex gap-4 mt-1 px-3 items-center">
+                        <button className="text-xs text-muted-foreground hover:text-foreground">
+                          {formatTimestamp(comment.timestamp)}
+                        </button>
+                        <button
+                          className={`text-xs flex items-center gap-1 ${comment.likes?.includes(user?._id || user?.id || '') ? 'text-red-600' : 'text-muted-foreground hover:text-foreground'}`}
+                          onClick={() => handleLikeComment(comment.id)}
+                          disabled={!!commentLikeLoading[comment.id]}
+                        >
+                          <Heart className="h-3 w-3" />
+                          <span>{comment.likes?.length ?? 0} </span>
+                        </button>
+                        <button
+                          className="text-xs text-muted-foreground hover:text-foreground"
+                          onClick={() => handleReplyToggle(comment.id)}
+                        >
+                          Reply
+                        </button>
+                      </div>
+                      {replyOpen[comment.id] && (
+                        <div className="mt-2 flex items-center gap-2 px-3">
+                          <Input
+                            size={"sm" as any}
+                            placeholder="Write a reply..."
+                            value={replyText[comment.id] || ''}
+                            onChange={(e) => setReplyText((prev) => ({ ...prev, [comment.id]: e.target.value }))}
+                            onKeyDown={(e) => e.key === 'Enter' && handleReplySubmit(comment.id)}
+                            className="flex-1 border border-border px-3 py-2 rounded-full"
+                          />
+                          <Button size="icon" onClick={() => handleReplySubmit(comment.id)} disabled={!((replyText[comment.id] || '').trim())}>
+                            <Send className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      )}
+                      {/* Render replies if any */}
+                      {Array.isArray(comment.replies) && comment.replies.length > 0 && (
+                        <div className="mt-3 ml-12 space-y-3">
+                          {comment.replies.map((rep: Comment) => (
+                            <div key={rep.id} className="flex gap-3 items-start">
+                              <Avatar className="h-7 w-7">
+                                {rep.authorAvatar && isImageUrl(rep.authorAvatar) ? (
+                                  <AvatarImage src={rep.authorAvatar} alt={rep.author} />
+                                ) : (
+                                  <AvatarFallback>{(rep.author || 'U').charAt(0)}</AvatarFallback>
+                                )}
+                              </Avatar>
+                              <div>
+                                <div className="bg-muted rounded-lg px-3 py-2">
+                                  <p className="font-semibold text-sm">{rep.author}</p>
+                                  <p className="text-sm">{rep.content}</p>
+                                </div>
+                                <div className="flex gap-4 mt-1 px-3">
+                                  <button className="text-xs text-muted-foreground hover:text-foreground">
+                                    {formatTimestamp(rep.timestamp)}
+                                  </button>
+                                </div>
                               </div>
                             </div>
-                          </div>
-                        ))}
-                      </div>
-                    )}
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                    <Button variant="ghost" size="icon" className="h-8 w-8">
+                      <MoreHorizontal className="h-4 w-4" />
+                    </Button>
                   </div>
-                  <Button variant="ghost" size="icon" className="h-8 w-8">
-                    <MoreHorizontal className="h-4 w-4" />
-                  </Button>
-                </div>
-              ))}
-            </div>
-          </CardContent>
+                ))}
+              </div>
+            </CardContent>
 
           </Card>
         </div>

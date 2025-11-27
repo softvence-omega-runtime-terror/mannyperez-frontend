@@ -36,6 +36,7 @@ import AdminSettings from "@/pages/admin/AdminSettings";
 import AdminPayout from "@/pages/admin/AdminPayout";
 import AdminReports from "@/pages/admin/AdminReports";
 import AdminCategories from "@/pages/admin/AdminCategories";
+import UpdateProduct from "@/components/ProductsComponent/CreateNewListing/UpdateProduct";
 
 // --------------------- AUTH CHECK ---------------------
 const checkAuth = (options?: {
@@ -127,6 +128,14 @@ const routes = createBrowserRouter([
           checkAuth({
             allowedRoles: ["seller", "admin"],
           }),
+      },
+      {
+        path: "/update-product/:productId",
+        element: <UpdateProduct />,
+        loader: () =>
+          checkAuth({
+            allowedRoles: ["seller", "admin"],
+          })
       },
 
       // Buyer Routes
