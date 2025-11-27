@@ -1,7 +1,13 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Calendar as CalendarIcon, Plus, CheckCircle2 } from "lucide-react";
+import {
+  Calendar as CalendarIcon,
+  Plus,
+  CheckCircle2,
+  ImagePlus,
+  Loader2,
+} from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -25,6 +31,9 @@ import { useCreateLiveStreamMutation } from "@/store/services/liveStreamApi";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
+import { toast } from "sonner";
+import { Input } from "../ui/input";
+import { cn } from "@/lib/utils";
 
 // Popover wrappers
 const Popover = ({ children }: any) => (
@@ -86,7 +95,35 @@ const schema = z.object({
   title: z.string().min(1, "Title is required"),
   description: z.string().min(1, "Description is required"),
   paymentMethod: z.string().min(1, "Payment method is required"),
+  accessFee: z
+    .number()
+    .optional()
+    .refine((val) => {
+      if (!val) return true;
+      return val >= 0;
+    }, "Access fee must be a non-negative number"),
 });
+
+// const promoOptions = [
+//   {
+//     id: "homepage",
+//     label: "Homepage Feature",
+//     desc: "Featured on homepage",
+//     price: 25,
+//   },
+//   {
+//     id: "email",
+//     label: "Email Blast",
+//     desc: "Notify all subscribers",
+//     price: 20,
+//   },
+//   {
+//     id: "buyer",
+//     label: "Buyer Notifications",
+//     desc: "Push to interested buyers",
+//     price: 10,
+//   },
+// ];
 
 type FormValues = z.infer<typeof schema>;
 
@@ -94,37 +131,27 @@ const CreateNewListing = () => {
   const navigate = useNavigate();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [step, setStep] = useState(1);
-  const [selectedPromos, setSelectedPromos] = useState<string[]>([]);
+  // const [selectedPromos, setSelectedPromos] = useState<string[]>([]);
   const [isCalendarOpen, setIsCalendarOpen] = useState(false);
 
-  const [createLiveStream] = useCreateLiveStreamMutation();
+  const [image, setImage] = useState<File | null>(null);
+  const [preview, setPreview] = useState<string | null>(null);
 
-  const promoOptions = [
-    {
-      id: "homepage",
-      label: "Homepage Feature",
-      desc: "Featured on homepage",
-      price: 25,
-    },
-    {
-      id: "email",
-      label: "Email Blast",
-      desc: "Notify all subscribers",
-      price: 20,
-    },
-    {
-      id: "buyer",
-      label: "Buyer Notifications",
-      desc: "Push to interested buyers",
-      price: 10,
-    },
-  ];
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setImage(file);
+    setPreview(URL.createObjectURL(file));
+  };
+
+  const [createLiveStream, { isLoading }] = useCreateLiveStreamMutation();
 
   const liveSlotFee = 150;
-  const selectedPromoTotal = promoOptions
-    .filter((p) => selectedPromos.includes(p.id))
-    .reduce((acc, curr) => acc + curr.price, 0);
-  const totalCost = liveSlotFee + selectedPromoTotal;
+  // const selectedPromoTotal = promoOptions
+  //   .filter((p) => selectedPromos.includes(p.id))
+  //   .reduce((acc, curr) => acc + curr.price, 0);
+  // const totalCost = liveSlotFee + selectedPromoTotal;
 
   const actions = [
     {
@@ -179,24 +206,51 @@ const CreateNewListing = () => {
   const handlePrevious = () => setStep(step - 1);
 
   const handleLiveStream = async () => {
+    // Early exit if validation fails
     const isValid = await trigger();
-    if (!isValid) return;
+    if (!isValid) {
+      toast.error("Please fill in all required fields.");
+      return;
+    }
 
-    const payload = {
-      title: currentValues.title,
-      description: currentValues.description,
-      startAt: currentValues.date!.toISOString(),
-      time: currentValues.time,
-      durationMinutes: currentValues.duration,
-      promos: selectedPromos,
-      paymentMethod: currentValues.paymentMethod,
-      totalCost,
-    };
+    if (!image) {
+      toast.error("Thumbnail is required");
+      return;
+    }
+
+    // Show loading toast
+    const loadingToastId = toast.loading("Processing your live stream...");
 
     try {
-      await createLiveStream(payload).unwrap();
-      setStep(5);
+      const formData = new FormData();
+      formData.append("title", currentValues.title);
+      formData.append("description", currentValues.description);
+      formData.append("startAt", currentValues.date!.toISOString());
+      formData.append("time", currentValues.time);
+      formData.append("durationMinutes", currentValues.duration.toString());
+      // formData.append("promos", JSON.stringify(selectedPromos));
+      formData.append("paymentMethod", currentValues.paymentMethod);
+      formData.append("thumbnail", image);
+      formData.append("totalCost", liveSlotFee.toString());
+
+      if (currentValues.accessFee) {
+        formData.append("accessFee", currentValues.accessFee.toString());
+      }
+
+      const res = await createLiveStream(formData).unwrap();
+
+      if (res.success) {
+        toast.success("Redirecting to payment...", { id: loadingToastId });
+        window.location.replace(res.data.stripeUrl);
+        return;
+      }
+
+      // If API returned success: false
+      toast.error("Failed to create live stream", { id: loadingToastId });
     } catch (err: any) {
+      toast.error(err?.data?.message || "Failed to create live stream", {
+        id: loadingToastId,
+      });
       console.error("Create live stream failed:", err);
     }
   };
@@ -350,8 +404,10 @@ const CreateNewListing = () => {
           )}
 
           {/* STEP 2 */}
+
           {step === 2 && (
             <div className="space-y-6 mt-4">
+              {/* Event Title */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Event Title
@@ -366,7 +422,9 @@ const CreateNewListing = () => {
                   <p className="text-red-600 text-sm">{errors.title.message}</p>
                 )}
               </div>
-              <div>
+
+              {/* Event Description */}
+              <div className="flex flex-col gap-3 mt-2">
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Event Description
                 </label>
@@ -382,6 +440,63 @@ const CreateNewListing = () => {
                   </p>
                 )}
               </div>
+              {/* Access Fee */}
+              <div>
+                <label className="block text-sm font-medium mb-1">
+                  Access Fee ($)
+                </label>
+                <input
+                  type="number"
+                  min={0}
+                  step={0.01}
+                  placeholder="Enter amount viewers will pay"
+                  className="w-full border rounded p-2"
+                  {...register("accessFee", {
+                    valueAsNumber: true,
+                    required: "Access fee is required",
+                  })}
+                />
+                {errors.accessFee && (
+                  <p className="text-red-600 text-sm mt-1">
+                    {errors.accessFee.message}
+                  </p>
+                )}
+              </div>
+              {/* Thumbnail Upload */}
+              <div>
+                <p className="text-sm font-medium text-gray-700">Thumbnail</p>{" "}
+                {/* Hidden file input */}{" "}
+                <Input
+                  id="imageUpload"
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={handleImageChange}
+                />
+                <label
+                  htmlFor="imageUpload"
+                  className="inline-flex items-center gap-2 px-4 py-2 bg-white border rounded shadow-sm text-gray-700 cursor-pointer hover:bg-gray-100 transition"
+                >
+                  {" "}
+                  <ImagePlus
+                    className="h-5 w-5 text-gray-600"
+                    strokeWidth={2}
+                  />{" "}
+                  Upload Thumbnail{" "}
+                </label>
+                <p className="text-xs text-gray-500 -mt-1 ml-1">
+                  Add a thumbnail for your event (required){" "}
+                </p>
+                {preview && (
+                  <div className="mt-2">
+                    <img
+                      src={preview}
+                      alt="Thumbnail Preview"
+                      className="h-32 w-32 rounded-lg border object-cover shadow-sm"
+                    />{" "}
+                  </div>
+                )}
+              </div>
             </div>
           )}
 
@@ -392,7 +507,7 @@ const CreateNewListing = () => {
                 Select Promote Options
               </h4>
               <div className="space-y-3">
-                {promoOptions.map((opt) => (
+                {/* {promoOptions.map((opt) => (
                   <div
                     key={opt.id}
                     className="flex justify-between items-center border rounded-lg p-4 hover:shadow-sm transition"
@@ -417,7 +532,7 @@ const CreateNewListing = () => {
                     </div>
                     <p className="font-semibold">${opt.price}</p>
                   </div>
-                ))}
+                ))} */}
               </div>
             </div>
           )}
@@ -431,7 +546,7 @@ const CreateNewListing = () => {
                   <p>Live Slot Fee</p>
                   <p className="font-medium">${liveSlotFee}</p>
                 </div>
-                {promoOptions
+                {/* {promoOptions
                   .filter((p) => selectedPromos.includes(p.id))
                   .map((p) => (
                     <div
@@ -441,11 +556,11 @@ const CreateNewListing = () => {
                       <p>{p.label}</p>
                       <p>${p.price}</p>
                     </div>
-                  ))}
+                  ))} */}
                 <hr />
                 <div className="flex justify-between font-semibold text-gray-900">
                   <p>Total Cost</p>
-                  <p>${totalCost}</p>
+                  <p>${ liveSlotFee}</p>
                 </div>
               </div>
 
@@ -495,7 +610,7 @@ const CreateNewListing = () => {
                 Booking Confirmed!
               </h3>
               <p className="text-gray-600">
-                Your live slot has been successfully booked. We’ll send
+                Your live slot has been successfully booked. We'll send
                 confirmation shortly.
               </p>
             </div>
@@ -503,16 +618,21 @@ const CreateNewListing = () => {
 
           {/* FOOTER */}
           {step < 5 && (
-            <DialogFooter className="mt-6 flex justify-between">
-              {step > 1 && (
+            <DialogFooter className="mt-6 flex justify-between items-center">
+              {/* Back button on the left */}
+              {step > 1 ? (
                 <Button
                   variant="outline"
                   onClick={handlePrevious}
                 >
                   Back
                 </Button>
+              ) : (
+                <div />
               )}
-              <div className="ml-auto space-x-2">
+
+              {/* Cancel + Next/Submit on the right */}
+              <div className="flex space-x-2">
                 <Button
                   variant="outline"
                   onClick={() => setIsDialogOpen(false)}
@@ -520,12 +640,21 @@ const CreateNewListing = () => {
                   Cancel
                 </Button>
                 <Button
+                  type="button"
                   onClick={step === 4 ? handleLiveStream : handleNext}
-                  className={
+                  disabled={step === 4 ? isLoading : false} // disable only during submission
+                  className={cn(
+                    "flex items-center justify-center gap-2",
                     step === 4 ? "bg-[#D82479] hover:bg-[#c41f6d]" : ""
-                  }
+                  )}
                 >
-                  {step === 4 ? "Submit Booking" : "Next Step"}
+                  {step === 4 && isLoading ? (
+                    <Loader2 className="animate-spin" />
+                  ) : step === 4 ? (
+                    "Submit Booking"
+                  ) : (
+                    "Next Step"
+                  )}
                 </Button>
               </div>
             </DialogFooter>

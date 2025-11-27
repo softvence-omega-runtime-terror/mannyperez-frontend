@@ -37,6 +37,7 @@ import AdminPayout from "@/pages/admin/AdminPayout";
 import AdminReports from "@/pages/admin/AdminReports";
 import AdminCategories from "@/pages/admin/AdminCategories";
 import UpdateProduct from "@/components/ProductsComponent/CreateNewListing/UpdateProduct";
+import PaymentSuccessPage from "@/pages/payment-success";
 
 // --------------------- AUTH CHECK ---------------------
 const checkAuth = (options?: {
@@ -83,6 +84,7 @@ const routes = createBrowserRouter([
       { path: "/sign-up", element: <SignUp />, loader: () => checkAuth({}) },
       { path: "/verify-email", element: <VerifyEmail /> },
       { path: "/unauthorized", element: <Unauthorized /> },
+      { path: "/payment-success/:paymentId", element: <PaymentSuccessPage /> },
 
       // Feed
       {
@@ -118,8 +120,7 @@ const routes = createBrowserRouter([
       {
         path: "/seller",
         element: <Seller />,
-        loader: () =>
-          checkAuth({ allowedRoles: ["seller", "admin"] }),
+        loader: () => checkAuth({ allowedRoles: ["seller", "admin"] }),
       },
       {
         path: "/new-listing",
@@ -135,7 +136,7 @@ const routes = createBrowserRouter([
         loader: () =>
           checkAuth({
             allowedRoles: ["seller", "admin"],
-          })
+          }),
       },
 
       // Buyer Routes
@@ -164,19 +165,21 @@ const routes = createBrowserRouter([
       {
         path: "/seller/profile",
         element: <SellerProfile />,
-        loader: () =>
-          checkAuth({ allowedRoles: ["seller", "admin"] }),
+        loader: () => checkAuth({ allowedRoles: ["seller", "admin"] }),
       },
       {
         path: "/seller/messages",
         element: <SellerMessagePage />,
-        loader: () =>
-          checkAuth({ allowedRoles: ["seller", "admin"] }),
+        loader: () => checkAuth({ allowedRoles: ["seller", "admin"] }),
       },
 
       // Live
       { path: "/live", element: <LivePage />, loader: () => checkAuth({}) },
-      { path: "/live/:eventId", element: <Live />, loader: () => checkAuth({}) },
+      {
+        path: "/live/:eventId",
+        element: <Live />,
+        loader: () => checkAuth({}),
+      },
 
       // Checkout
       {
@@ -186,7 +189,7 @@ const routes = createBrowserRouter([
       },
 
       // ------------------------------------------------------------------
-      //                     ADMIN ROUTES 
+      //                     ADMIN ROUTES
       // ------------------------------------------------------------------
       {
         path: "/admin",
