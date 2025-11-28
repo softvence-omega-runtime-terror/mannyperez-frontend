@@ -33,6 +33,7 @@ const CheckoutPage: React.FC = () => {
   const [selectedShippingId, setSelectedShippingId] = useState<number>(
     SHIPPING_OPTIONS[0].id
   );
+  const [quantity, setQuantity] = useState<number>(1);
 
   const {
     register,
@@ -62,6 +63,25 @@ const CheckoutPage: React.FC = () => {
       ? priceFromApi
       : parseFloat(priceFromApi || "0") || 0;
   }, [priceFromApi]);
+  const subtotal = useMemo(
+    () => productPriceNumber * quantity,
+    [productPriceNumber, quantity]
+  );
+
+  const incrementQuantity = () =>
+    setQuantity((prev) => Math.max(1, prev + 1));
+  const decrementQuantity = () =>
+    setQuantity((prev) => Math.max(1, prev - 1));
+  const handleQuantityInputChange = (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    const parsed = parseInt(event.target.value, 10);
+    if (Number.isNaN(parsed)) {
+      setQuantity(1);
+      return;
+    }
+    setQuantity(Math.max(1, parsed));
+  };
 
   const onSubmit = async (form: CheckoutForm) => {
     const id = toast.loading("Placing order...");
@@ -71,8 +91,9 @@ const CheckoutPage: React.FC = () => {
         shippingAddress: form.shippingAddress,
         shippingMethod: selectedShipping.name,
         shippingCost: shippingCostNumber,
-        priceId: product?.pricingAndInventory?.[0]._id ?? "",
+        priceId: (product as any)?.pricingAndInventory?.[0]._id ?? "",
         isDue: false,
+        quantity,
       });
 
       if ((res as any).data?.success) {
@@ -136,6 +157,42 @@ const CheckoutPage: React.FC = () => {
 
           {!isLoading && !isError && <OrderSummary product={derivedProduct} />}
 
+          {!isLoading && !isError && (
+            <div className="bg-white p-6 rounded-xl shadow border border-gray-100">
+              <h3 className="text-xl font-bold mb-4">Quantity</h3>
+              <div className="flex items-center gap-3">
+                <button
+                  type="button"
+                  onClick={decrementQuantity}
+                  className="h-10 w-10 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-50 disabled:opacity-60"
+                  aria-label="Decrease quantity"
+                  disabled={quantity <= 1}
+                >
+                  -
+                </button>
+                <input
+                  type="number"
+                  min={1}
+                  value={quantity}
+                  onChange={handleQuantityInputChange}
+                  className="w-20 text-center rounded-lg border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-pink-500"
+                />
+                <button
+                  type="button"
+                  onClick={incrementQuantity}
+                  className="h-10 w-10 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-50"
+                  aria-label="Increase quantity"
+                >
+                  +
+                </button>
+              </div>
+              <p className="text-sm text-gray-500 mt-3">
+                ${productPriceNumber.toFixed(2)} each — subtotal $
+                {subtotal.toFixed(2)}
+              </p>
+            </div>
+          )}
+
           <div className="bg-white p-6 rounded-xl shadow border border-gray-100">
             <ShippingMethod
               initialSelectionId={selectedShippingId}
@@ -175,8 +232,9 @@ const CheckoutPage: React.FC = () => {
 
         <div className="lg:col-span-3">
           <CheckoutSidebar
-            subtotal={productPriceNumber}
+            subtotal={subtotal}
             shipping={shippingCostNumber}
+            quantity={quantity}
             // platformFee={PLATFORM_FEE}
             isSubmitting={isPlacingOrder}
             onPlaceOrder={() => {

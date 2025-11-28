@@ -9,6 +9,20 @@ export interface CreateOrderRequest {
   priceId: string;
   platformFee: number;
   totalAmount: number;
+  quantity: number;
+}
+
+export interface ApiOrder {
+  _id: string;
+  createdAt?: string;
+  orderStatus?: string;
+  paymentStatus?: string;
+  shippingAddress?: string;
+  shippingMethod?: string;
+  totalAmount?: number;
+  productId?: any;
+  buyerId?: any;
+  quantity?: number;
 }
 
 export interface OrderResponse {
@@ -32,10 +46,17 @@ export interface OrderResponse {
   stripeUrl: string | null;
 }
 
+export interface GetOrdersQuery {
+  page?: number;
+  limit?: number;
+  search?: string;
+  status?: "pending" | "processing" | "shipped" | "delivered" | "cancelled";
+}
+
 export const orderApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
     
-    // Create order mutation
+
     createOrder: builder.mutation<OrderResponse, CreateOrderRequest>({
       query: (payload) => ({
         url: `/order/create-order`,
@@ -44,8 +65,22 @@ export const orderApi = baseApi.injectEndpoints({
       }),
       invalidatesTags: ["Orders"],
     }),
+    
+     getMyselfOrders: builder.query<
+      { data: ApiOrder[]; total?: number; meta?: { total: number } } | ApiOrder[],
+      GetOrdersQuery | void
+    >({
+      query: (params) => ({
+        url: `/order/get-myself-orders`,
+        method: "GET",
+        params,
+      }),
+      providesTags: ["Orders"],
+    }),
+
 
   }),
+  
 });
 
-export const { useCreateOrderMutation } = orderApi;
+export const { useCreateOrderMutation, useGetMyselfOrdersQuery } = orderApi;

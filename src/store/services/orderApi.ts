@@ -7,6 +7,7 @@ export interface CreateOrderRequest {
   shippingCost: number;
   priceId: string;
   isDue: boolean;
+  quantity: number;
 }
 
 export interface CreateOrderResponse {

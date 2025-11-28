@@ -5,6 +5,7 @@ import React from 'react';
 interface OrderTotalProps {
   subtotal: number;
   shipping: number;
+  quantity: number;
   platformFee?: number;
   isSubmitting?: boolean;
   onPlaceOrder?: () => void;
@@ -13,20 +14,27 @@ interface OrderTotalProps {
 const OrderTotalCard: React.FC<OrderTotalProps> = ({
   subtotal,
   shipping,
+  quantity,
   // platformFee = 1,
   isSubmitting = false,
   onPlaceOrder,
 }) => {
-  const total = subtotal + shipping ;
+  const total = subtotal + shipping;
+  const itemsLabel = `Subtotal (${quantity} item${quantity !== 1 ? "s" : ""})`;
 
   return (
     <div className="bg-white p-6 rounded-xl shadow-lg border border-gray-100">
       <h3 className="text-xl font-bold mb-4">Order Total</h3>
       <div className="space-y-3 text-gray-700">
+
+        <div className="flex justify-between">
+          <span className="text-sm">Quantity</span>
+          <span className="font-medium">{quantity}</span>
+        </div>
         
         {/* Subtotal */}
         <div className="flex justify-between">
-          <span className="text-sm">Subtotal (1 item)</span>
+          <span className="text-sm">{itemsLabel}</span>
           <span className="font-medium">${subtotal.toFixed(2)}</span>
         </div>
 

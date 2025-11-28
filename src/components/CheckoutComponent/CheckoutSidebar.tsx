@@ -6,6 +6,7 @@ interface CheckoutSidebarProps {
   subtotal: number;
   shipping: number;
   // platformFee?: number;
+  quantity: number;
   isSubmitting?: boolean;
   onPlaceOrder?: () => void;
 }
@@ -14,6 +15,7 @@ const CheckoutSidebar: React.FC<CheckoutSidebarProps> = ({
   subtotal,
   shipping,
   // platformFee,
+  quantity,
   isSubmitting,
   onPlaceOrder,
 }) => {
@@ -22,6 +24,7 @@ const CheckoutSidebar: React.FC<CheckoutSidebarProps> = ({
       <OrderTotalCard
         subtotal={subtotal}
         shipping={shipping}
+        quantity={quantity}
         // platformFee={platformFee}
         isSubmitting={isSubmitting}
         onPlaceOrder={onPlaceOrder}

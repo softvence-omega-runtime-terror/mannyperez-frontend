@@ -8,18 +8,26 @@ interface UploadPhotoStepProps {
   stepNumber?: number;
   onFilesSelect?: (files: File[]) => void;
   onFileRemove?: (index: number) => void;
-  acceptedFormats?: string[];
+  onRemoveExisting?: (url: string) => void;
+  acceptedFormats?: string[][];
   maxSize?: number;
   selectedFiles?: File[];
+  existingImages?: string[];
+  removedImages?: string[];
+  error?: string;
 }
 
 export function UploadPhotoStep({
   stepNumber = 1,
   onFilesSelect,
   onFileRemove,
+  onRemoveExisting,
   acceptedFormats = ['PNG', 'JPG'],
   maxSize = 10,
   selectedFiles = [],
+  existingImages = [],
+  removedImages = [],
+  error,
 }: UploadPhotoStepProps) {
   const [files, setFiles] = useState<File[]>(selectedFiles);
   const [previews, setPreviews] = useState<string[]>([]);
@@ -125,6 +133,7 @@ export function UploadPhotoStep({
 
             <input
               ref={fileInputRef}
+              required
               type="file"
               accept="image/*"
               multiple
@@ -136,10 +145,33 @@ export function UploadPhotoStep({
           </div>
         </div>
 
-        {files.length > 0 && (
+        {error && <p className="text-sm text-red-600 mt-2">{error}</p>}
+
+        {(existingImages.filter(img => !removedImages.includes(img)).length > 0 || files.length > 0) && (
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            {existingImages.filter(img => !removedImages.includes(img)).map((img, index) => (
+              <div key={`existing-${index}`} className="relative rounded-lg border p-2 bg-white">
+                <img
+                  src={img}
+                  alt={`Existing ${index + 1}`}
+                  className="w-full h-24 object-cover rounded"
+                />
+                <div className="absolute top-1 right-1 bg-green-500 text-white text-xs px-1 py-0.5 rounded">
+                  Existing
+                </div>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => onRemoveExisting?.(img)}
+                  className="absolute top-1 left-1 p-1 bg-white rounded-full hover:bg-red-50 hover:text-red-600"
+                >
+                  <X className="h-4 w-4" />
+                </Button>
+              </div>
+            ))}
             {files.map((file, index) => (
-              <div key={index} className="relative rounded-lg border p-2 bg-white">
+              <div key={`new-${index}`} className="relative rounded-lg border p-2 bg-white">
                 {previews[index] ? (
                   <img
                     src={previews[index]}
