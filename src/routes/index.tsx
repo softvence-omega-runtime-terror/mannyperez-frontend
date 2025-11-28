@@ -37,7 +37,8 @@ import AdminPayout from "@/pages/admin/AdminPayout";
 import AdminReports from "@/pages/admin/AdminReports";
 import AdminCategories from "@/pages/admin/AdminCategories";
 import UpdateProduct from "@/components/ProductsComponent/CreateNewListing/UpdateProduct";
-import StreamerLive from "@/pages/live-events/StreamerLive";
+import PaymentSuccessPage from "@/pages/payment-success";
+
 
 
 // --------------------- AUTH CHECK ---------------------
@@ -58,6 +59,7 @@ const checkAuth = (options?: {
 
     if (
       options?.allowedRoles &&
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       !options.allowedRoles.includes(user.role as any)
     ) {
       return redirect("/unauthorized");
@@ -85,6 +87,7 @@ const routes = createBrowserRouter([
       { path: "/sign-up", element: <SignUp />, loader: () => checkAuth({}) },
       { path: "/verify-email", element: <VerifyEmail /> },
       { path: "/unauthorized", element: <Unauthorized /> },
+      { path: "/payment-success/:paymentId", element: <PaymentSuccessPage /> },
 
       // Feed
       {
@@ -100,6 +103,7 @@ const routes = createBrowserRouter([
           { path: "post/:id", element: <div>Feed Posts.</div> },
         ],
       },
+      { path: "/live", element: <LivePage />, loader: () => checkAuth({}) },
 
       // Seller Routes
       {
@@ -120,8 +124,7 @@ const routes = createBrowserRouter([
       {
         path: "/seller",
         element: <Seller />,
-        loader: () =>
-          checkAuth({ allowedRoles: ["seller", "admin"] }),
+        loader: () => checkAuth({ allowedRoles: ["seller", "admin"] }),
       },
       {
         path: "/new-listing",
@@ -137,7 +140,7 @@ const routes = createBrowserRouter([
         loader: () =>
           checkAuth({
             allowedRoles: ["seller", "admin"],
-          })
+          }),
       },
 
       // Buyer Routes
@@ -166,17 +169,21 @@ const routes = createBrowserRouter([
       {
         path: "/seller/profile",
         element: <SellerProfile />,
-        loader: () =>
-          checkAuth({ allowedRoles: ["seller", "admin"] }),
+        loader: () => checkAuth({ allowedRoles: ["seller", "admin"] }),
       },
       {
         path: "/seller/messages",
         element: <SellerMessagePage />,
-        loader: () =>
-          checkAuth({ allowedRoles: ["seller", "admin"] }),
+        loader: () => checkAuth({ allowedRoles: ["seller", "admin"] }),
       },
 
       // Live
+
+      {
+        path: "/live/:eventId",
+        element: <Live />,
+        loader: () => checkAuth({}),
+      },
       { path: "/live", element: <LivePage />, loader: () => checkAuth({}) },
       { path: "/live/:eventId", element: <Live />, loader: () => checkAuth({}) },
       { path: "/live/feature", element: < LivePage />, loader: () => checkAuth({}) },
@@ -189,7 +196,7 @@ const routes = createBrowserRouter([
       },
 
       // ------------------------------------------------------------------
-      //                     ADMIN ROUTES 
+      //                     ADMIN ROUTES
       // ------------------------------------------------------------------
       {
         path: "/admin",
