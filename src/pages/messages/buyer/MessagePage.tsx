@@ -57,12 +57,12 @@ const MessagingPage = () => {
   const { receiverId, productId } = useParams();
 
   const { data: productData, isLoading: productLoading } =
-    useGetProductByIdQuery(productId!);
+    useGetProductByIdQuery(productId || "");
   const { data: receiverData, isLoading: receiverLoading } =
     useGetSingleUserQuery(receiverId!, { skip: !receiverId });
   const user = useAppSelector((state) => state.auth.user);
 
-  const product = productData?.data;
+  const product = productData?.data as unknown as MessageProduct;
 
   const receiver = receiverData?.data as MessageUser;
 

@@ -37,11 +37,13 @@ const FeaturedPost: React.FC<FeaturedPostProps> = ({ onBuyNow }) => {
   );
   const [newComments, setNewComments] = useState<Record<string, string>>({});
 
-  // @ts-ignore
-  if (isLoading || !data?.data) return;
+  if (isLoading) return <div>Loading...</div>;
 
-  // @ts-ignore
-  const products = data.data;
+  // Normalize API response shape: support array returned directly or wrapped as { data } / { products }
+  const products: any[] =
+    Array.isArray(data)
+      ? data
+      : (data as any)?.data ?? (data as any)?.products ?? [];
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const renderPriceRange = (pricing: any[]) => {

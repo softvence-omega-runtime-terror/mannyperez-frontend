@@ -15,13 +15,15 @@ const MessageRightSidebar = () => {
 
   // Fetch product details
   const { data: productData, isLoading: productLoading } =
-    useGetProductByIdQuery(productId!);
+    useGetProductByIdQuery(productId || "", {
+      skip: !productId,
+    });
 
   // Once we have the product, fetch seller info
-  // @ts-ignore
-  const sellerId = productData?.data?.sellerId?._id;
-  const { data: sellerData, isLoading: sellerLoading } =
-    useGetSingleSellerQuery(sellerId!, {
+  const sellerId = typeof productData?.data?.sellerId === "object" ? productData?.data?.sellerId?._id : productData?.data?.sellerId;
+  const { data: sellerData, isLoading: sellerLoading } = useGetSingleUserQuery(
+    sellerId!,
+    {
       skip: !sellerId,
     });
 

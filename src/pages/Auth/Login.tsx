@@ -1,7 +1,10 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { Button } from "@/components/ui/button";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
-import { useLoginMutation, useSellerLoginMutation } from "@/store/services/authApi";
+import {
+  useLoginMutation,
+  useSellerLoginMutation,
+} from "@/store/services/authApi";
 import { setCredentials } from "@/store/slices/authSlice";
 import { Eye, EyeOff } from "lucide-react";
 import { useState } from "react";
@@ -20,7 +23,8 @@ const Login = () => {
   const dispatch = useAppDispatch();
 
   const [loginBuyer, { isLoading: isBuyerLoading }] = useLoginMutation();
-  const [loginSeller, { isLoading: isSellerLoading }] = useSellerLoginMutation();
+  const [loginSeller, { isLoading: isSellerLoading }] =
+    useSellerLoginMutation();
 
   const { user, isAuthenticated } = useAppSelector((state) => state.auth);
 
@@ -43,7 +47,6 @@ const Login = () => {
 
   const isLoading = isBuyerLoading || isSellerLoading;
 
-
   const onSubmit = async (data: LoginForm) => {
     try {
       const input = {
@@ -59,19 +62,35 @@ const Login = () => {
         result = await loginSeller(input).unwrap();
       }
 
- 
-
+      // extract payload
       const payload = (result as any)?.data ?? result;
- 
+
+      // ❗ BAN CHECK — Important
+      if (payload.user?.isBlocked) {
+        toast.error("Your account is blocked by admin. You cannot login.");
+        return;
+      }
+
+      if (payload.user?.isDeleted) {
+        toast.error("Your account has been deleted. Contact support.");
+        return;
+      }
+
+      // Seller specific check (optional)
+      if (loginMode === "seller" && payload.user?.isVerified === false) {
+        toast.error("Your seller account is not verified yet.");
+        return;
+      }
 
       const accessToken = payload?.approvalToken ?? payload?.token;
       const refreshToken = payload?.refreshToken ?? null;
 
       if (payload.user && accessToken) {
-        // also drop tokens into localStorage for manual fallback
-        if (accessToken) localStorage.setItem("auth.accessToken", accessToken);
-        if (refreshToken) localStorage.setItem("auth.refreshToken", refreshToken);
+        // Update localStorage manually
         localStorage.setItem("auth.user", JSON.stringify(payload.user));
+        localStorage.setItem("auth.accessToken", accessToken);
+        if (refreshToken)
+          localStorage.setItem("auth.refreshToken", refreshToken);
 
         dispatch(
           setCredentials({
@@ -81,16 +100,11 @@ const Login = () => {
             approvalToken: payload?.approvalToken,
           })
         );
+
         toast.success("Logged in successfully!");
-           navigate("/");
+        navigate("/");
         return;
       }
-
-    
-
-
-  
-   
     } catch (err: any) {
       console.log("Error:", err);
 
@@ -100,13 +114,11 @@ const Login = () => {
         "Login failed. Please check your credentials.";
 
       toast.error(message);
-
-      // show error in UI field
       setError("email", { message });
     }
   };
 
-  // Already authenticated UI
+  // Already logged in
   if (isAuthenticated && user) {
     return (
       <div className="flex items-center justify-center min-h-[80dvh] bg-secondary">
@@ -157,7 +169,7 @@ const Login = () => {
           </button>
         </div>
 
-        {/* FORM (HOOK FORM) */}
+        {/* FORM */}
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
           {/* Email */}
           <div>
@@ -180,7 +192,6 @@ const Login = () => {
                 onChange: () => clearErrors("email"),
               })}
             />
-
             {errors.email && (
               <p className="text-red-500 text-sm mt-1">
                 {errors.email.message}
@@ -223,7 +234,7 @@ const Login = () => {
             )}
           </div>
 
-          {/* Remember Password */}
+          {/* Remember Checkbox */}
           <div className="flex items-center justify-between">
             <label className="flex items-center cursor-pointer">
               <input

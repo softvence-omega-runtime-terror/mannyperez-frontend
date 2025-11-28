@@ -36,6 +36,7 @@ export interface ProductsResponse {
   total: number;
   page: number;
   limit: number;
+  data: any;
 }
 
 export interface CreateProductRequest {
