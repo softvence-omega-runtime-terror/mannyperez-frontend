@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { useParams } from "react-router-dom";
 import {
@@ -81,7 +82,7 @@ const StreamerLive = ({ event }: Props) => {
 
         zp.joinRoom({
           container: liveRef.current,
-
+          // @ts-expect-error ts(2322)
           scenario: { mode: "LiveStreaming", config: { role: "Host" } },
           turnOnCameraWhenJoining: true,
           turnOnMicrophoneWhenJoining: true,

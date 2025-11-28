@@ -117,8 +117,6 @@ const routes = createBrowserRouter([
       {
         path: "/seller",
         element: <Seller />,
-<<<<<<< HEAD
-=======
         loader: () =>
           checkAuth({
             requireAuth: true,
@@ -153,7 +151,6 @@ const routes = createBrowserRouter([
       {
         path: "/seller",
         element: <Seller />,
->>>>>>> 0fd1efbb9d1430dcf22127505d8b5a1638b9b95b
         loader: () => checkAuth({ allowedRoles: ["seller", "admin"] }),
       },
       {
@@ -167,13 +164,6 @@ const routes = createBrowserRouter([
           }),
       },
 
-<<<<<<< HEAD
-      // Buyer Routes
-      {
-        path: "/buyer/profile",
-        element: <BuyerProfile />,
-        loader: () => checkAuth({ allowedRoles: ["buyer"] }),
-=======
       // SELLER MESSAGE PAGE
       {
         path: "/seller/messages",
@@ -202,55 +192,17 @@ const routes = createBrowserRouter([
             requireAuth: true,
             allowedRoles: ["buyer"],
           }),
->>>>>>> 0fd1efbb9d1430dcf22127505d8b5a1638b9b95b
       },
       {
         path: "/buyer/orders",
         element: <Orders />,
-<<<<<<< HEAD
-        loader: () => checkAuth({}),
-=======
         loader: () => checkAuth({ requireAuth: true }),
->>>>>>> 0fd1efbb9d1430dcf22127505d8b5a1638b9b95b
       },
       {
         path: "/buyer/saved-items",
         element: <SavedItems />,
-<<<<<<< HEAD
-        loader: () => checkAuth({}),
-      },
-
-      // Profiles
-      {
-        path: "/seller/profile",
-        element: <Profile />,
-        loader: () => checkAuth({}),
-      },
-      {
-        path: "/seller/profile",
-        element: <SellerProfile />,
-        loader: () => checkAuth({ allowedRoles: ["seller", "admin"] }),
-      },
-      {
-        path: "/seller/messages",
-        element: <SellerMessagePage />,
-        loader: () => checkAuth({ allowedRoles: ["seller", "admin"] }),
-      },
-
-      // Live
-
-      {
-        path: "/live/:eventId",
-        element: <Live />,
-        loader: () => checkAuth({}),
-      },
-      { path: "/live", element: <LivePage />, loader: () => checkAuth({}) },
-      { path: "/live/:eventId", element: <Live />, loader: () => checkAuth({}) },
-      { path: "/live/feature", element: < LivePage />, loader: () => checkAuth({}) },
-=======
         loader: () => checkAuth({ requireAuth: true }),
       },
->>>>>>> 0fd1efbb9d1430dcf22127505d8b5a1638b9b95b
 
       // PROFILE (GENERAL)
       {

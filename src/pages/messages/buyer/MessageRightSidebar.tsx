@@ -21,7 +21,7 @@ const MessageRightSidebar = () => {
 
   // Once we have the product, fetch seller info
   const sellerId = typeof productData?.data?.sellerId === "object" ? productData?.data?.sellerId?._id : productData?.data?.sellerId;
-  const { data: sellerData, isLoading: sellerLoading } = useGetSingleUserQuery(
+  const { data: sellerData, isLoading: sellerLoading } = useGetSingleSellerQuery(
     sellerId!,
     {
       skip: !sellerId,
