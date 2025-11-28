@@ -109,16 +109,16 @@ res = await kelaDelivery(orderId)
  
     
    }
-     j
+     
       if ((res as any)?.data?.success ) {
         toast.success("Status updated", { id: toastId });
        
         refetch();
       } else {
-        toast.error("Failed to update status", { id: toastId });
+        toast.error((res as  any).error.data.message, { id: toastId });
       }
     } catch (error: any) {
-      toast.error(error?.data?.message || "Failed to update status", {
+      toast.error((error as  any).error.data.message || error?.data?.message || "Failed to update status", {
         id: toastId,
       });
     }
