@@ -23,7 +23,7 @@ const MessageList = ({ receiverId, productId }: Props) => {
   const isUserNearBottom = useCallback(() => {
     if (!scrollRef.current) return true;
     const { scrollTop, clientHeight, scrollHeight } = scrollRef.current;
-    return scrollHeight - scrollTop - clientHeight < clientHeight * 0.1; // 10% threshold
+    return scrollHeight - scrollTop - clientHeight < clientHeight * 0.1; 
   }, []);
 
   // Scroll when messages change

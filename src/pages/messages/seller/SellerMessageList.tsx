@@ -112,12 +112,14 @@ const SellerMessageList = ({ receiverId, productId }: Props) => {
             No messages yet. Start the conversation!
           </p>
         ) : (
-          messages.map((msg) => (
-            <MessageBubble
-              key={msg._id}
-              message={msg}
-            />
-          ))
+          <div className="flex flex-col-reverse">
+            {messages.map((msg) => (
+              <MessageBubble
+                key={msg._id}
+                message={msg}
+              />
+            ))}
+          </div>
         )}
       </div>
 

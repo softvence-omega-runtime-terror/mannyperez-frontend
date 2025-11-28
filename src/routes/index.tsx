@@ -40,7 +40,6 @@ import UpdateProduct from "@/components/ProductsComponent/CreateNewListing/Updat
 import PaymentSuccessPage from "@/pages/payment-success";
 
 
-
 // --------------------- AUTH CHECK ---------------------
 const checkAuth = (options?: {
   requireAuth?: boolean;
@@ -96,6 +95,10 @@ const routes = createBrowserRouter([
         loader: () => checkAuth({}),
         children: [
           { path: "", element: <FeedHome /> },
+          {
+            path: "messages",
+            element: <MessagingPage />,
+          },
           {
             path: "messages/:receiverId/:productId",
             element: <MessagingPage />,
@@ -185,8 +188,16 @@ const routes = createBrowserRouter([
         loader: () => checkAuth({}),
       },
       { path: "/live", element: <LivePage />, loader: () => checkAuth({}) },
-      { path: "/live/:eventId", element: <Live />, loader: () => checkAuth({}) },
-      { path: "/live/feature", element: < LivePage />, loader: () => checkAuth({}) },
+      {
+        path: "/live/:eventId",
+        element: <Live />,
+        loader: () => checkAuth({}),
+      },
+      {
+        path: "/live/feature",
+        element: <LivePage />,
+        loader: () => checkAuth({}),
+      },
 
       // Checkout
       {
