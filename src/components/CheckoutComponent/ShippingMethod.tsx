@@ -1,8 +1,9 @@
+/* eslint-disable react-refresh/only-export-components */
 // src/components/CheckoutComponent/ShippingMethod.tsx
 import React, { useState } from "react";
 
 // --- Type Definitions ---
-interface ShippingOption {
+export interface ShippingOption {
   id: number;
   name: string;
   price: string;
@@ -14,16 +15,15 @@ interface ShippingMethodProps {
   onShippingSelect: (selectedOptionId: number) => void; // Callback function to inform the parent component
 }
 
-// --- Dummy Data ---
-const DUMMY_SHIPPING_OPTIONS: ShippingOption[] = [
+
+export const SHIPPING_OPTIONS: ShippingOption[] = [
   { id: 1, name: "Standard Shipping", price: "$5.00", estimatedTime: "3-5 business days" },
   { id: 2, name: "Express Shipping", price: "$15.00", estimatedTime: "1-2 business days" },
   { id: 3, name: "Overnight Shipping", price: "$25.00", estimatedTime: "1 business day" },
 ];
 
 // --- Component ---
-const ShippingMethod: React.FC<ShippingMethodProps> = ({ initialSelectionId = DUMMY_SHIPPING_OPTIONS[0].id, onShippingSelect }) => {
-  // Use the initialSelectionId prop or the first item's ID as the default
+const ShippingMethod: React.FC<ShippingMethodProps> = ({ initialSelectionId = SHIPPING_OPTIONS[0].id, onShippingSelect }) => {
   const [selectedOptionId, setSelectedOptionId] = useState<number>(initialSelectionId);
 
   const handleSelectionChange = (id: number) => {
@@ -36,18 +36,17 @@ const ShippingMethod: React.FC<ShippingMethodProps> = ({ initialSelectionId = DU
       <h3 className="text-2xl font-semibold text-gray-800 mb-5">Shipping Method</h3>
 
       <div className="space-y-4">
-        {DUMMY_SHIPPING_OPTIONS.map((option) => {
+        {SHIPPING_OPTIONS.map((option) => {
           const isSelected = selectedOptionId === option.id;
           
           return (
             <label
               key={option.id}
-              // Conditional styling for the selected option 
               className={`
                 flex items-center justify-between p-4 rounded-xl cursor-pointer transition duration-200
                 ${isSelected 
                   ? "border-2 border-pink-500 bg-pink-50 shadow-md" 
-                  : "border border-gray-200 hover:border-pink-300"
+                  : "border border-gray-200 hover:border-pink-300 bg-white"
                 }
               `}
               onClick={() => handleSelectionChange(option.id)}
@@ -58,17 +57,17 @@ const ShippingMethod: React.FC<ShippingMethodProps> = ({ initialSelectionId = DU
                 <p className="text-sm text-gray-500">{option.estimatedTime}</p>
               </div>
               
-              {/* Right Side: Price and Radio Button */}
+              {/* Right Side: Price and indicator */}
               <div className="flex items-center gap-3">
                 <span className={`text-lg font-extrabold ${isSelected ? "text-pink-600" : "text-gray-700"}`}>{option.price}</span>
-                <input
-                  type="radio"
-                  name="shippingMethod"
-                  checked={isSelected}
-                  // We use the onClick on the label, but we must update the input's change handler to be correct for accessibility/form submission 
-                  onChange={() => handleSelectionChange(option.id)} 
-                  className="w-5 h-5 text-pink-600 border-gray-300 focus:ring-pink-500 checked:ring-2 checked:ring-offset-2 checked:ring-pink-500"
-                />
+                <div
+                  className={`inline-flex h-5 w-5 items-center justify-center rounded-full border-2 ${
+                    isSelected ? "border-pink-500 bg-pink-100" : "border-gray-300 bg-white"
+                  }`}
+                  aria-hidden="true"
+                >
+                  {isSelected && <span className="h-2.5 w-2.5 rounded-full bg-pink-500" />}
+                </div>
               </div>
             </label>
           );

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import App from "@/App";
 import Login from "@/pages/Auth/Login";
 import SignUp from "@/pages/Auth/SignUp";
@@ -20,23 +21,28 @@ import Live from "@/pages/Live";
 import LivePage from "@/pages/live-events/LivePage";
 import MessagingPage from "@/pages/messages/buyer/MessagePage";
 import SellerMessagePage from "@/pages/messages/seller/SellerMessagePage";
+import OrderDetails from "@/pages/OrderDetails";
 import Products from "@/pages/Products";
 import BuyerProfile from "@/pages/profile/BuyerProfile";
 import Profile from "@/pages/profile/Profile";
 import SellerProfile from "@/pages/profile/SellerProfile";
 import { store } from "@/store";
 
+// NEW — ADMIN LAYOUT
+
+import UpdateProduct from "@/components/ProductsComponent/CreateNewListing/UpdateProduct";
+import AdminCategories from "@/pages/admin/AdminCategories";
 // ADMIN
-import AdminLayout from "@/pages/admin/AdminLayout";
+
 import AdminDashboard from "@/pages/admin/AdminDashboard";
-import AdminUsers from "@/pages/admin/AdminUsers";
-import AdminListings from "@/pages/admin/AdminListings";
 import AdminIncidents from "@/pages/admin/AdminIncidents";
-import AdminSettings from "@/pages/admin/AdminSettings";
+import AdminLayout from "@/pages/admin/AdminLayout";
+import AdminListings from "@/pages/admin/AdminListings";
 import AdminPayout from "@/pages/admin/AdminPayout";
 import AdminReports from "@/pages/admin/AdminReports";
-import AdminCategories from "@/pages/admin/AdminCategories";
-import UpdateProduct from "@/components/ProductsComponent/CreateNewListing/UpdateProduct";
+import AdminSettings from "@/pages/admin/AdminSettings";
+import AdminUsers from "@/pages/admin/AdminUsers";
+
 import PaymentSuccessPage from "@/pages/payment-success";
 
 
@@ -63,7 +69,7 @@ const checkAuth = (options?: {
     // ROLE CHECK
     if (
       options?.allowedRoles &&
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+       
       !options.allowedRoles.includes(user.role as any)
     ) {
       return redirect("/unauthorized");
@@ -161,6 +167,11 @@ const routes = createBrowserRouter([
           }),
       },
 
+      // Buyer Routes
+      {
+        path: "/buyer/profile",
+        element: <BuyerProfile />,
+        loader: () => checkAuth({ allowedRoles: ["buyer"] }),},
       // SELLER MESSAGE PAGE
       {
         path: "/seller/messages",
@@ -193,13 +204,49 @@ const routes = createBrowserRouter([
       {
         path: "/buyer/orders",
         element: <Orders />,
+    
         loader: () => checkAuth({ requireAuth: true }),
+      },
+      {
+        path: "/orders/:orderId",
+        element: <OrderDetails />,
+        loader: () => checkAuth({}),
       },
       {
         path: "/buyer/saved-items",
         element: <SavedItems />,
-        loader: () => checkAuth({ requireAuth: true }),
+        loader: () => checkAuth({}),
       },
+
+      // Profiles
+      {
+        path: "/seller/profile",
+        element: <Profile />,
+        loader: () => checkAuth({}),
+      },
+      {
+        path: "/seller/profile",
+        element: <SellerProfile />,
+        loader: () => checkAuth({ allowedRoles: ["seller", "admin"] }),
+      },
+      {
+        path: "/seller/messages",
+        element: <SellerMessagePage />,
+        loader: () => checkAuth({ allowedRoles: ["seller", "admin"] }),
+      },
+
+      // Live
+
+      {
+        path: "/live/:eventId",
+        element: <Live />,
+        loader: () => checkAuth({}),
+      },
+      { path: "/live", element: <LivePage />, loader: () => checkAuth({}) },
+      { path: "/live/:eventId", element: <Live />, loader: () => checkAuth({}) },
+      { path: "/live/feature", element: < LivePage />, loader: () => checkAuth({}) },
+    
+      
 
       // PROFILE (GENERAL)
       {
