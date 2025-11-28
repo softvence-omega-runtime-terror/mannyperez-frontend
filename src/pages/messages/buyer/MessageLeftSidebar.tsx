@@ -26,25 +26,33 @@ export type Conversation = {
 const MessageLeftSidebar: React.FC = () => {
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const navigate = useNavigate();
-  console.log(conversations[0]?.product?._id, "message")
 
   useEffect(() => {
+    // Load initial contacts
     socket.emit(SocketEvent.LOAD_CONTACTS);
 
     const handleContactsLoaded = (data: { conversations: Conversation[] }) => {
       setConversations(data.conversations || []);
     };
 
+    const handleContactsUpdated = () => {
+      socket.emit(SocketEvent.LOAD_CONTACTS);
+    };
+
     socket.on(SocketEvent.CONTACTS_LOADED, handleContactsLoaded);
+    socket.on(SocketEvent.CONTACTS_UPDATED, handleContactsUpdated);
 
     return () => {
       socket.off(SocketEvent.CONTACTS_LOADED, handleContactsLoaded);
+      socket.off(SocketEvent.CONTACTS_UPDATED, handleContactsUpdated);
     };
   }, []);
 
   const handleSelectConversation = (conversation: Conversation) => {
     const otherUser = conversation.members?.[0];
-    navigate(`/feed/messages/${otherUser?._id}/${conversation.product?._id || "null"}`);
+    navigate(
+      `/feed/messages/${otherUser?._id}/${conversation.product?._id || "null"}`
+    );
   };
 
   const formatTime = (timestamp?: string) => {

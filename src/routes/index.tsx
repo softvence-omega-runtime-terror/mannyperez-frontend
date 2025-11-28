@@ -46,7 +46,6 @@ import AdminUsers from "@/pages/admin/AdminUsers";
 import PaymentSuccessPage from "@/pages/payment-success";
 
 
-
 // --------------------- AUTH CHECK ---------------------
 const checkAuth = (options?: {
   requireAuth?: boolean;
@@ -108,6 +107,10 @@ const routes = createBrowserRouter([
         loader: () => checkAuth({ requireAuth: true, requireVerified: true }),
         children: [
           { path: "", element: <FeedHome /> },
+          {
+            path: "messages",
+            element: <MessagingPage />,
+          },
           {
             path: "messages/:receiverId/:productId",
             element: <MessagingPage />,

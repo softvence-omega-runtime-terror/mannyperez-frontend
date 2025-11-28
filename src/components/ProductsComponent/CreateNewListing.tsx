@@ -33,7 +33,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { toast } from "sonner";
 import { Input } from "../ui/input";
-import { cn } from "@/lib/utils";
+import { cn, combineDateAndTime } from "@/lib/utils";
 
 // Popover wrappers
 const Popover = ({ children }: any) => (
@@ -225,8 +225,11 @@ const CreateNewListing = () => {
       const formData = new FormData();
       formData.append("title", currentValues.title);
       formData.append("description", currentValues.description);
-      formData.append("startAt", currentValues.date!.toISOString());
-      formData.append("time", currentValues.time);
+      const startAt = combineDateAndTime(
+        currentValues.date,
+        currentValues.time
+      );
+      formData.append("startAt", startAt);
       formData.append("durationMinutes", currentValues.duration.toString());
       // formData.append("promos", JSON.stringify(selectedPromos));
       formData.append("paymentMethod", currentValues.paymentMethod);
@@ -453,7 +456,16 @@ const CreateNewListing = () => {
                   className="w-full border rounded p-2"
                   {...register("accessFee", {
                     valueAsNumber: true,
-                    required: "Access fee is required",
+                    required: false,
+                    validate: (value) => {
+                      // value can be: undefined | NaN | number
+
+                      if (value === undefined || isNaN(value)) {
+                        return true; // optional → empty allowed
+                      }
+
+                      return value > 0 || "Fee must be positive";
+                    },
                   })}
                 />
                 {errors.accessFee && (
@@ -560,7 +572,7 @@ const CreateNewListing = () => {
                 <hr />
                 <div className="flex justify-between font-semibold text-gray-900">
                   <p>Total Cost</p>
-                  <p>${ liveSlotFee}</p>
+                  <p>${liveSlotFee}</p>
                 </div>
               </div>
 

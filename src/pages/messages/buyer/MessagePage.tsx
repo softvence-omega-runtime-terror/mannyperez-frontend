@@ -84,7 +84,12 @@ const MessagingPage = () => {
 
   if (productLoading || receiverLoading) return <div>Loading...</div>;
 
-  if (!product || !receiver || !user) return <div>Select a Conversation</div>;
+  if (!product || !receiver || !user)
+    return (
+      <div className="flex flex-col items-center justify-center">
+        Select a Conversation
+      </div>
+    );
 
   return (
     <div className="flex flex-col max-h-screen bg-white">

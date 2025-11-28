@@ -3,11 +3,11 @@
 import React, { useState } from "react";
 import { Outlet, useLocation, useNavigate, useParams } from "react-router-dom";
 import DestashAdmin from "@/components/FeedComponents/DestashAdmin";
-import DiamondPost from "@/components/FeedComponents/DiamondPost";
+// import DiamondPost from "@/components/FeedComponents/DiamondPost";
 import FeaturedPost from "@/components/FeedComponents/FeaturedPost";
 import FeedSidbar from "@/components/FeedComponents/FeedSidebar";
 import FeedSpotlight from "@/components/FeedComponents/FeedSpotlight";
-import GoldPost from "@/components/FeedComponents/GoldPost";
+// import GoldPost from "@/components/FeedComponents/GoldPost";
 import LiveStream from "@/components/FeedComponents/LiveStream";
 import OrderSummary from "@/components/CheckoutComponent/OrderSummary";
 import BuyerInformation from "@/components/CheckoutComponent/BuyerInformation";
@@ -25,9 +25,12 @@ const CurrentPackage: React.FC<{ onBuyNow?: (product: any) => void }> = ({
 }) => {
   const { productId } = useParams();
 
-  const { data: productData, isLoading } = useGetProductByIdQuery(productId as any, {
-    skip: !productId,
-  });
+  const { data: productData, isLoading } = useGetProductByIdQuery(
+    productId as any,
+    {
+      skip: !productId,
+    }
+  );
 
   if (isLoading || !productData?.data) return <div>Loading...</div>;
 
@@ -35,7 +38,9 @@ const CurrentPackage: React.FC<{ onBuyNow?: (product: any) => void }> = ({
 
   // --- Calculate price ---
   const renderPrice = () => {
-    const prices = product.pricingAndInventory?.map((p: any) => Number(p.price));
+    const prices = product.pricingAndInventory?.map((p: any) =>
+      Number(p.price)
+    );
 
     if (!prices?.length) return null;
 
@@ -50,9 +55,7 @@ const CurrentPackage: React.FC<{ onBuyNow?: (product: any) => void }> = ({
     }
 
     return (
-      <p className="text-xl font-bold text-pink-600">
-        ${prices[0].toFixed(2)}
-      </p>
+      <p className="text-xl font-bold text-pink-600">${prices[0].toFixed(2)}</p>
     );
   };
 
@@ -69,9 +72,9 @@ const CurrentPackage: React.FC<{ onBuyNow?: (product: any) => void }> = ({
             <p className="text-lg font-semibold">
               {product.productInformation?.title}
             </p>
-            <p className="text-sm text-gray-500">
+            {/* <p className="text-sm text-gray-500">
               {product.productInformation?.description}
-            </p>
+            </p> */}
             <div className="mt-1">{renderPrice()}</div>
           </div>
         </div>
@@ -111,7 +114,9 @@ const Feed: React.FC = () => {
             <OrderSummary product={checkoutProduct} />
             <BuyerInformation />
             <ShippingAddress />
-            <ShippingMethod onShippingSelect={(id) => setSelectedShipping(id)} />
+            <ShippingMethod
+              onShippingSelect={(id) => setSelectedShipping(id)}
+            />
             <PaymentMethod />
           </div>
         </div>
@@ -146,8 +151,8 @@ const Feed: React.FC = () => {
               <FeedSpotlight />
               <LiveStream />
               <FeaturedPost onBuyNow={handleBuyNow} />
-              <DiamondPost onBuyNow={handleBuyNow} />
-              <GoldPost onBuyNow={handleBuyNow} />
+              {/* <DiamondPost onBuyNow={handleBuyNow} /> */}
+              {/* <GoldPost onBuyNow={handleBuyNow} /> */}
             </div>
 
             <div className="lg:col-span-3 relative">
