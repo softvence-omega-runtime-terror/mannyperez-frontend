@@ -44,7 +44,7 @@ import AdminSettings from "@/pages/admin/AdminSettings";
 import AdminUsers from "@/pages/admin/AdminUsers";
 
 import PaymentSuccessPage from "@/pages/payment-success";
-
+import PaymentCancelPage from "@/pages/payment-cancel";
 
 // --------------------- AUTH CHECK ---------------------
 const checkAuth = (options?: {
@@ -68,7 +68,6 @@ const checkAuth = (options?: {
     // ROLE CHECK
     if (
       options?.allowedRoles &&
-       
       !options.allowedRoles.includes(user.role as any)
     ) {
       return redirect("/unauthorized");
@@ -94,11 +93,20 @@ const routes = createBrowserRouter([
       { path: "/", element: <Landing /> },
 
       // AUTH
-      { path: "/login", element: <Login />, loader: () => checkAuth({ requireGuest: true }) },
-      { path: "/sign-up", element: <SignUp />, loader: () => checkAuth({ requireGuest: true }) },
+      {
+        path: "/login",
+        element: <Login />,
+        loader: () => checkAuth({ requireGuest: true }),
+      },
+      {
+        path: "/sign-up",
+        element: <SignUp />,
+        loader: () => checkAuth({ requireGuest: true }),
+      },
       { path: "/verify-email", element: <VerifyEmail /> },
       { path: "/unauthorized", element: <Unauthorized /> },
       { path: "/payment-success/:paymentId", element: <PaymentSuccessPage /> },
+      { path: "/payment-cancel", element: <PaymentCancelPage /> },
 
       // FEED
       {
@@ -174,7 +182,8 @@ const routes = createBrowserRouter([
       {
         path: "/buyer/profile",
         element: <BuyerProfile />,
-        loader: () => checkAuth({ allowedRoles: ["buyer"] }),},
+        loader: () => checkAuth({ allowedRoles: ["buyer"] }),
+      },
       // SELLER MESSAGE PAGE
       {
         path: "/seller/messages",
@@ -207,7 +216,7 @@ const routes = createBrowserRouter([
       {
         path: "/buyer/orders",
         element: <Orders />,
-    
+
         loader: () => checkAuth({ requireAuth: true }),
       },
       {
@@ -246,16 +255,22 @@ const routes = createBrowserRouter([
         loader: () => checkAuth({}),
       },
       { path: "/live", element: <LivePage />, loader: () => checkAuth({}) },
-      { path: "/live/:eventId", element: <Live />, loader: () => checkAuth({}) },
-      { path: "/live/feature", element: < LivePage />, loader: () => checkAuth({}) },
-    
-      
+      {
+        path: "/live/:eventId",
+        element: <Live />,
+        loader: () => checkAuth({}),
+      },
+      {
+        path: "/live/feature",
+        element: <LivePage />,
+        loader: () => checkAuth({}),
+      },
 
       // PROFILE (GENERAL)
       {
         path: "/profile",
         element: <Profile />,
-        loader: () => checkAuth({ requireAuth: true ,}),
+        loader: () => checkAuth({ requireAuth: true }),
       },
 
       // SELLER PROFILE (REAL ROUTE)
@@ -278,8 +293,16 @@ const routes = createBrowserRouter([
         loader: () => checkAuth({}),
       },
       { path: "/live", element: <LivePage />, loader: () => checkAuth({}) },
-      { path: "/live/:eventId", element: <Live />, loader: () => checkAuth({}) },
-      { path: "/live/feature", element: < LivePage />, loader: () => checkAuth({}) },
+      {
+        path: "/live/:eventId",
+        element: <Live />,
+        loader: () => checkAuth({}),
+      },
+      {
+        path: "/live/feature",
+        element: <LivePage />,
+        loader: () => checkAuth({}),
+      },
 
       // CHECKOUT
       {
