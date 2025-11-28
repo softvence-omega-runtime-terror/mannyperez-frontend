@@ -29,9 +29,13 @@ const FeaturedPost: React.FC<FeaturedPostProps> = ({ onBuyNow }) => {
   const [commentsMap, setCommentsMap] = useState<Record<string, CommentType[]>>({});
   const [newComments, setNewComments] = useState<Record<string, string>>({});
 
-  if (isLoading || !data?.data) return <div>Loading...</div>;
+  if (isLoading) return <div>Loading...</div>;
 
-  const products = data.data;
+  // Normalize API response shape: support array returned directly or wrapped as { data } / { products }
+  const products: any[] =
+    Array.isArray(data)
+      ? data
+      : (data as any)?.data ?? (data as any)?.products ?? [];
 
   const renderPriceRange = (pricing: any[]) => {
     if (!pricing || pricing.length === 0) return "$0";
