@@ -3,19 +3,25 @@ import { baseApi } from "./baseApi";
 // Product types
 export interface Product {
   id: string;
-  title: string;
-  description: string;
-  price: number;
-  images: string[];
-  category: string;
-  sellerId: string;
-  condition: string;
+  title?: string;
+  description?: string;
+  price?: number;
+  images?: string[];
+  category?: string;
+  sellerId?: any;
+  condition?: string;
   extraOptions?: {
     productVariants?: boolean;
     variants?: { size: string; color: string }[];
   };
-  createdAt: string;
-  status: "active" | "sold" | "pending";
+  createdAt?: string;
+  status?: "active" | "sold" | "pending" | string;
+  productInformation?: {
+    title?: string;
+    description?: string;
+    category?: string;
+  };
+  pricingAndInventory?: { price: number; quantity: number; _id: string }[];
 }
 
 export interface ProductsResponse {
@@ -80,6 +86,7 @@ export const productsApi = baseApi.injectEndpoints({
         url: `/products/${id}`,
         method: "GET",
       }),
+      transformResponse: (response: any) => response?.data ?? response,
       providesTags: ["Products"],
     }),
 
