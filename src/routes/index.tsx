@@ -26,7 +26,7 @@ import Profile from "@/pages/profile/Profile";
 import SellerProfile from "@/pages/profile/SellerProfile";
 import { store } from "@/store";
 
-// NEW — ADMIN LAYOUT
+// ADMIN
 import AdminLayout from "@/pages/admin/AdminLayout";
 import AdminDashboard from "@/pages/admin/AdminDashboard";
 import AdminUsers from "@/pages/admin/AdminUsers";
@@ -50,13 +50,17 @@ const checkAuth = (options?: {
 }) => {
   const { user, isAuthenticated } = store.getState().auth;
 
+  // If user is logged in and trying to visit login/register → kick back
   if (options?.requireGuest && isAuthenticated) return redirect("/");
 
+  // If route requires auth but user not authenticated
   if (options?.requireAuth && !isAuthenticated) return redirect("/login");
 
   if (isAuthenticated && user) {
+    // BLOCKED / DELETED
     if (user.isBlocked || user.isDeleted) return redirect("/login");
 
+    // ROLE CHECK
     if (
       options?.allowedRoles &&
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -65,8 +69,10 @@ const checkAuth = (options?: {
       return redirect("/unauthorized");
     }
 
-    if (options?.requireVerified && !user.isVerified)
+    // EMAIL VERIFICATION CHECK
+    if (options?.requireVerified && !user.isVerified) {
       return redirect("/verify-email");
+    }
   }
 
   return null;
@@ -82,39 +88,59 @@ const routes = createBrowserRouter([
     children: [
       { path: "/", element: <Landing /> },
 
-      // Auth Pages
-      { path: "/login", element: <Login />, loader: () => checkAuth({}) },
-      { path: "/sign-up", element: <SignUp />, loader: () => checkAuth({}) },
+      // AUTH
+      { path: "/login", element: <Login />, loader: () => checkAuth({ requireGuest: true }) },
+      { path: "/sign-up", element: <SignUp />, loader: () => checkAuth({ requireGuest: true }) },
       { path: "/verify-email", element: <VerifyEmail /> },
       { path: "/unauthorized", element: <Unauthorized /> },
       { path: "/payment-success/:paymentId", element: <PaymentSuccessPage /> },
 
-      // Feed
+      // FEED
       {
         path: "/feed",
         element: <Feed />,
-        loader: () => checkAuth({}),
+        loader: () => checkAuth({ requireAuth: true, requireVerified: true }),
         children: [
           { path: "", element: <FeedHome /> },
           {
             path: "messages/:receiverId/:productId",
             element: <MessagingPage />,
           },
-          { path: "post/:id", element: <div>Feed Posts.</div> },
         ],
       },
       { path: "/live", element: <LivePage />, loader: () => checkAuth({}) },
 
-      // Seller Routes
+      // SELLER ROUTES
+      {
+        path: "/seller",
+        element: <Seller />,
+<<<<<<< HEAD
+=======
+        loader: () =>
+          checkAuth({
+            requireAuth: true,
+            allowedRoles: ["seller", "admin"],
+            requireVerified: true,
+          }),
+      },
       {
         path: "/seller/products",
         element: <Products />,
-        loader: () => checkAuth({}),
+        loader: () =>
+          checkAuth({
+            requireAuth: true,
+            allowedRoles: ["seller", "admin"],
+            requireVerified: true,
+          }),
       },
       {
         path: "/seller/promotions",
         element: <Promotions />,
-        loader: () => checkAuth({}),
+        loader: () =>
+          checkAuth({
+            requireAuth: true,
+            allowedRoles: ["seller", "admin"],
+          }),
       },
       {
         path: "/seller/orders",
@@ -124,6 +150,7 @@ const routes = createBrowserRouter([
       {
         path: "/seller",
         element: <Seller />,
+>>>>>>> 0fd1efbb9d1430dcf22127505d8b5a1638b9b95b
         loader: () => checkAuth({ allowedRoles: ["seller", "admin"] }),
       },
       {
@@ -131,6 +158,26 @@ const routes = createBrowserRouter([
         element: <NewListingSteps />,
         loader: () =>
           checkAuth({
+            requireAuth: true,
+            allowedRoles: ["seller", "admin"],
+            requireVerified: true,
+          }),
+      },
+
+<<<<<<< HEAD
+      // Buyer Routes
+      {
+        path: "/buyer/profile",
+        element: <BuyerProfile />,
+        loader: () => checkAuth({ allowedRoles: ["buyer"] }),
+=======
+      // SELLER MESSAGE PAGE
+      {
+        path: "/seller/messages",
+        element: <SellerMessagePage />,
+        loader: () =>
+          checkAuth({
+            requireAuth: true,
             allowedRoles: ["seller", "admin"],
           }),
       },
@@ -143,20 +190,30 @@ const routes = createBrowserRouter([
           }),
       },
 
-      // Buyer Routes
+      // BUYER ROUTES
       {
         path: "/buyer/profile",
         element: <BuyerProfile />,
-        loader: () => checkAuth({ allowedRoles: ["buyer"] }),
+        loader: () =>
+          checkAuth({
+            requireAuth: true,
+            allowedRoles: ["buyer"],
+          }),
+>>>>>>> 0fd1efbb9d1430dcf22127505d8b5a1638b9b95b
       },
       {
         path: "/buyer/orders",
         element: <Orders />,
+<<<<<<< HEAD
         loader: () => checkAuth({}),
+=======
+        loader: () => checkAuth({ requireAuth: true }),
+>>>>>>> 0fd1efbb9d1430dcf22127505d8b5a1638b9b95b
       },
       {
         path: "/buyer/saved-items",
         element: <SavedItems />,
+<<<<<<< HEAD
         loader: () => checkAuth({}),
       },
 
@@ -187,12 +244,46 @@ const routes = createBrowserRouter([
       { path: "/live", element: <LivePage />, loader: () => checkAuth({}) },
       { path: "/live/:eventId", element: <Live />, loader: () => checkAuth({}) },
       { path: "/live/feature", element: < LivePage />, loader: () => checkAuth({}) },
+=======
+        loader: () => checkAuth({ requireAuth: true }),
+      },
+>>>>>>> 0fd1efbb9d1430dcf22127505d8b5a1638b9b95b
 
-      // Checkout
+      // PROFILE (GENERAL)
+      {
+        path: "/profile",
+        element: <Profile />,
+        loader: () => checkAuth({ requireAuth: true ,}),
+      },
+
+      // SELLER PROFILE (REAL ROUTE)
+      {
+        path: "/seller/profile-page",
+        element: <SellerProfile />,
+        loader: () => checkAuth({ allowedRoles: ["seller", "admin"] }),
+      },
+      {
+        path: "/seller/messages",
+        element: <SellerMessagePage />,
+        loader: () => checkAuth({ allowedRoles: ["seller", "admin"] }),
+      },
+
+      // Live
+
+      {
+        path: "/live/:eventId",
+        element: <Live />,
+        loader: () => checkAuth({}),
+      },
+      { path: "/live", element: <LivePage />, loader: () => checkAuth({}) },
+      { path: "/live/:eventId", element: <Live />, loader: () => checkAuth({}) },
+      { path: "/live/feature", element: < LivePage />, loader: () => checkAuth({}) },
+
+      // CHECKOUT
       {
         path: "/checkout/:id",
         element: <CheckoutPage />,
-        loader: () => checkAuth({}),
+        loader: () => checkAuth({ requireAuth: true }),
       },
 
       // ------------------------------------------------------------------
@@ -200,7 +291,7 @@ const routes = createBrowserRouter([
       // ------------------------------------------------------------------
       {
         path: "/admin",
-        element: <AdminLayout />, // OUTLET WRAPPER
+        element: <AdminLayout />,
         loader: () =>
           checkAuth({
             requireAuth: true,
@@ -218,7 +309,6 @@ const routes = createBrowserRouter([
           { path: "categories", element: <AdminCategories /> },
         ],
       },
-      // ------------------------------------------------------------------
     ],
   },
 ]);

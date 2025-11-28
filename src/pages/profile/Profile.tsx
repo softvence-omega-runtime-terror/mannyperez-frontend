@@ -1,32 +1,108 @@
-import React, { useState, ChangeEvent } from "react";
+import React, { useState, ChangeEvent, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { FiCamera } from "react-icons/fi";
+import Swal from "sweetalert2";
+import {
+  useGetUserByIdQuery,
+  useUpdateProfileDataMutation,
+  useUpdateProfileImageMutation,
+} from "@/store/services/profile/profileApi";
+import { useAppSelector, useAppDispatch } from "@/store/hooks";
+import { updateUser } from "@/store/slices/authSlice";
 
 const Profile: React.FC = () => {
+  // Get logged-in user
+  const authUser = useAppSelector((state) => state.auth.user);
+  const userId = authUser?._id;
+  const dispatch = useAppDispatch();
+
+  // Fetch profile
+  const { data, isLoading } = useGetUserByIdQuery(userId as any);
+  const profile = data?.data;
+
+  const [updateProfileData] = useUpdateProfileDataMutation();
+  const [updateProfileImage] = useUpdateProfileImageMutation();
+
+  // Local state
   const [isEditing, setIsEditing] = useState(false);
   const [isChangingPassword, setIsChangingPassword] = useState(false);
-  const [fullName, setFullName] = useState("Sarah Johnson");
-  const [username, setUsername] = useState("@sarahjohnson");
-  const [email, setEmail] = useState("sarah.johnson@example.com");
-  const [phone, setPhone] = useState("+1 (555) 123-4567");
-  const [bio, setBio] = useState(
-    "Senior Product Designer with 8+ years of experience creating user-centered digital experiences. Passionate about accessibility and inclusive design."
-  );
-  const [profileImage, setProfileImage] = useState(
-    "https://via.placeholder.com/150"
-  );
-  const [newPassword, setNewPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
 
-  const handleImageChange = (e: ChangeEvent<HTMLInputElement>) => {
+  const [fullName, setFullName] = useState("");
+  const [username, setUsername] = useState("");
+  const [email, setEmail] = useState("");
+  const [phone, setPhone] = useState("");
+  const [bio, setBio] = useState("");
+  const [profileImagePreview, setProfileImagePreview] = useState("");
+
+  const [oldPassword, setOldPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+
+  // Sync backend → local state
+  useEffect(() => {
+    if (profile) {
+      setFullName(profile.fullName || "");
+      setUsername(profile.userName || "");
+      setEmail(profile.email || "");
+      setPhone(profile.phone || "");
+      setBio(profile.bio || "");
+      setProfileImagePreview(profile.img || "");
+    }
+  }, [profile]);
+
+  if (isLoading) return <p>Loading...</p>;
+
+  // Handle Image Upload
+  const handleImageChange = async (e: ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
+      const file = e.target.files[0];
+
+      // Preview
       const reader = new FileReader();
       reader.onload = (e) => {
-        if (e.target?.result) {
-          setProfileImage(e.target.result as string);
-        }
+        if (e.target?.result) setProfileImagePreview(e.target.result as string);
       };
-      reader.readAsDataURL(e.target.files[0]);
+      reader.readAsDataURL(file);
+
+      // Upload
+      const formData = new FormData();
+      formData.append("files", file);
+
+      try {
+        const updated = await updateProfileImage(formData).unwrap();
+
+        // update Redux instantly
+        dispatch(updateUser(updated.data));
+
+        Swal.fire("Success!", "Profile image updated successfully!", "success");
+      } catch (err: any) {
+        Swal.fire("Error!", err?.data?.message || "Image upload failed", "error");
+      }
+    }
+  };
+
+  // Save Text Data
+  const handleSaveChanges = async () => {
+    try {
+      const updated = await updateProfileData({
+        fullName,
+        userName: username,
+        email,
+        phone,
+        bio,
+        ...(newPassword ? { password: newPassword, oldPassword } : {}),
+      }).unwrap();
+
+      // update Redux instantly
+      dispatch(updateUser(updated.data));
+
+      Swal.fire("Success!", "Profile updated successfully!", "success");
+
+      setIsEditing(false);
+      setIsChangingPassword(false);
+      setOldPassword("");
+      setNewPassword("");
+    } catch (error: any) {
+      Swal.fire("Error!", error?.data?.message || "Update failed", "error");
     }
   };
 
@@ -37,10 +113,11 @@ const Profile: React.FC = () => {
         <div className="flex items-center space-x-4 relative">
           <div className="relative">
             <img
-              src={profileImage}
+              src={profileImagePreview || authUser?.img || ""}
               alt="Profile"
               className="w-16 h-16 rounded-full object-cover"
             />
+
             {isEditing && (
               <label className="absolute -bottom-4 right-5 bg-gray-200 p-1 rounded-full cursor-pointer hover:bg-gray-300">
                 <FiCamera className="w-4 h-4 text-gray-700" />
@@ -53,12 +130,18 @@ const Profile: React.FC = () => {
               </label>
             )}
           </div>
+
           <div>
-            <h2 className="text-lg font-semibold">{fullName}</h2>
+            <h2 className="text-lg font-semibold">
+              {authUser?.fullName || fullName}
+            </h2>
             <p className="text-gray-500">{email}</p>
-            <p className="text-gray-400 text-sm">Last updated: January 15, 2025</p>
+            <p className="text-gray-400 text-sm">
+              Last updated: {new Date(profile?.updatedAt || "").toDateString()}
+            </p>
           </div>
         </div>
+
         <Button
           className="bg-pink-600 text-white px-4 py-2 rounded-lg hover:bg-pink-700"
           onClick={() => setIsEditing(!isEditing)}
@@ -67,14 +150,11 @@ const Profile: React.FC = () => {
         </Button>
       </div>
 
-      {/* Form Sections */}
+      {/* Main */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Basic Information */}
         <div className="bg-white p-6 rounded-lg shadow-sm">
-          <h3 className="text-lg font-semibold mb-2">Basic Information</h3>
-          <p className="text-gray-500 mb-4">
-            Update your personal details and contact information
-          </p>
+          <h3 className="text-lg font-semibold mb-4">Basic Information</h3>
           <div className="space-y-4">
             <div className="flex gap-4">
               <div className="flex-1">
@@ -105,7 +185,7 @@ const Profile: React.FC = () => {
 
             <div className="flex gap-4">
               <div className="flex-1">
-                <label className="block text-sm font-medium mb-1">Email Address*</label>
+                <label className="block text-sm font-medium mb-1">Email*</label>
                 <input
                   type="email"
                   className={`w-full border rounded-lg p-2 ${
@@ -116,8 +196,9 @@ const Profile: React.FC = () => {
                   readOnly={!isEditing}
                 />
               </div>
+
               <div className="flex-1">
-                <label className="block text-sm font-medium mb-1">Phone Number</label>
+                <label className="block text-sm font-medium mb-1">Phone</label>
                 <input
                   type="text"
                   className={`w-full border rounded-lg p-2 ${
@@ -147,29 +228,38 @@ const Profile: React.FC = () => {
 
         {/* Account Security */}
         <div className="bg-white p-6 rounded-lg shadow-sm">
-          <h3 className="text-lg font-semibold mb-2">Account Security</h3>
-          <p className="text-gray-500 mb-4">Manage your account security settings</p>
+          <h3 className="text-lg font-semibold mb-4">Account Security</h3>
 
-          <div className="mb-4">
+          <div>
             <label className="block text-sm font-medium mb-1">Password</label>
-            <div className="flex gap-2">
+            <div className="flex gap-2 mb-2">
               <input
                 type="password"
                 className="flex-1 border rounded-lg p-2 bg-gray-100 cursor-not-allowed"
                 value="********"
                 readOnly
               />
-              <Button
-                className="bg-gray-200 text-gray-700 hover:bg-gray-300"
-                onClick={() => setIsChangingPassword(!isChangingPassword)}
-              >
-                Change Password
-              </Button>
+              {isEditing && (
+                <Button
+                  className="bg-gray-200 text-gray-700 hover:bg-gray-300"
+                  onClick={() => setIsChangingPassword(!isChangingPassword)}
+                >
+                  Change Password
+                </Button>
+              )}
             </div>
-            <p className="text-gray-400 text-sm mt-1">Last changed 3 months ago</p>
 
             {isChangingPassword && (
-              <div className="mt-4 space-y-4">
+              <div className="space-y-4 mt-4">
+                <div>
+                  <label className="block text-sm font-medium mb-1">Old Password</label>
+                  <input
+                    type="password"
+                    className="w-full border rounded-lg p-2"
+                    value={oldPassword}
+                    onChange={(e) => setOldPassword(e.target.value)}
+                  />
+                </div>
                 <div>
                   <label className="block text-sm font-medium mb-1">New Password</label>
                   <input
@@ -179,30 +269,19 @@ const Profile: React.FC = () => {
                     onChange={(e) => setNewPassword(e.target.value)}
                   />
                 </div>
-                <div>
-                  <label className="block text-sm font-medium mb-1">
-                    Confirm Password
-                  </label>
-                  <input
-                    type="password"
-                    className="w-full border rounded-lg p-2"
-                    value={confirmPassword}
-                    onChange={(e) => setConfirmPassword(e.target.value)}
-                  />
-                </div>
-                <Button className="bg-pink-600 text-white hover:bg-pink-700 py-2 px-6 rounded-lg">
-                  Save Changes
-                </Button>
               </div>
             )}
           </div>
         </div>
       </div>
 
-      {/* Save Changes Button */}
+      {/* Save Button */}
       {isEditing && (
         <div className="mt-6 flex justify-center">
-          <Button className="w-2xl bg-pink-600 text-white hover:bg-pink-700 py-3 px-12 rounded-lg">
+          <Button
+            className="w-2xl bg-pink-600 text-white hover:bg-pink-700 py-3 px-12 rounded-lg"
+            onClick={handleSaveChanges}
+          >
             Save Changes
           </Button>
         </div>
