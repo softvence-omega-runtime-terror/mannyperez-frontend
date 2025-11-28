@@ -20,7 +20,6 @@ export default function AdminListings() {
     limit: 10,
   });
 
-  // ✅ FIX: TypeScript-safe casting
   const listings = (data?.products as unknown as IPendingProduct[]) || [];
   const meta = data?.meta;
 
