@@ -21,6 +21,7 @@ import Live from "@/pages/Live";
 import LivePage from "@/pages/live-events/LivePage";
 import MessagingPage from "@/pages/messages/buyer/MessagePage";
 import SellerMessagePage from "@/pages/messages/seller/SellerMessagePage";
+import OrderDetails from "@/pages/OrderDetails";
 import Products from "@/pages/Products";
 import BuyerProfile from "@/pages/profile/BuyerProfile";
 import Profile from "@/pages/profile/Profile";
@@ -28,6 +29,7 @@ import SellerProfile from "@/pages/profile/SellerProfile";
 import { store } from "@/store";
 
 // NEW — ADMIN LAYOUT
+
 import UpdateProduct from "@/components/ProductsComponent/CreateNewListing/UpdateProduct";
 import AdminCategories from "@/pages/admin/AdminCategories";
 import AdminDashboard from "@/pages/admin/AdminDashboard";
@@ -38,6 +40,7 @@ import AdminPayout from "@/pages/admin/AdminPayout";
 import AdminReports from "@/pages/admin/AdminReports";
 import AdminSettings from "@/pages/admin/AdminSettings";
 import AdminUsers from "@/pages/admin/AdminUsers";
+
 
 // --------------------- AUTH CHECK ---------------------
 const checkAuth = (options?: {
@@ -151,6 +154,11 @@ const routes = createBrowserRouter([
         loader: () => checkAuth({}),
       },
       {
+        path: "/orders/:orderId",
+        element: <OrderDetails />,
+        loader: () => checkAuth({}),
+      },
+      {
         path: "/buyer/saved-items",
         element: <SavedItems />,
         loader: () => checkAuth({}),
@@ -158,7 +166,7 @@ const routes = createBrowserRouter([
 
       // Profiles
       {
-        path: "/profile",
+        path: "/seller/profile",
         element: <Profile />,
         loader: () => checkAuth({}),
       },
@@ -178,6 +186,7 @@ const routes = createBrowserRouter([
       // Live
       { path: "/live", element: <LivePage />, loader: () => checkAuth({}) },
       { path: "/live/:eventId", element: <Live />, loader: () => checkAuth({}) },
+      { path: "/live/feature", element: < LivePage />, loader: () => checkAuth({}) },
 
       // Checkout
       {

@@ -1,7 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { Button } from "@/components/ui/button";
 import { useGetMyselfOrdersQuery } from "@/store/services/buyer/orderApi";
-import { ChevronLeftCircle, Star } from "lucide-react";
 import React, { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Footer from "../layout/Footer";
@@ -26,8 +25,8 @@ interface NormalizedOrder {
   date: string;
   status: string;
   productName: string;
-  seller: string;
-  sellerTier: string;
+  // seller: string;
+  // sellerTier: string;
   quantity: number;
   pricePerUnit: number;
   total: number;
@@ -116,16 +115,16 @@ const OrderCard: React.FC<OrderCardProps> = ({ order, onViewDetails }) => {
 
         <div className="flex-grow">
           <p className="font-medium text-gray-900 mb-1">{order.productName}</p>
-
+{/* 
           <div className="flex items-center text-sm text-gray-600 mb-2">
             <span>{order.seller}</span>
             <span className="inline-flex items-center ml-2 px-2 py-0.5 text-xs font-semibold rounded-full bg-yellow-100 text-yellow-700">
               <Star size={12} className="mr-1 fill-yellow-500 text-yellow-500" />
               {order.sellerTier}
             </span>
-          </div>
+          </div> */}
 
-          <p className="text-sm text-gray-600">
+          <p className="text-sm text-gray-600 flex justify-between gap-2">
             Qty: x {order.quantity}{" "}
             <span className="font-semibold" style={{ color: primaryPink }}>
               ${order.pricePerUnit.toFixed(2)} per sheet
@@ -138,7 +137,7 @@ const OrderCard: React.FC<OrderCardProps> = ({ order, onViewDetails }) => {
       </div>
 
       {/* Bottom Section */}
-      <div className="mt-4 pt-3 border-t border-gray-100 flex justify-end">
+      <div className="mt-4 pt-3 border-t cursor-pointer border-gray-100 flex justify-end">
         <Button variant="outline" size="sm" onClick={() => onViewDetails(order.id)}>
           View Details
         </Button>
@@ -153,6 +152,7 @@ const Orders: React.FC = () => {
   const [page, setPage] = useState(1);
   const [limit] = useState(10);
   const [searchTerm, setSearchTerm] = useState("");
+  console.log("🚀 ~ Orders ~ searchTerm:", searchTerm)
   const [statusFilter, setStatusFilter] = useState<
     "pending" | "processing" | "shipped" | "delivered" | "cancelled" | ""
   >("");
@@ -160,60 +160,57 @@ const Orders: React.FC = () => {
   const { data, isLoading, isFetching } = useGetMyselfOrdersQuery({
     page,
     limit,
-    search: searchTerm || undefined,
+    search: searchTerm.trim() || undefined,
     status: statusFilter || undefined,
   });
-  console.log("🚀 ~ Orders ~ data:", data)
 
-  const totalOrders =
-    (data as any)?.total ||
-    (data as any)?.meta?.total ||
-    ((data as any)?.data ? (data as any)?.data.length : 0);
+const totalOrders = (data as any)?.data?.meta?.totalOrders ?? 0;
 
-  const normalizedOrders: NormalizedOrder[] = useMemo(() => {
-    const apiOrders: ApiOrder[] = Array.isArray(data)
-      ? (data as ApiOrder[])
-      : (data as any)?.data ?? [];
-    return apiOrders.map((order) => {
-      const quantity = order.quantity ?? 1;
-      const total = typeof order.totalAmount === "number" ? order.totalAmount : 0;
-      const pricePerUnit = quantity ? total / quantity : total;
+const normalizedOrders: NormalizedOrder[] = useMemo(() => {
+  const backend = (data as any)?.data ?? {};
 
-      const productTitle =
-        order?.productId?.productInformation?.title ||
-        order?.productId?.title ||
-        order?.shippingMethod ||
-        "Product";
+  const apiOrders: ApiOrder[] = backend.data ?? [];
+  console.log("🚀 ~ Orders ~ apiOrders:", apiOrders)
 
-      const sellerName =
-        order?.productId?.sellerId?.name ||
-        order?.productId?.sellerId?.userName ||
-        order?.buyerId?.name ||
-        "Seller";
+  return apiOrders.map((order: any) => {
+    const quantity = order.quantity ?? 1;
+    const total = order.totalAmount ?? 0;
+    const pricePerUnit = quantity ? total / quantity : total;
 
-      const productImage =
-        order?.productId?.images?.[0] ||
-        order?.productId?.imageUrls?.[0] ||
-        "https://placehold.co/80x80/F1E6FF/EE2A7B?text=IMG";
+    const product = order.product;
 
-      const statusRaw = order.orderStatus || order.paymentStatus || "Pending";
-      const status =
-        statusRaw.charAt(0).toUpperCase() + statusRaw.slice(1).toLowerCase();
+    const productTitle =
+      product?.productInformation?.title ||
+      product?.title ||
+      "Product";
 
-      return {
-        id: order._id,
-        date: formatDate(order.createdAt),
-        status,
-        productName: productTitle,
-        seller: sellerName,
-        sellerTier: "Gold",
-        quantity,
-        pricePerUnit: Number.isFinite(pricePerUnit) ? Number(pricePerUnit) : 0,
-        total,
-        image: productImage,
-      };
-    });
-  }, [data]);
+    // const sellerName =
+    //   product?.seller?.name ||
+    //   product?.seller?.userName ||
+    //   "Seller";
+
+    const productImage =
+      product?.images?.[0] ||
+      "https://placehold.co/80x80/F1E6FF/EE2A7B?text=IMG";
+
+    const statusRaw = order.orderStatus || order.paymentStatus || "Pending";
+    const status =
+      statusRaw.charAt(0).toUpperCase() + statusRaw.slice(1).toLowerCase();
+
+    return {
+      id: order._id,
+      date: formatDate(order.createdAt),
+      status,
+      productName: productTitle,
+      // sell5er: sellerName,
+      // sellerTier: "Gold",
+      quantity,
+      pricePerUnit,
+      total,
+      image: productImage,
+    };
+  });
+}, [data]);
 
   const handleViewDetails = (id: string) => {
     navigate(`/orders/${id}`);
@@ -228,7 +225,7 @@ const Orders: React.FC = () => {
           {/* Header */}
           <div className="w-full mb-8">
             <div className="flex items-center gap-3 mb-1">
-              <ChevronLeftCircle size={32} className="text-gray-800" />
+              {/* <ChevronLeftCircle size={32} className="text-gray-800" /> */}
               <h1 className="text-3xl font-bold text-gray-900">My Orders</h1>
             </div>
             <p className="text-gray-600">

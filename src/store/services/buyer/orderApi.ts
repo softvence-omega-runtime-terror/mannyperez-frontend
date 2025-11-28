@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { baseApi } from "../baseApi";
 
 export interface CreateOrderRequest {
@@ -53,6 +54,13 @@ export interface GetOrdersQuery {
   status?: "pending" | "processing" | "shipped" | "delivered" | "cancelled";
 }
 
+export type OrderStatus =
+  | "pending"
+  | "processing"
+  | "shipped"
+  | "delivered"
+  | "cancelled";
+
 export const orderApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
     
@@ -69,18 +77,54 @@ export const orderApi = baseApi.injectEndpoints({
      getMyselfOrders: builder.query<
       { data: ApiOrder[]; total?: number; meta?: { total: number } } | ApiOrder[],
       GetOrdersQuery | void
-    >({
+    >({ 
       query: (params) => ({
         url: `/order/get-myself-orders`,
         method: "GET",
-        params,
+        params: params ? params : {},
       }),
       providesTags: ["Orders"],
     }),
 
+    getSingleOrder: builder.query<{ data: ApiOrder } | ApiOrder, string>({
+      query: (id) => ({
+        url: `/order/get-single-order/${id}`,
+        method: "GET",
+      }),
+      providesTags: (result, error, id) => [{ type: "Orders", id }],
+    }),
+
+    kelaDelivery: builder.mutation({
+      query: (id:string) => ({
+        url: `order/delivery/${id}`,
+        method: "PATCH",
+      
+      }),
+      invalidatesTags: (_result, _error,  id ) => [
+        { type: "Orders", id },
+        "Orders",
+      ],
+    }),
+    OrderComplete: builder.mutation({
+      query: (id:string) => ({
+        url: `order/complete/${id}`,
+        method: "PATCH",
+      
+      }),
+      invalidatesTags: (_result, _error,  id ) => [
+        { type: "Orders", id },
+        "Orders",
+      ],
+    }),
 
   }),
   
 });
 
-export const { useCreateOrderMutation, useGetMyselfOrdersQuery } = orderApi;
+export const {
+  useCreateOrderMutation,
+  useGetMyselfOrdersQuery,
+  useGetSingleOrderQuery,
+useKelaDeliveryMutation,
+  useOrderCompleteMutation
+} = orderApi;
