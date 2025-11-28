@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import App from "@/App";
 import Login from "@/pages/Auth/Login";
 import SignUp from "@/pages/Auth/SignUp";
@@ -20,23 +21,28 @@ import Live from "@/pages/Live";
 import LivePage from "@/pages/live-events/LivePage";
 import MessagingPage from "@/pages/messages/buyer/MessagePage";
 import SellerMessagePage from "@/pages/messages/seller/SellerMessagePage";
+import OrderDetails from "@/pages/OrderDetails";
 import Products from "@/pages/Products";
 import BuyerProfile from "@/pages/profile/BuyerProfile";
 import Profile from "@/pages/profile/Profile";
 import SellerProfile from "@/pages/profile/SellerProfile";
 import { store } from "@/store";
 
+// NEW — ADMIN LAYOUT
+
+import UpdateProduct from "@/components/ProductsComponent/CreateNewListing/UpdateProduct";
+import AdminCategories from "@/pages/admin/AdminCategories";
 // ADMIN
-import AdminLayout from "@/pages/admin/AdminLayout";
+
 import AdminDashboard from "@/pages/admin/AdminDashboard";
-import AdminUsers from "@/pages/admin/AdminUsers";
-import AdminListings from "@/pages/admin/AdminListings";
 import AdminIncidents from "@/pages/admin/AdminIncidents";
-import AdminSettings from "@/pages/admin/AdminSettings";
+import AdminLayout from "@/pages/admin/AdminLayout";
+import AdminListings from "@/pages/admin/AdminListings";
 import AdminPayout from "@/pages/admin/AdminPayout";
 import AdminReports from "@/pages/admin/AdminReports";
-import AdminCategories from "@/pages/admin/AdminCategories";
-import UpdateProduct from "@/components/ProductsComponent/CreateNewListing/UpdateProduct";
+import AdminSettings from "@/pages/admin/AdminSettings";
+import AdminUsers from "@/pages/admin/AdminUsers";
+
 import PaymentSuccessPage from "@/pages/payment-success";
 
 
@@ -63,7 +69,7 @@ const checkAuth = (options?: {
     // ROLE CHECK
     if (
       options?.allowedRoles &&
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+       
       !options.allowedRoles.includes(user.role as any)
     ) {
       return redirect("/unauthorized");
@@ -114,8 +120,6 @@ const routes = createBrowserRouter([
       {
         path: "/seller",
         element: <Seller />,
-<<<<<<< HEAD
-=======
         loader: () =>
           checkAuth({
             requireAuth: true,
@@ -150,7 +154,6 @@ const routes = createBrowserRouter([
       {
         path: "/seller",
         element: <Seller />,
->>>>>>> 0fd1efbb9d1430dcf22127505d8b5a1638b9b95b
         loader: () => checkAuth({ allowedRoles: ["seller", "admin"] }),
       },
       {
@@ -164,13 +167,11 @@ const routes = createBrowserRouter([
           }),
       },
 
-<<<<<<< HEAD
       // Buyer Routes
       {
         path: "/buyer/profile",
         element: <BuyerProfile />,
-        loader: () => checkAuth({ allowedRoles: ["buyer"] }),
-=======
+        loader: () => checkAuth({ allowedRoles: ["buyer"] }),},
       // SELLER MESSAGE PAGE
       {
         path: "/seller/messages",
@@ -199,21 +200,21 @@ const routes = createBrowserRouter([
             requireAuth: true,
             allowedRoles: ["buyer"],
           }),
->>>>>>> 0fd1efbb9d1430dcf22127505d8b5a1638b9b95b
       },
       {
         path: "/buyer/orders",
         element: <Orders />,
-<<<<<<< HEAD
-        loader: () => checkAuth({}),
-=======
+    
         loader: () => checkAuth({ requireAuth: true }),
->>>>>>> 0fd1efbb9d1430dcf22127505d8b5a1638b9b95b
+      },
+      {
+        path: "/orders/:orderId",
+        element: <OrderDetails />,
+        loader: () => checkAuth({}),
       },
       {
         path: "/buyer/saved-items",
         element: <SavedItems />,
-<<<<<<< HEAD
         loader: () => checkAuth({}),
       },
 
@@ -244,10 +245,8 @@ const routes = createBrowserRouter([
       { path: "/live", element: <LivePage />, loader: () => checkAuth({}) },
       { path: "/live/:eventId", element: <Live />, loader: () => checkAuth({}) },
       { path: "/live/feature", element: < LivePage />, loader: () => checkAuth({}) },
-=======
-        loader: () => checkAuth({ requireAuth: true }),
-      },
->>>>>>> 0fd1efbb9d1430dcf22127505d8b5a1638b9b95b
+    
+      
 
       // PROFILE (GENERAL)
       {
