@@ -1,11 +1,17 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { Button } from "@/components/ui/button";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { useGetMyselfOrdersQuery } from "@/store/services/buyer/orderApi";
 import React, { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Footer from "../layout/Footer";
 import Wrapper from "../layout/Wrapper";
-
 // --- Types from API ---
 interface ApiOrder {
   _id: string;
@@ -245,21 +251,27 @@ const normalizedOrders: NormalizedOrder[] = useMemo(() => {
               placeholder="Search orders..."
               className="flex-1 rounded-lg border border-gray-200 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-pink-500"
             />
-            <select
-              value={statusFilter}
-              onChange={(e) => {
-                setStatusFilter(e.target.value as any);
-                resetToFirstPage();
-              }}
-              className="rounded-lg border border-gray-200 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-pink-500"
-            >
-              <option value="">All Statuses</option>
-              <option value="pending">Pending</option>
-              <option value="processing">Processing</option>
-              <option value="shipped">Shipped</option>
-              <option value="delivered">Delivered</option>
-              <option value="cancelled">Cancelled</option>
-            </select>
+ <Select
+  value={statusFilter || "all"}
+  onValueChange={(value) => {
+    setStatusFilter(value === "all" ? "" : value);
+    resetToFirstPage();
+  }}
+>
+  <SelectTrigger className="w-fit rounded-lg px-3 py-2 border border-gray-200 bg-white focus:ring-2 focus:ring-primary focus:border-primary">
+    <SelectValue placeholder="All Statuses" />
+  </SelectTrigger>
+
+  <SelectContent className="rounded-lg border border-gray-200 bg-white shadow-md">
+    <SelectItem className="cursor-pointer" value="all">All Statuses</SelectItem>
+    <SelectItem className="cursor-pointer" value="pending">Pending</SelectItem>
+    <SelectItem className="cursor-pointer" value="processing">Processing</SelectItem>
+    <SelectItem className="cursor-pointer" value="shipped">Shipped</SelectItem>
+    <SelectItem className="cursor-pointer" value="delivered">Delivered</SelectItem>
+    <SelectItem className="cursor-pointer" value="cancelled">Cancelled</SelectItem>
+  </SelectContent>
+</Select>
+
             <div className="text-sm text-gray-500">
               Page {page}
               {totalOrders ? ` - ${totalOrders} total` : ""}
