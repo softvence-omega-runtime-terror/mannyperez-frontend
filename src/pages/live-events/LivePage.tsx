@@ -1,8 +1,14 @@
+import { useAppSelector } from "@/store/hooks";
+import BuyerLivesPage from "./BuyerLivesPage";
+import SellerLivesPage from "./SellerLivesPage";
 
 function LivePage() {
-  return (
-    <div>Live For Your Association Full Page</div>
-  )
+  const user = useAppSelector((state) => state.auth.user);
+
+  if (!user) return <div>Loading...</div>;
+
+  if (user.role === "buyer") return <BuyerLivesPage />;
+  if (user.role === "seller") return <SellerLivesPage />;
 }
 
-export default LivePage     
+export default LivePage;
