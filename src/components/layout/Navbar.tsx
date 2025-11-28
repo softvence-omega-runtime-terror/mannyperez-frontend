@@ -48,7 +48,8 @@ const Navbar = () => {
   };
 
   const navLinks = [
-    { name: "Home", path: "/", roles: ["admin","buyer"], isPublic: true },
+    { name: "Home", path: "/", roles: ["admin"], isPublic: true },
+    { name: "Feed", path: "/feed", roles: ["admin","buyer"], isPublic: false },
     { name: "Sellers", path: "/seller", roles: ["admin","buyer"], isPublic: true },
     { name: "Products", path: "/seller/products", roles: ["seller"], isPublic: false },
     { name: "Live", path: "/live", roles: [], isPublic: true },
