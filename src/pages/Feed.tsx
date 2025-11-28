@@ -25,9 +25,12 @@ const CurrentPackage: React.FC<{ onBuyNow?: (product: any) => void }> = ({
 }) => {
   const { productId } = useParams();
 
-  const { data: productData, isLoading } = useGetProductByIdQuery(productId as any, {
-    skip: !productId,
-  });
+  const { data: productData, isLoading } = useGetProductByIdQuery(
+    productId as any,
+    {
+      skip: !productId,
+    }
+  );
 
   if (isLoading || !productData?.data) return <div>Loading...</div>;
 
@@ -35,7 +38,9 @@ const CurrentPackage: React.FC<{ onBuyNow?: (product: any) => void }> = ({
 
   // --- Calculate price ---
   const renderPrice = () => {
-    const prices = product.pricingAndInventory?.map((p: any) => Number(p.price));
+    const prices = product.pricingAndInventory?.map((p: any) =>
+      Number(p.price)
+    );
 
     if (!prices?.length) return null;
 
@@ -50,9 +55,7 @@ const CurrentPackage: React.FC<{ onBuyNow?: (product: any) => void }> = ({
     }
 
     return (
-      <p className="text-xl font-bold text-pink-600">
-        ${prices[0].toFixed(2)}
-      </p>
+      <p className="text-xl font-bold text-pink-600">${prices[0].toFixed(2)}</p>
     );
   };
 
@@ -69,9 +72,9 @@ const CurrentPackage: React.FC<{ onBuyNow?: (product: any) => void }> = ({
             <p className="text-lg font-semibold">
               {product.productInformation?.title}
             </p>
-            <p className="text-sm text-gray-500">
+            {/* <p className="text-sm text-gray-500">
               {product.productInformation?.description}
-            </p>
+            </p> */}
             <div className="mt-1">{renderPrice()}</div>
           </div>
         </div>
@@ -111,7 +114,9 @@ const Feed: React.FC = () => {
             <OrderSummary product={checkoutProduct} />
             <BuyerInformation />
             <ShippingAddress />
-            <ShippingMethod onShippingSelect={(id) => setSelectedShipping(id)} />
+            <ShippingMethod
+              onShippingSelect={(id) => setSelectedShipping(id)}
+            />
             <PaymentMethod />
           </div>
         </div>

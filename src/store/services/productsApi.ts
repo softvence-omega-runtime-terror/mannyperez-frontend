@@ -12,7 +12,9 @@ export interface Product {
 
   condition?: string;
   _id: string;
-  sellerId: string | { _id: string; name: string; userName: string; img: string };
+  sellerId:
+    | string
+    | { _id: string; name: string; userName: string; img: string };
   productInformation: {
     title: string;
     description: string;
@@ -35,6 +37,7 @@ export interface Product {
   socialDetails?: {
     views: number;
     likes: number;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     comments: any[];
   };
  
@@ -80,9 +83,7 @@ export const productsApi = baseApi.injectEndpoints({
         method: "GET",
       }),
       providesTags: ["Products"],
-
-    })
-    ,
+    }),
     likeProduct: builder.mutation<void, string>({
       query: (id) => ({
         url: `/products/${id}/like`,
@@ -108,7 +109,7 @@ export const productsApi = baseApi.injectEndpoints({
       query: ({ id, comment }) => ({
         url: `/products/${id}/comment`,
         method: "POST",
-        body: { 'message': comment },
+        body: { message: comment },
       }),
       invalidatesTags: ["Products"],
     }),
@@ -116,7 +117,7 @@ export const productsApi = baseApi.injectEndpoints({
       query: ({ id, comment }) => ({
         url: `/products/${id}/comment-reply`,
         method: "POST",
-        body: { 'message': comment },
+        body: { message: comment },
       }),
       invalidatesTags: ["Products"],
     }),
@@ -134,14 +135,16 @@ export const productsApi = baseApi.injectEndpoints({
       invalidatesTags: ["Products"],
     }),
 
-    updateProduct: builder.mutation<Product, { payload: FormData; id: string }>({
-      query: ({ payload, id }) => ({
-        url: `/products/${id}`,
-        method: "PATCH",
-        body: payload,
-      }),
-      invalidatesTags: ["Products"],
-    }),
+    updateProduct: builder.mutation<Product, { payload: FormData; id: string }>(
+      {
+        query: ({ payload, id }) => ({
+          url: `/products/${id}`,
+          method: "PATCH",
+          body: payload,
+        }),
+        invalidatesTags: ["Products"],
+      }
+    ),
 
     getProductById: builder.query<{ data: Product }, string>({
       query: (id) => ({

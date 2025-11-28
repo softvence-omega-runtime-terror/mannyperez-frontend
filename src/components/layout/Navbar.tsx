@@ -21,6 +21,8 @@ import {
 import AddressBookModal from "./AddressBookModal";
 import SettingsModal from "./SettingsModal";
 
+import MessageButton from "./MessageButton";
+
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
@@ -50,12 +52,32 @@ const Navbar = () => {
 
   const navLinks = [
     { name: "Home", path: "/", roles: ["admin"], isPublic: true },
-    { name: "Feed", path: "/feed", roles: ["admin","buyer"], isPublic: false },
-    { name: "Sellers", path: "/seller", roles: ["admin","buyer"], isPublic: true },
-    { name: "Products", path: "/seller/products", roles: ["seller"], isPublic: false },
+    { name: "Feed", path: "/feed", roles: ["admin", "buyer"], isPublic: false },
+    {
+      name: "Sellers",
+      path: "/seller",
+      roles: ["admin", "buyer"],
+      isPublic: true,
+    },
+    {
+      name: "Products",
+      path: "/seller/products",
+      roles: ["seller"],
+      isPublic: false,
+    },
     { name: "Live", path: "/live", roles: [], isPublic: true },
-    { name: "Orders", path: "/seller/orders", roles: ["seller"], isPublic: false },
-    { name: "Promotions", path: "/seller/promotions", roles: ["seller"], isPublic: false },
+    {
+      name: "Orders",
+      path: "/seller/orders",
+      roles: ["seller"],
+      isPublic: false,
+    },
+    {
+      name: "Promotions",
+      path: "/seller/promotions",
+      roles: ["seller"],
+      isPublic: false,
+    },
     { name: "Dashboard", path: "/admin", roles: ["admin"], isPublic: false },
   ].filter((link) => {
     if (!isAuthenticated) {
@@ -88,7 +110,7 @@ const Navbar = () => {
       label: "Address Book",
       action: () => setIsAddressBookOpen(true),
     },
- 
+
     {
       icon: Settings,
       label: "Settings",
@@ -121,7 +143,10 @@ const Navbar = () => {
         <div className="flex items-center justify-between py-4">
           {/* LEFT */}
           <div className="flex items-center gap-8">
-            <NavLink to="/" className="flex items-center">
+            <NavLink
+              to="/"
+              className="flex items-center"
+            >
               <img
                 src="/logoDestash.png"
                 alt="DTFdestash"
@@ -142,7 +167,6 @@ const Navbar = () => {
                   }
                 >
                   {link.name}
-                  
                 </NavLink>
               ))}
             </div>
@@ -150,6 +174,7 @@ const Navbar = () => {
 
           {/* RIGHT */}
           <div className="hidden lg:flex items-center gap-5">
+            {isAuthenticated && <MessageButton />}
             <SearchInput
               placeholder="Search listings, sellers..."
               onSearch={(e) => console.log(e)}
@@ -190,7 +215,6 @@ const Navbar = () => {
                       </div>
 
                       <div className="space-y-1 mt-2">
-
                         {/*  ADDED ADMIN DASHBOARD BUTTON */}
                         {user?.role === "admin" && (
                           <button
@@ -206,27 +230,31 @@ const Navbar = () => {
                         )}
 
                         {/* Original dropdown links */}
-                        {dropdownLinks.map(({ icon: Icon, label, path, action }) => (
-                          <button
-                            key={label}
-                            onClick={() => {
-                              setIsDropdownOpen(false);
-                              if (action) action();
-                              else if (path) navigate(path);
-                            }}
-                            className="w-full flex items-center space-x-3 px-3 py-2 hover:bg-gray-50 rounded-lg text-left"
-                          >
-                            <Icon className="w-5 h-5 text-gray-700" />
-                            <span className="text-gray-800">{label}</span>
-                          </button>
-                        ))}
+                        {dropdownLinks.map(
+                          ({ icon: Icon, label, path, action }) => (
+                            <button
+                              key={label}
+                              onClick={() => {
+                                setIsDropdownOpen(false);
+                                if (action) action();
+                                else if (path) navigate(path);
+                              }}
+                              className="w-full flex items-center space-x-3 px-3 py-2 hover:bg-gray-50 rounded-lg text-left"
+                            >
+                              <Icon className="w-5 h-5 text-gray-700" />
+                              <span className="text-gray-800">{label}</span>
+                            </button>
+                          )
+                        )}
 
                         <button
                           onClick={handleLogout}
                           className="w-full flex items-center space-x-3 px-3 py-2 hover:bg-gray-50 rounded-lg text-left mt-2 pt-3 border-t border-gray-200"
                         >
                           <LogOut className="w-5 h-5 text-pink-500" />
-                          <span className="text-pink-500 font-medium">Logout</span>
+                          <span className="text-pink-500 font-medium">
+                            Logout
+                          </span>
                         </button>
                       </div>
                     </div>
@@ -324,8 +352,12 @@ const Navbar = () => {
         </div>
       )}
 
-      {isAddressBookOpen && <AddressBookModal onClose={() => setIsAddressBookOpen(false)} />}
-      {isSettingsOpen && <SettingsModal onClose={() => setIsSettingsOpen(false)} />}
+      {isAddressBookOpen && (
+        <AddressBookModal onClose={() => setIsAddressBookOpen(false)} />
+      )}
+      {isSettingsOpen && (
+        <SettingsModal onClose={() => setIsSettingsOpen(false)} />
+      )}
     </nav>
   );
 };

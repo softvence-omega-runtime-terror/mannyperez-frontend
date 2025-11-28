@@ -23,7 +23,6 @@ const SellerMessagePage = () => {
 
   return (
     <div className="flex flex-col h-screen w-full overflow-hidden">
-
       {/* Main Container: Full height, flexible content area */}
       <div className="flex flex-1 overflow-hidden relative bg-gray-50">
         {/* Mobile top header (for toggling contacts) */}

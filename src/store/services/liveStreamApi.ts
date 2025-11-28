@@ -83,6 +83,14 @@ export const liveStreamApi = baseApi.injectEndpoints({
       }),
       invalidatesTags: ["LiveEvents"],
     }),
+
+    getMyBookedLiveEvents: builder.query({
+      query: () => ({
+        url: `/live-event/getMyBookedEvents`,
+        method: "GET",
+      }),
+      providesTags: ["LiveEvents"],
+    }),
   }),
 });
 
@@ -97,4 +105,5 @@ export const {
   useUpdateLiveEventMutation,
   useGetAllLiveEventsQuery,
   useBookLiveEventMutation,
+  useGetMyBookedLiveEventsQuery,
 } = liveStreamApi;

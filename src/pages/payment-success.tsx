@@ -40,7 +40,7 @@ const PaymentSuccessPage = () => {
               <p><strong>Access Fee:</strong> ${contextId.accessFee}</p>
             </CardContent>
             <CardFooter className="flex justify-center">
-              <Button onClick={() => navigate("/feed")}>Return to Feed</Button>
+              <Button onClick={() => navigate("/live")}>Return to Live Events</Button>
             </CardFooter>
           </Card>
         );

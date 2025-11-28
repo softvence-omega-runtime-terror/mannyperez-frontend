@@ -1,8 +1,9 @@
+/* eslint-disable @typescript-eslint/ban-ts-comment */
 import { useParams } from "react-router-dom";
 import { useGetProductByIdQuery } from "@/store/services/productsApi";
-import { useGetSingleUserQuery } from "@/store/services/userApi";
 import { FaStar } from "react-icons/fa";
 import { useAppSelector } from "@/store/hooks";
+import { useGetSingleSellerQuery } from "@/store/services/seller";
 
 const MessageRightSidebar = () => {
   const { productId } = useParams<{
@@ -20,12 +21,11 @@ const MessageRightSidebar = () => {
 
   // Once we have the product, fetch seller info
   const sellerId = typeof productData?.data?.sellerId === "object" ? productData?.data?.sellerId?._id : productData?.data?.sellerId;
-  const { data: sellerData, isLoading: sellerLoading } = useGetSingleUserQuery(
+  const { data: sellerData, isLoading: sellerLoading } = useGetSingleSellerQuery(
     sellerId!,
     {
       skip: !sellerId,
-    }
-  );
+    });
 
   if (productLoading || sellerLoading) {
     return (
@@ -49,9 +49,9 @@ const MessageRightSidebar = () => {
   const seller = sellerData.data;
 
   const badgeColors: Record<string, string> = {
-    Gold: "bg-yellow-100 text-yellow-800",
-    Silver: "bg-gray-200 text-gray-800",
-    Platinum: "bg-purple-100 text-purple-800",
+    gold: "bg-yellow-100 text-yellow-800",
+    silver: "bg-gray-200 text-gray-800",
+    platinum: "bg-purple-100 text-purple-800",
   };
 
   const productTitle = product.productInformation?.title || "No title";
@@ -60,10 +60,10 @@ const MessageRightSidebar = () => {
     "Specialized product with unique features";
   const price = product.pricingAndInventory?.[0]?.price;
 
-  const orderCompletion = "98%"; // Example stat
-  const totalOrders = 1247; // Example stat
-  const responseTime = "Within 1 hour"; // Example stat
-  const badge = "Gold";
+  const orderCompletion = seller.successRate;
+  const totalOrders = seller.totalOrders;
+  const responseTime = "Within 1 hour"; //TODO: Replace with actual stats
+  const badge = seller.tiers;
 
   return (
     <div className="flex flex-col bg-white min-h-full rounded-xl space-y-6 p-6 shadow border border-gray-100">
@@ -80,9 +80,11 @@ const MessageRightSidebar = () => {
       <div className="text-center space-y-2">
         <h2 className="text-lg font-bold">{productTitle}</h2>
         <span
-          className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${badgeColors[badge]}`}
+          className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${
+            badgeColors[badge?.toLowerCase()]
+          }`}
         >
-          <FaStar className="mr-1 text-yellow-500" />
+          <FaStar className="mr-1 text-yellow-500 capitalize" />
           {badge} Seller
         </span>
       </div>
