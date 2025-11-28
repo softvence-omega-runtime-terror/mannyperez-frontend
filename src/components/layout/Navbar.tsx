@@ -32,6 +32,7 @@ const Navbar = () => {
   const dispatch = useAppDispatch();
 
   const { user, isAuthenticated, accessToken } = useAppSelector((state) => state.auth);
+  console.log(user)
 
   const [logout] = useLogoutMutation();
 
@@ -80,7 +81,7 @@ const Navbar = () => {
   }, []);
 
   const sellerDropdownLinks = [
-    { icon: User, label: "Profile", path: "/seller/profile", },
+    { icon: User, label: "Profile", path: "/profile", },
     { icon: Bookmark, label: "Saved Items", path: "/seller/saved-items" },
     {
       icon: MapPin,
@@ -98,7 +99,7 @@ const Navbar = () => {
   const buyerDropdownLinks = [
     { icon: User, label: "Profile", path: "/profile" },
     { icon: ShoppingBag, label: "My Orders", path: "/buyer/orders" },
-    { icon: Bookmark, label: "Saved Items", path: "/saved-items" },
+    { icon: Bookmark, label: "Saved Items", path: "/buyer/saved-items" },
     {
       icon: MapPin,
       label: "Address Book",

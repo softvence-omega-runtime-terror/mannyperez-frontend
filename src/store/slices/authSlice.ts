@@ -1,8 +1,7 @@
-// src/store/slices/authSlice.ts
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import type { RootState } from "../index";
 
-// Matches backend payload shape and stays permissive to avoid runtime type errors
+// User interface
 export interface User {
   _id?: string;
   id?: string;
@@ -34,22 +33,19 @@ interface AuthState {
   isLoading: boolean;
 }
 
-// LocalStorage helpers (guarded for SSR/sandbox)
+// LocalStorage helpers
 const safeGetItem = (key: string) =>
   typeof window !== "undefined" ? window.localStorage.getItem(key) : null;
 
 const safeSetItem = (key: string, value: string) => {
-  if (typeof window !== "undefined") {
-    window.localStorage.setItem(key, value);
-  }
+  if (typeof window !== "undefined") window.localStorage.setItem(key, value);
 };
 
 const safeRemoveItem = (key: string) => {
-  if (typeof window !== "undefined") {
-    window.localStorage.removeItem(key);
-  }
+  if (typeof window !== "undefined") window.localStorage.removeItem(key);
 };
 
+// Bootstrap auth state
 const bootstrapAuth = (): AuthState => {
   try {
     const storedUser = safeGetItem("auth.user");
@@ -83,87 +79,75 @@ const authSlice = createSlice({
   name: "auth",
   initialState,
   reducers: {
+    // Login / Signup
     setCredentials: (
       state,
       action: PayloadAction<{
         user: User;
         accessToken?: string;
-        approvalToken?: string;
         refreshToken?: string;
         token?: string;
+        approvalToken?: string;
       }>
     ) => {
-      const {
-        user,
-        accessToken,
-        approvalToken,
-        refreshToken,
-        token,
-      } = action.payload;
+      const { user, accessToken, refreshToken, token, approvalToken } =
+        action.payload;
 
-      // Prefer explicit accessToken/approvalToken, fall back to generic token key
+      state.user = user;
       state.accessToken = accessToken || approvalToken || token || null;
       state.refreshToken = refreshToken || null;
-      state.user = user;
-      state.isAuthenticated = Boolean(state.accessToken && state.user);
+      state.isAuthenticated = Boolean(state.user && state.accessToken);
 
-      // Persist manually to localStorage so refresh survives even if redux-persist fails
-      if (state.accessToken) {
-        safeSetItem("auth.accessToken", state.accessToken);
-      }
-      if (state.refreshToken) {
-        safeSetItem("auth.refreshToken", state.refreshToken);
-      }
+      if (state.user) safeSetItem("auth.user", JSON.stringify(state.user));
+      if (state.accessToken) safeSetItem("auth.accessToken", state.accessToken);
+      if (state.refreshToken) safeSetItem("auth.refreshToken", state.refreshToken);
+    },
+
+    // Update user partially (image, name, bio, etc.)
+    updateUser: (state, action: PayloadAction<Partial<User>>) => {
       if (state.user) {
+        state.user = { ...state.user, ...action.payload };
         safeSetItem("auth.user", JSON.stringify(state.user));
       }
     },
 
-    updateUser: (state, action: PayloadAction<Partial<User>>) => {
-      if (state.user) {
-        state.user = { ...state.user, ...action.payload };
-      }
-    },
-
+    // Logout
     logout: (state) => {
       state.user = null;
       state.accessToken = null;
       state.refreshToken = null;
       state.isAuthenticated = false;
 
-       // Clear manual localStorage copies
+      safeRemoveItem("auth.user");
       safeRemoveItem("auth.accessToken");
       safeRemoveItem("auth.refreshToken");
-      safeRemoveItem("auth.user");
     },
   },
 });
 
-export const { setCredentials, updateUser, logout } = authSlice.actions;
-
-const readUserFromStorage = (): User | null => {
-  try {
-    const raw = safeGetItem("auth.user");
-    return raw ? (JSON.parse(raw) as User) : null;
-  } catch {
-    return null;
-  }
-};
-
-const readAccessTokenFromStorage = () => safeGetItem("auth.accessToken");
-const readRefreshTokenFromStorage = () => safeGetItem("auth.refreshToken");
-
+// Selectors
 export const selectCurrentUser = (state: RootState["auth"]) =>
-  state.user ?? readUserFromStorage();
+  state.user ??
+  (safeGetItem("auth.user")
+    ? JSON.parse(safeGetItem("auth.user")!)
+    : null);
 
 export const selectAccessToken = (state: RootState["auth"]) =>
-  state.accessToken ?? readAccessTokenFromStorage();
+  state.accessToken ?? safeGetItem("auth.accessToken");
 
 export const selectRefreshToken = (state: RootState["auth"]) =>
-  state.refreshToken ?? readRefreshTokenFromStorage();
+  state.refreshToken ?? safeGetItem("auth.refreshToken");
 
 export const selectIsAuthenticated = (state: RootState["auth"]) =>
   state.isAuthenticated ||
-  Boolean((state.user ?? readUserFromStorage()) && (state.accessToken ?? readAccessTokenFromStorage()));
+  Boolean(
+    (state.user ??
+      (safeGetItem("auth.user")
+        ? JSON.parse(safeGetItem("auth.user")!)
+        : null)) &&
+      (state.accessToken ?? safeGetItem("auth.accessToken"))
+  );
+
+export const { setCredentials, updateUser, logout } = authSlice.actions;
 
 export default authSlice.reducer;
