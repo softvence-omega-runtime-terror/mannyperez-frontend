@@ -57,6 +57,7 @@ const checkAuth = (options?: {
 
     if (
       options?.allowedRoles &&
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       !options.allowedRoles.includes(user.role as any)
     ) {
       return redirect("/unauthorized");
@@ -100,6 +101,7 @@ const routes = createBrowserRouter([
           { path: "post/:id", element: <div>Feed Posts.</div> },
         ],
       },
+      { path: "/live", element: <LivePage />, loader: () => checkAuth({}) },
 
       // Seller Routes
       {
@@ -174,7 +176,7 @@ const routes = createBrowserRouter([
       },
 
       // Live
-      { path: "/live", element: <LivePage />, loader: () => checkAuth({}) },
+
       {
         path: "/live/:eventId",
         element: <Live />,
