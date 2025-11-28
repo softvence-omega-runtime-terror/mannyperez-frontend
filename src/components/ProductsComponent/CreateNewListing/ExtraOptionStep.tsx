@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { StepCard } from './StepCard';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
@@ -21,6 +21,10 @@ export function ExtraOptionsStep({
   onVariantsChange,
 }: ExtraOptionsStepProps) {
   const [localVariants, setLocalVariants] = useState(variants);
+
+  useEffect(() => {
+    setLocalVariants(variants);
+  }, [variants]);
 
   const handleAddVariant = () => {
     const updated = [...localVariants, { size: '', color: '' }];

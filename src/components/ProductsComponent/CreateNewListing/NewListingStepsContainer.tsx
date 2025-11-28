@@ -22,7 +22,7 @@ const NewListingStepsContainer = () => {
     category: string;
     price: string;
     quantity: string;
-    extraOptions: { size?: number; color?: string }[];
+    extraOptions: { size: string; color: string }[];
     hasVariants: boolean;
   }>(
     {
@@ -109,7 +109,10 @@ const NewListingStepsContainer = () => {
           },
         ],
         // include any collected extra options (variants)
-        extraOptions: formData.extraOptions || [],
+        extraOptions: formData.extraOptions.map(option => ({
+          size: isNaN(parseFloat(option.size)) ? option.size : parseFloat(option.size),
+          color: option.color
+        })) || [],
       };
 
       const data = new FormData();
@@ -241,6 +244,10 @@ const NewListingStepsContainer = () => {
           hasVariants={formData.hasVariants}
           onVariantsToggle={(value: boolean) =>
             setFormData((prev) => ({ ...prev, hasVariants: value }))
+          }
+          variants={formData.extraOptions}
+          onVariantsChange={(variants) =>
+            setFormData((prev) => ({ ...prev, extraOptions: variants }))
           }
         />
 

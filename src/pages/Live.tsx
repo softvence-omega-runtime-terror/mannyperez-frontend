@@ -7,6 +7,7 @@ import { useGetLiveEventInfoQuery } from "@/store/services/liveStreamApi";
 import { useParams } from "react-router-dom";
 import StreamerLive from "./live-events/StreamerLive";
 import WatcherLive from "./live-events/WatcherLive";
+import { PaymentStatus } from "@/store/services/payments";
 
 export type LiveEventStatus = "scheduled" | "live" | "ended";
 
@@ -21,7 +22,10 @@ export type LiveEvent = {
   featuredProductIds: string[];
   status: LiveEventStatus;
   promotionAddons: string[];
-  paymentStatus: "pending" | "completed" | "failed";
+  paymentStatus: PaymentStatus;
+  accessFee: number;
+  viewerCount?: number;
+  thumbnailUrl?: string;
 };
 
 function Live() {
