@@ -50,6 +50,39 @@ export const liveStreamApi = baseApi.injectEndpoints({
       }),
       providesTags: ["LiveEvents"],
     }),
+
+    getMyLiveEvents: builder.query({
+      query: () => ({
+        url: `/live-event/getMyEvents`,
+        method: "GET",
+      }),
+      providesTags: ["LiveEvents"],
+    }),
+
+    updateLiveEvent: builder.mutation({
+      query: ({ payload, eventId }) => ({
+        url: `/live-event/update/${eventId}`,
+        method: "PATCH",
+        body: payload,
+      }),
+      invalidatesTags: ["LiveEvents"],
+    }),
+    getAllLiveEvents: builder.query({
+      query: ({ status }) => ({
+        url: "/live-event/getAll",
+        method: "GET",
+        params: { filter: status },
+      }),
+      providesTags: ["LiveEvents"],
+    }),
+
+    bookLiveEvent: builder.mutation({
+      query: (eventId) => ({
+        url: `/live-event/book/${eventId}`,
+        method: "POST",
+      }),
+      invalidatesTags: ["LiveEvents"],
+    }),
   }),
 });
 
@@ -60,4 +93,8 @@ export const {
   useJoinLiveStreamMutation,
   useEndLiveStreamMutation,
   useGetLiveEventInfoForHostQuery,
+  useGetMyLiveEventsQuery,
+  useUpdateLiveEventMutation,
+  useGetAllLiveEventsQuery,
+  useBookLiveEventMutation,
 } = liveStreamApi;

@@ -2,20 +2,30 @@ import { baseApi } from "./baseApi";
 
 // Product types
 export interface Product {
-  id: string;
-  title: string;
-  description: string;
-  price: number;
+  _id: string;
+  sellerId: string | { _id: string; name: string; userName: string; img: string };
+  productInformation: {
+    title: string;
+    description: string;
+    tags: string[];
+    category: string;
+  };
+  pricingAndInventory: {
+    price: number;
+    quantity: number;
+  }[];
   images: string[];
-  category: string;
-  sellerId: string;
-  condition: string;
   extraOptions?: {
     productVariants?: boolean;
     variants?: { size: string; color: string }[];
   };
+  socialDetails?: {
+    views: number;
+    likes: number;
+    comments: any[];
+  };
   createdAt: string;
-  status: "active" | "sold" | "pending";
+  updatedAt?: string;
 }
 
 export interface ProductsResponse {
@@ -110,7 +120,7 @@ export const productsApi = baseApi.injectEndpoints({
       invalidatesTags: ["Products"],
     }),
 
-    updateProduct: builder.mutation<Product, { payload: Partial<CreateProductRequest>; id: string }>({
+    updateProduct: builder.mutation<Product, { payload: FormData; id: string }>({
       query: ({ payload, id }) => ({
         url: `/products/${id}`,
         method: "PATCH",
@@ -119,7 +129,7 @@ export const productsApi = baseApi.injectEndpoints({
       invalidatesTags: ["Products"],
     }),
 
-    getProductById: builder.query<Product, string>({
+    getProductById: builder.query<{ data: Product }, string>({
       query: (id) => ({
         url: `/products/${id}`,
         method: "GET",
