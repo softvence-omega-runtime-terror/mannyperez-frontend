@@ -9,7 +9,7 @@ interface UploadPhotoStepProps {
   onFilesSelect?: (files: File[]) => void;
   onFileRemove?: (index: number) => void;
   onRemoveExisting?: (url: string) => void;
-  acceptedFormats?: string[][];
+  acceptedFormats?: string[];
   maxSize?: number;
   selectedFiles?: File[];
   existingImages?: string[];
