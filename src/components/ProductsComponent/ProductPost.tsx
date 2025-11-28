@@ -6,8 +6,9 @@ import { MoreHorizontal, Eye, Heart, MessageCircle, ShoppingBag, Send } from 'lu
 import { useState, useEffect, useRef } from 'react';
 import { useAppSelector } from '@/store/hooks';
 import PrimaryButton from '@/reuseableComponents/PrimaryButton';
-import { useCommentOnProductMutation, useCommentReplyMutation, useGetMyProductsQuery, useLikeCommentMutation, useLikeProductMutation, useViewProductMutation } from '@/store/services/productsApi';
+import { useCommentOnProductMutation, useCommentReplyMutation, useDeleteProductsMutation, useGetMyProductsQuery, useLikeCommentMutation, useLikeProductMutation, useViewProductMutation } from '@/store/services/productsApi';
 import { useNavigate } from 'react-router-dom';
+import Swal from 'sweetalert2';
 
 interface Comment {
   id: string;
@@ -91,13 +92,14 @@ export default function ProductPost({
   onLike,
   onComment,
 }: SocialPostCardProps) {
-  const { data: apiResp } = useGetMyProductsQuery();
+  const { data: apiResp, refetch } = useGetMyProductsQuery();
   const [likeProduct, { isLoading }] = useLikeProductMutation();
   const [likeComment] = useLikeCommentMutation();
   const { user } = useAppSelector((state) => state.auth);
   const [commentOnProduct] = useCommentOnProductMutation();
   const [commentReply] = useCommentReplyMutation();
   const [viewProduct] = useViewProductMutation();
+  const [deleteProduct] = useDeleteProductsMutation();
   const [commentText, setCommentText] = useState<Record<string, string>>({});
   const [replyOpen, setReplyOpen] = useState<Record<string, boolean>>({});
   const [replyText, setReplyText] = useState<Record<string, string>>({});
@@ -294,6 +296,7 @@ export default function ProductPost({
       tags,
       stats,
       comments,
+      productStatus: item.status,
     };
   };
 
@@ -324,6 +327,30 @@ export default function ProductPost({
     navigate(`/update-product/${productId}`);
 
   }
+
+  const handleProductDelete = async (productId?: string, status?: string) => {
+    if (!productId) return;
+
+    Swal.fire({
+      title: 'Are you sure?',
+      text: status === 'live' ? "Are you sure you want to delete this live product?" : "You won't be able to revert this!",
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonText: 'Yes, delete it!',
+      confirmButtonColor: '#d33',
+      cancelButtonText: 'Cancel',
+    }).then(async (result) => {
+      if (result.isConfirmed) {
+        try {
+          await deleteProduct(productId).unwrap();
+          Swal.fire('Deleted!', 'Your product has been deleted.', 'success');
+          await refetch();
+        } catch (err) {
+          console.error('Delete failed', err);
+        }
+      }
+    });
+  };
 
   return (
     <div className="space-y-6">
@@ -381,7 +408,7 @@ export default function ProductPost({
                 <p className="text-2xl font-semibold">{p.price}</p>
                 <div className="flex gap-2">
                   <PrimaryButton type="Outline" title='Edit' className='border border-border text-gray-600 px-4 py-3 rounded-sm font-normal' onClick={() => handleEdit(p.id)} />
-                  <PrimaryButton type="Outline" title='Delete' className='px-4 py-3 rounded-sm font-normal' />
+                  <PrimaryButton type="Outline" title='Delete' className='px-4 py-3 rounded-sm font-normal' onClick={() => handleProductDelete(p.id, p.productStatus)} />
                   <PrimaryButton type="Primary" title='Promote' className='px-4 py-3 rounded-sm bg-[#229ECF] font-normal' />
                 </div>
               </div>
