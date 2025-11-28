@@ -3,11 +3,11 @@
 import React, { useState } from "react";
 import { Outlet, useLocation, useNavigate, useParams } from "react-router-dom";
 import DestashAdmin from "@/components/FeedComponents/DestashAdmin";
-import DiamondPost from "@/components/FeedComponents/DiamondPost";
+// import DiamondPost from "@/components/FeedComponents/DiamondPost";
 import FeaturedPost from "@/components/FeedComponents/FeaturedPost";
 import FeedSidbar from "@/components/FeedComponents/FeedSidebar";
 import FeedSpotlight from "@/components/FeedComponents/FeedSpotlight";
-import GoldPost from "@/components/FeedComponents/GoldPost";
+// import GoldPost from "@/components/FeedComponents/GoldPost";
 import LiveStream from "@/components/FeedComponents/LiveStream";
 import OrderSummary from "@/components/CheckoutComponent/OrderSummary";
 import BuyerInformation from "@/components/CheckoutComponent/BuyerInformation";
@@ -146,8 +146,8 @@ const Feed: React.FC = () => {
               <FeedSpotlight />
               <LiveStream />
               <FeaturedPost onBuyNow={handleBuyNow} />
-              <DiamondPost onBuyNow={handleBuyNow} />
-              <GoldPost onBuyNow={handleBuyNow} />
+              {/* <DiamondPost onBuyNow={handleBuyNow} /> */}
+              {/* <GoldPost onBuyNow={handleBuyNow} /> */}
             </div>
 
             <div className="lg:col-span-3 relative">
