@@ -6,7 +6,7 @@ import { BsPersonCircle } from "react-icons/bs"; // Placeholder if profile image
 import userA from "../../assets/feedImg/usermale1.jpg";
 import streamA from "../../assets/feedImg/liveStream1.png";
 import AccessLiveSaleModal from "../modals/AccessLiveSaleModal";
-// 👇 IMPORT THE NEW MODAL COMPONENT
+//  IMPORT THE NEW MODAL COMPONENT
 
 // Mock data for the Live Stream card
 const streamData = {

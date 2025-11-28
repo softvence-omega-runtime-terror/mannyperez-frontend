@@ -22,6 +22,7 @@ type FeaturedPostProps = {
 const FeaturedPost: React.FC<FeaturedPostProps> = ({ onBuyNow }) => {
   const navigate = useNavigate();
   const { data, isLoading } = useGetProductsQuery(undefined);
+  console.log(data)
 
   // --- Hooks must be top level ---
   const [likesMap, setLikesMap] = useState<Record<string, number>>({});

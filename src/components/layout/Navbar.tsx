@@ -11,7 +11,6 @@ import Wrapper from "./Wrapper";
 
 import {
   Bookmark,
-  CreditCard,
   LogOut,
   MapPin,
   Settings,
@@ -48,22 +47,21 @@ const Navbar = () => {
     navigate("/login");
   };
 
-  const commonLinks = [
-    { name: "Home", path: "/" },
-    { name: "Sellers", path: "/seller" },
-    { name: "Live", path: "/live" },
-    { name: "Feed", path: "/feed" },
-  ];
-
-  const sellerExtraLinks = [
-    { name: "Products", path: "/seller/products" },
-    { name: "Promotions", path: "/seller/promotions" },
-  ];
-
-  const navLinks =
-    isAuthenticated && user?.role === "seller"
-      ? [...commonLinks, ...sellerExtraLinks]
-      : commonLinks;
+  const navLinks = [
+    { name: "Home", path: "/", roles: ["admin","buyer"], isPublic: true },
+    { name: "Sellers", path: "/seller", roles: ["admin","buyer"], isPublic: true },
+    { name: "Products", path: "/seller/products", roles: ["seller"], isPublic: false },
+    { name: "Live", path: "/live", roles: [], isPublic: true },
+    { name: "Orders", path: "/seller/orders", roles: ["seller"], isPublic: false },
+    { name: "Promotions", path: "/seller/promotions", roles: ["seller"], isPublic: false },
+    { name: "Dashboard", path: "/admin", roles: ["admin"], isPublic: false },
+  ].filter((link) => {
+    if (!isAuthenticated) {
+      return link.isPublic;
+    }
+    if (link.roles.length === 0) return true;
+    return link.roles.includes(user?.role || "");
+  });
 
   useEffect(() => {
     const handleResize = () => {
@@ -131,19 +129,6 @@ const Navbar = () => {
 
             {/* Desktop Nav */}
             <div className="hidden lg:flex lg:space-x-6">
-              {user?.role === "admin" && (
-                          <button
-                            onClick={() => {
-                              setIsDropdownOpen(false);
-                              navigate("/admin");
-                            }}
-                            className="w-full cursor-pointer flex items-center hover:bg-gray-50 rounded-lg text-left"
-                          >
-                            
-                            <span className="text-gray-800">Dashboard</span>
-                          </button>
-                        )}
-
               {navLinks.map((link) => (
                 <NavLink
                   key={link.path}
@@ -252,6 +237,7 @@ const Navbar = () => {
               <>
                 <PrimaryButton
                   type="Outline"
+                  className="hover:text-white"
                   title="Log In"
                   onClick={() => navigate("/login")}
                 />

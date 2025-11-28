@@ -39,6 +39,8 @@ import AdminCategories from "@/pages/admin/AdminCategories";
 import UpdateProduct from "@/components/ProductsComponent/CreateNewListing/UpdateProduct";
 import PaymentSuccessPage from "@/pages/payment-success";
 
+
+
 // --------------------- AUTH CHECK ---------------------
 const checkAuth = (options?: {
   requireAuth?: boolean;
@@ -160,7 +162,7 @@ const routes = createBrowserRouter([
 
       // Profiles
       {
-        path: "/profile",
+        path: "/seller/profile",
         element: <Profile />,
         loader: () => checkAuth({}),
       },
@@ -182,6 +184,9 @@ const routes = createBrowserRouter([
         element: <Live />,
         loader: () => checkAuth({}),
       },
+      { path: "/live", element: <LivePage />, loader: () => checkAuth({}) },
+      { path: "/live/:eventId", element: <Live />, loader: () => checkAuth({}) },
+      { path: "/live/feature", element: < LivePage />, loader: () => checkAuth({}) },
 
       // Checkout
       {
