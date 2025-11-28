@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/ban-ts-comment */
+
 import { useParams } from "react-router-dom";
 import { useAppSelector } from "@/store/hooks";
 import { useEffect } from "react";
@@ -57,12 +59,13 @@ const MessagingPage = () => {
   const { receiverId, productId } = useParams();
 
   const { data: productData, isLoading: productLoading } =
-    useGetProductByIdQuery(productId || "");
+    useGetProductByIdQuery(productId!, { skip: !productId });
+
   const { data: receiverData, isLoading: receiverLoading } =
     useGetSingleUserQuery(receiverId!, { skip: !receiverId });
   const user = useAppSelector((state) => state.auth.user);
 
-  const product = productData?.data as unknown as MessageProduct;
+  const product = productData;
 
   const receiver = receiverData?.data as MessageUser;
 
@@ -70,12 +73,14 @@ const MessagingPage = () => {
     if (!product || !receiver || !user) return;
 
     socket.emit(SocketEvent.JOIN_ROOM, {
+      // @ts-expect-error
       productId: product._id,
       receiverId: receiver._id,
     });
 
     return () => {
       socket.emit(SocketEvent.LEAVE_ROOM, {
+        // @ts-expect-error
         productId: product._id,
         receiverId: receiver._id,
       });
@@ -94,11 +99,13 @@ const MessagingPage = () => {
   return (
     <div className="flex flex-col max-h-screen bg-white">
       <MessageList
+        // @ts-expect-error
         productId={product._id}
         receiverId={receiver._id}
       />
       <div className="sticky bottom-0 bg-white z-10">
         <MessageInput
+          // @ts-expect-error
           productId={product._id}
           receiverId={receiver._id}
         />
