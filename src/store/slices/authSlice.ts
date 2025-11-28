@@ -125,29 +125,39 @@ const authSlice = createSlice({
   },
 });
 
-// Selectors
-export const selectCurrentUser = (state: RootState["auth"]) =>
-  state.user ??
-  (safeGetItem("auth.user")
-    ? JSON.parse(safeGetItem("auth.user")!)
-    : null);
-
-export const selectAccessToken = (state: RootState["auth"]) =>
-  state.accessToken ?? safeGetItem("auth.accessToken");
-
-export const selectRefreshToken = (state: RootState["auth"]) =>
-  state.refreshToken ?? safeGetItem("auth.refreshToken");
-
-export const selectIsAuthenticated = (state: RootState["auth"]) =>
-  state.isAuthenticated ||
-  Boolean(
-    (state.user ??
-      (safeGetItem("auth.user")
-        ? JSON.parse(safeGetItem("auth.user")!)
-        : null)) &&
-      (state.accessToken ?? safeGetItem("auth.accessToken"))
-  );
-
 export const { setCredentials, updateUser, logout } = authSlice.actions;
+
+const readUserFromStorage = (): User | null => {
+  try {
+    const raw = safeGetItem("auth.user");
+    return raw ? (JSON.parse(raw) as User) : null;
+  } catch {
+    return null;
+  }
+};
+
+const readAccessTokenFromStorage = () => safeGetItem("auth.accessToken");
+const readRefreshTokenFromStorage = () => safeGetItem("auth.refreshToken");
+
+
+
+
+
+
+export const selectCurrentUser = (state: RootState) =>
+  state.auth.user ?? readUserFromStorage();
+
+export const selectAccessToken = (state: RootState) =>
+  state.auth.accessToken ?? readAccessTokenFromStorage();
+
+export const selectRefreshToken = (state: RootState) =>
+  state.auth.refreshToken ?? readRefreshTokenFromStorage();
+
+export const selectIsAuthenticated = (state: RootState) =>
+  state.auth.isAuthenticated ||
+  Boolean(
+    (state.auth.user ?? readUserFromStorage()) &&
+      (state.auth.accessToken ?? readAccessTokenFromStorage())
+  );
 
 export default authSlice.reducer;

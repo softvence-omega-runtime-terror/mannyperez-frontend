@@ -1,7 +1,16 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { baseApi } from "./baseApi";
 
 // Product types
 export interface Product {
+  id: string;
+  title?: string;
+  description?: string;
+  price?: number;
+
+  category?: string;
+
+  condition?: string;
   _id: string;
   sellerId:
     | string
@@ -15,19 +24,23 @@ export interface Product {
   pricingAndInventory: {
     price: number;
     quantity: number;
+    _id:string
   }[];
   images: string[];
   extraOptions?: {
     productVariants?: boolean;
     variants?: { size: string; color: string }[];
   };
+  createdAt?: string;
+  status?: "active" | "sold" | "pending" | string;
+ 
   socialDetails?: {
     views: number;
     likes: number;
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     comments: any[];
   };
-  createdAt: string;
+ 
   updatedAt?: string;
 }
 
@@ -138,6 +151,7 @@ export const productsApi = baseApi.injectEndpoints({
         url: `/products/${id}`,
         method: "GET",
       }),
+      transformResponse: (response: any) => response?.data ?? response,
       providesTags: ["Products"],
     }),
 
