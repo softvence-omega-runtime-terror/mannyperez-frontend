@@ -5,6 +5,7 @@ import {
 } from "@/store/services/buyer/orderApi";
 import { ChevronDown, Search, ShoppingBag } from "lucide-react";
 import React, { useEffect, useMemo, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import Footer from "../layout/Footer";
 import Wrapper from "../layout/Wrapper";
 
@@ -134,6 +135,7 @@ export default function OrdersList() {
   const [limit] = useState(10);
   const [searchTerm, setSearchTerm] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
+  const navigate = useNavigate();
 
 
 
@@ -240,6 +242,11 @@ export default function OrdersList() {
   const handleStatusChange = (value: OrderStatus | "") => {
     setStatusFilter(value);
     setPage(1);
+  };
+
+  const handleViewDetails = (orderId: string) => {
+    if (!orderId) return;
+    navigate(`/orders/${orderId}`);
   };
 
   return (
@@ -405,15 +412,12 @@ export default function OrdersList() {
 
                       {/* Action */}
                       <td className="px-6 py-4 text-right text-sm font-medium whitespace-nowrap">
-                        {order.status === "processing" ? (
-                          <button className="text-pink-600 hover:text-pink-800 font-semibold transition duration-150">
-                            Mark as Shipped
-                          </button>
-                        ) : (
-                          <button className="text-blue-600 hover:text-blue-800 font-semibold transition duration-150">
-                            View Details
-                          </button>
-                        )}
+                        <button
+                          className="text-blue-600 hover:text-blue-800 font-semibold transition duration-150"
+                          onClick={() => handleViewDetails(order.id)}
+                        >
+                          View Details
+                        </button>
                       </td>
                     </tr>
                   ))}
