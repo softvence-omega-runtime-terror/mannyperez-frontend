@@ -34,7 +34,7 @@ const Navbar = () => {
   const dispatch = useAppDispatch();
 
   const { user, isAuthenticated, accessToken } = useAppSelector((state) => state.auth);
-  console.log(user)
+
 
   const [logout] = useLogoutMutation();
 
