@@ -134,7 +134,7 @@ const routes = createBrowserRouter([
         loader: () =>
           checkAuth({
             requireAuth: true,
-            allowedRoles: ["seller", "admin"],
+            allowedRoles: ["seller", "admin","buyer"],
             requireVerified: true,
           }),
       },

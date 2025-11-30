@@ -1,6 +1,6 @@
 import React, { useState, ChangeEvent, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { FiCamera } from "react-icons/fi";
+import { FiCamera, FiEye, FiEyeOff } from "react-icons/fi";
 import Swal from "sweetalert2";
 import {
   useGetUserByIdQuery,
@@ -9,21 +9,20 @@ import {
 } from "@/store/services/profile/profileApi";
 import { useAppSelector, useAppDispatch } from "@/store/hooks";
 import { updateUser } from "@/store/slices/authSlice";
+import { useChangePasswordMutation } from "@/store/services/profile/changePasswordApi";
 
 const Profile: React.FC = () => {
-  // Get logged-in user
   const authUser = useAppSelector((state) => state.auth.user);
   const userId = authUser?._id;
   const dispatch = useAppDispatch();
 
-  // Fetch profile
   const { data, isLoading } = useGetUserByIdQuery(userId as any);
   const profile = data?.data;
 
   const [updateProfileData] = useUpdateProfileDataMutation();
   const [updateProfileImage] = useUpdateProfileImageMutation();
+  const [changePassword] = useChangePasswordMutation();
 
-  // Local state
   const [isEditing, setIsEditing] = useState(false);
   const [isChangingPassword, setIsChangingPassword] = useState(false);
 
@@ -34,10 +33,14 @@ const Profile: React.FC = () => {
   const [bio, setBio] = useState("");
   const [profileImagePreview, setProfileImagePreview] = useState("");
 
+  // Password states
   const [oldPassword, setOldPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
 
-  // Sync backend → local state
+  // 🔥 NEW TOGGLE STATES
+  const [showOldPassword, setShowOldPassword] = useState(false);
+  const [showNewPassword, setShowNewPassword] = useState(false);
+
   useEffect(() => {
     if (profile) {
       setFullName(profile.fullName || "");
@@ -51,26 +54,22 @@ const Profile: React.FC = () => {
 
   if (isLoading) return <p>Loading...</p>;
 
-  // Handle Image Upload
+  // Image Upload
   const handleImageChange = async (e: ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
       const file = e.target.files[0];
 
-      // Preview
       const reader = new FileReader();
       reader.onload = (e) => {
         if (e.target?.result) setProfileImagePreview(e.target.result as string);
       };
       reader.readAsDataURL(file);
 
-      // Upload
       const formData = new FormData();
       formData.append("files", file);
 
       try {
         const updated = await updateProfileImage(formData).unwrap();
-
-        // update Redux instantly
         dispatch(updateUser(updated.data));
 
         Swal.fire("Success!", "Profile image updated successfully!", "success");
@@ -80,27 +79,35 @@ const Profile: React.FC = () => {
     }
   };
 
-  // Save Text Data
+  // Save Profile + Change Password
   const handleSaveChanges = async () => {
     try {
+      // If password being changed
+      if (isChangingPassword && oldPassword && newPassword) {
+        await changePassword({
+          oldPassword,
+          newPassword,
+        }).unwrap();
+
+        Swal.fire("Success!", "Password changed successfully!", "success");
+        setOldPassword("");
+        setNewPassword("");
+        setIsChangingPassword(false);
+      }
+
+      // Update profile
       const updated = await updateProfileData({
         fullName,
         userName: username,
         email,
         phone,
         bio,
-        ...(newPassword ? { password: newPassword, oldPassword } : {}),
       }).unwrap();
 
-      // update Redux instantly
       dispatch(updateUser(updated.data));
 
       Swal.fire("Success!", "Profile updated successfully!", "success");
-
       setIsEditing(false);
-      setIsChangingPassword(false);
-      setOldPassword("");
-      setNewPassword("");
     } catch (error: any) {
       Swal.fire("Error!", error?.data?.message || "Update failed", "error");
     }
@@ -150,7 +157,7 @@ const Profile: React.FC = () => {
         </Button>
       </div>
 
-      {/* Main */}
+      {/* Main Content */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Basic Information */}
         <div className="bg-white p-6 rounded-lg shadow-sm">
@@ -251,23 +258,56 @@ const Profile: React.FC = () => {
 
             {isChangingPassword && (
               <div className="space-y-4 mt-4">
+                {/* OLD PASSWORD */}
                 <div>
-                  <label className="block text-sm font-medium mb-1">Old Password</label>
-                  <input
-                    type="password"
-                    className="w-full border rounded-lg p-2"
-                    value={oldPassword}
-                    onChange={(e) => setOldPassword(e.target.value)}
-                  />
+                  <label className="block text-sm font-medium mb-1">
+                    Old Password
+                  </label>
+                  <div className="relative">
+                    <input
+                      type={showOldPassword ? "text" : "password"}
+                      className="w-full border rounded-lg p-2 pr-10"
+                      value={oldPassword}
+                      onChange={(e) => setOldPassword(e.target.value)}
+                    />
+
+                    <span
+                      className="absolute right-3 top-1/2 -translate-y-1/2 cursor-pointer"
+                      onClick={() => setShowOldPassword(!showOldPassword)}
+                    >
+                      {showOldPassword ? (
+                        <FiEyeOff className="text-gray-600" />
+                      ) : (
+                        <FiEye className="text-gray-600" />
+                      )}
+                    </span>
+                  </div>
                 </div>
+
+                {/* NEW PASSWORD */}
                 <div>
-                  <label className="block text-sm font-medium mb-1">New Password</label>
-                  <input
-                    type="password"
-                    className="w-full border rounded-lg p-2"
-                    value={newPassword}
-                    onChange={(e) => setNewPassword(e.target.value)}
-                  />
+                  <label className="block text-sm font-medium mb-1">
+                    New Password
+                  </label>
+                  <div className="relative">
+                    <input
+                      type={showNewPassword ? "text" : "password"}
+                      className="w-full border rounded-lg p-2 pr-10"
+                      value={newPassword}
+                      onChange={(e) => setNewPassword(e.target.value)}
+                    />
+
+                    <span
+                      className="absolute right-3 top-1/2 -translate-y-1/2 cursor-pointer"
+                      onClick={() => setShowNewPassword(!showNewPassword)}
+                    >
+                      {showNewPassword ? (
+                        <FiEyeOff className="text-gray-600" />
+                      ) : (
+                        <FiEye className="text-gray-600" />
+                      )}
+                    </span>
+                  </div>
                 </div>
               </div>
             )}
@@ -275,7 +315,6 @@ const Profile: React.FC = () => {
         </div>
       </div>
 
-      {/* Save Button */}
       {isEditing && (
         <div className="mt-6 flex justify-center">
           <Button
