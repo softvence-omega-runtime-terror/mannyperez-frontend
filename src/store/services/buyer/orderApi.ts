@@ -18,12 +18,16 @@ export interface ApiOrder {
   createdAt?: string;
   orderStatus?: string;
   paymentStatus?: string;
+  priceId?: string;
+  platformFee?: number;
   shippingAddress?: string;
   shippingMethod?: string;
   totalAmount?: number;
   productId?: any;
   buyerId?: any;
   quantity?: number;
+  buyer?: any;
+  product?: any;
 }
 
 export interface OrderResponse {
@@ -61,9 +65,20 @@ export type OrderStatus =
   | "delivered"
   | "cancelled";
 
+export interface SellerOrdersResponse {
+  data: ApiOrder[];
+  meta?: {
+    currentPage?: number;
+    perPage?: number;
+    totalOrders?: number;
+    totalPages?: number;
+  };
+  message?: string;
+}
+
 export const orderApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
-    
+
 
     createOrder: builder.mutation<OrderResponse, CreateOrderRequest>({
       query: (payload) => ({
@@ -73,11 +88,11 @@ export const orderApi = baseApi.injectEndpoints({
       }),
       invalidatesTags: ["Orders"],
     }),
-    
-     getMyselfOrders: builder.query<
+
+    getMyselfOrders: builder.query<
       { data: ApiOrder[]; total?: number; meta?: { total: number } } | ApiOrder[],
       GetOrdersQuery | void
-    >({ 
+    >({
       query: (params) => ({
         url: `/order/get-myself-orders`,
         method: "GET",
@@ -95,36 +110,49 @@ export const orderApi = baseApi.injectEndpoints({
     }),
 
     kelaDelivery: builder.mutation({
-      query: (id:string) => ({
+      query: (id: string) => ({
         url: `order/delivery/${id}`,
         method: "PATCH",
-      
+
       }),
-      invalidatesTags: (_result, _error,  id ) => [
+      invalidatesTags: (_result, _error, id) => [
         { type: "Orders", id },
         "Orders",
       ],
     }),
     OrderComplete: builder.mutation({
-      query: (id:string) => ({
+      query: (id: string) => ({
         url: `order/complete/${id}`,
         method: "PATCH",
-      
+
       }),
-      invalidatesTags: (_result, _error,  id ) => [
+      invalidatesTags: (_result, _error, id) => [
         { type: "Orders", id },
         "Orders",
       ],
     }),
+    getSellerOrder: builder.query<
+      SellerOrdersResponse | ApiOrder[] | any,
+      GetOrdersQuery | void
+    >({
+      query: (params) => ({
+        url: `/order/seller-orders`,
+        method: "GET",
+        params: params ? params : {},
+      }), 
+      providesTags: ["Orders"],
+    
+    }),
 
   }),
-  
+
 });
 
 export const {
   useCreateOrderMutation,
   useGetMyselfOrdersQuery,
   useGetSingleOrderQuery,
-useKelaDeliveryMutation,
-  useOrderCompleteMutation
+  useKelaDeliveryMutation,
+  useOrderCompleteMutation,
+  useGetSellerOrderQuery,
 } = orderApi;

@@ -39,6 +39,7 @@ const OrderDetails: React.FC = () => {
   const { data, isLoading, refetch } = useGetSingleOrderQuery(orderId ?? "", {
     skip: !orderId,
   });
+  console.log("🚀 ~ OrderDetails ~ data:", data)
   
   const [OrderComplete, { isLoading: isUpdatingComplete }] =
     useOrderCompleteMutation()
@@ -52,6 +53,7 @@ const OrderDetails: React.FC = () => {
   const [showCancelModal, setShowCancelModal] = useState(false);
 
   const isSeller = (currentUser?.role || "").toLowerCase() === "seller";
+
 
   const isBuyer = (currentUser?.role || "").toLowerCase() === "buyer";
 
@@ -142,13 +144,18 @@ res = await kelaDelivery(orderId)
 
       <div className="bg-white rounded-2xl shadow border border-box overflow-hidden border-gray-100 p-6 space-y-6">
         <div className="flex flex-wrap flex-col md:flex-row md:items-center md:justify-between gap-4">
-          <div>
+       <div className="flex justify-between items-center gap-2 flex-col md:flex-row w-full">
+           <div>
             <p className="text-sm text-gray-500">Order ID</p>
             <h2 className="md:text-2xl font-bold  text-gray-800">{order._id}</h2>
             <p className="text-sm text-gray-500">
               Placed on {formatDate(order.createdAt)}
             </p>
+          </div><div className="bg-gray-50 md:w-fit w-full rounded-xl p-4 border border-gray-100">
+             <h2 className=" capitalize text-base font-medium">Order Status : <span className="text-primary font-semibold text-lg"> {order.orderStatus}</span> </h2>
+             <h2 className=" capitalize text-base font-medium">Payment Status : <span className="text-primary font-semibold text-lg"> {order.paymentStatus}</span> </h2>
           </div>
+       </div>
        
         </div>
 
@@ -240,7 +247,7 @@ res = await kelaDelivery(orderId)
               </div>
             </div>
 
-            {isBuyer && (
+            {isBuyer ||isSeller && (
               <div className="mt-4">
                 <button
                   className="w-full py-2 rounded-lg border isUpdatingComplete border-red-500 bg-primary text-white  cursor-pointer "
