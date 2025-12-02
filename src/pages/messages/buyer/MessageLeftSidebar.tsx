@@ -25,6 +25,7 @@ export type Conversation = {
 
 const MessageLeftSidebar: React.FC = () => {
   const [conversations, setConversations] = useState<Conversation[]>([]);
+  console.log(conversations, "from buyer")
   const navigate = useNavigate();
 
   useEffect(() => {
