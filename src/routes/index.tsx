@@ -28,7 +28,6 @@ import Profile from "@/pages/profile/Profile";
 import SellerProfile from "@/pages/profile/SellerProfile";
 import { store } from "@/store";
 
-// NEW — ADMIN LAYOUT
 
 import UpdateProduct from "@/components/ProductsComponent/CreateNewListing/UpdateProduct";
 import AdminCategories from "@/pages/admin/AdminCategories";
