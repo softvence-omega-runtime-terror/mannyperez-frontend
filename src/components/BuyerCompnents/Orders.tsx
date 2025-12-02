@@ -254,7 +254,7 @@ const normalizedOrders: NormalizedOrder[] = useMemo(() => {
  <Select
   value={statusFilter || "all"}
   onValueChange={(value) => {
-    setStatusFilter(value === "all" ? "" : value);
+    setStatusFilter(value === "all" ? "" : (value as any));
     resetToFirstPage();
   }}
 >
