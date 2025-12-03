@@ -161,6 +161,14 @@ export const productsApi = baseApi.injectEndpoints({
       }),
       invalidatesTags: ["Products"],
     }),
+
+    getFeedProducts: builder.query<ProductsResponse, void>({
+      query: () => ({
+        url: `/products/feed`,
+        method: "GET",
+      }),
+      providesTags: ["Products"],
+    }),
   }),
 });
 
@@ -176,4 +184,5 @@ export const {
   useUpdateProductMutation,
   useDeleteProductsMutation,
   useGetProductByIdQuery,
+  useGetFeedProductsQuery,
 } = productsApi;
