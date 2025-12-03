@@ -1,36 +1,38 @@
 import { useAppSelector } from "@/store/hooks";
-
 import { FaFileWord, FaFileAlt, FaFilePdf } from "react-icons/fa";
-import { format } from "date-fns";
+import { format, isToday, isYesterday, isThisWeek } from "date-fns";
 import { Message } from "./buyer/MessagePage";
 
-type Props = {
-  message: Message;
+type Props = { message: Message };
+
+// Friendly date helper
+const getFriendlyDate = (date: Date) => {
+  if (isToday(date)) return "Today";
+  if (isYesterday(date)) return "Yesterday";
+  if (isThisWeek(date)) return format(date, "EEEE");
+  return format(date, "MMM dd, yyyy");
 };
 
 const MessageBubble = ({ message }: Props) => {
   const user = useAppSelector((state) => state.auth.user);
   const { sender, text, mediaUrl, mediaType, fileName, createdAt } = message;
 
-  // Determine if the message was sent by the currently logged-in user
   const isOwnMessage = user?._id === sender._id;
 
-  // Helper function to render media content (image, video, document)
   const renderMedia = () => {
     if (!mediaUrl) return null;
+
+    const fileBlock =
+      "mt-2 flex items-center gap-2 p-2 rounded-lg border shadow-sm hover:shadow-md transition cursor-pointer";
 
     switch (mediaType) {
       case "image":
         return (
-          <a
-            href={mediaUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-          >
+          <a href={mediaUrl} target="_blank" rel="noopener noreferrer">
             <img
               src={mediaUrl}
               alt={fileName || "Image"}
-              className="mt-2 max-w-full rounded-lg shadow-md max-h-60 object-contain cursor-pointer transition-transform duration-200 hover:scale-[1.02]"
+              className="mt-2 max-w-full rounded-lg shadow-md max-h-64 object-cover cursor-pointer transition-transform hover:scale-[1.02]"
             />
           </a>
         );
@@ -40,7 +42,7 @@ const MessageBubble = ({ message }: Props) => {
           <video
             src={mediaUrl}
             controls
-            className="mt-2 max-w-full rounded-lg shadow-md max-h-60"
+            className="mt-2 w-full rounded-lg shadow-md max-h-64 object-cover"
           />
         );
 
@@ -50,13 +52,10 @@ const MessageBubble = ({ message }: Props) => {
             href={mediaUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className="mt-2 flex items-center space-x-2 p-2 bg-red-50 text-red-700 border border-red-200 rounded-lg hover:bg-red-100 transition duration-150 shadow-sm"
+            className={`${fileBlock} bg-red-50 text-red-700 border-red-200`}
           >
-            <FaFilePdf
-              size={20}
-              className="flex-shrink-0"
-            />
-            <span className="truncate max-w-[calc(100%-30px)] font-medium text-xs">
+            <FaFilePdf size={20} />
+            <span className="truncate text-xs font-medium">
               {fileName || "PDF Document"}
             </span>
           </a>
@@ -68,32 +67,25 @@ const MessageBubble = ({ message }: Props) => {
             href={mediaUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className="mt-2 flex items-center space-x-2 p-2 bg-blue-50 text-blue-700 border border-blue-200 rounded-lg hover:bg-blue-100 transition duration-150 shadow-sm"
+            className={`${fileBlock} bg-blue-50 text-blue-700 border-blue-200`}
           >
-            <FaFileWord
-              size={20}
-              className="flex-shrink-0"
-            />
-            <span className="truncate max-w-[calc(100%-30px)] font-medium text-xs">
+            <FaFileWord size={20} />
+            <span className="truncate text-xs font-medium">
               {fileName || "Document"}
             </span>
           </a>
         );
 
       default:
-        // Default file type
         return (
           <a
             href={mediaUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className="mt-2 flex items-center space-x-2 p-2 bg-gray-50 text-gray-700 border border-gray-200 rounded-lg hover:bg-gray-100 transition duration-150 shadow-sm"
+            className={`${fileBlock} bg-gray-50 text-gray-700 border-gray-200`}
           >
-            <FaFileAlt
-              size={20}
-              className="flex-shrink-0"
-            />
-            <span className="truncate max-w-[calc(100%-30px)] font-medium text-xs">
+            <FaFileAlt size={20} />
+            <span className="truncate text-xs font-medium">
               {fileName || "File"}
             </span>
           </a>
@@ -101,66 +93,65 @@ const MessageBubble = ({ message }: Props) => {
     }
   };
 
-  // Content for the sender's avatar
-  const avatarContent = sender.img ? (
+  const avatar = sender.img ? (
     <img
       src={sender.img}
       alt={sender.name}
-      className="w-8 h-8 rounded-full object-cover object-center ring-2 ring-white"
+      className="w-8 h-8 rounded-full object-cover ring-1 ring-gray-300"
     />
   ) : (
-    <div className="w-8 h-8 rounded-full bg-pink-500 flex items-center justify-center text-white text-sm font-bold flex-shrink-0">
+    <div className="w-8 h-8 rounded-full bg-pink-500 flex items-center justify-center text-white text-sm font-bold">
       {sender.name[0].toUpperCase()}
     </div>
   );
 
-  // Dynamic Tailwind classes for alignment and colors
-  const containerClasses = isOwnMessage ? "justify-end" : "justify-start";
-
-  const bubbleClasses = isOwnMessage
-    ? "bg-pink-500 text-white rounded-tr-none"
-    : "bg-gray-200 text-gray-800 rounded-tl-none";
-
-  const textClasses = mediaUrl ? "mb-2" : "mb-3"; // Add bottom margin to text if media is present
+  const bubbleClass = isOwnMessage
+    ? "bg-pink-500 text-white rounded-tl-xl rounded-br-xl"
+    : "bg-white text-gray-900 border border-gray-200 rounded-tr-xl rounded-bl-xl";
 
   return (
-    <div className={`flex ${containerClasses} mb-4 items-end`}>
-      {/* Avatar for received messages (left side) */}
-      {!isOwnMessage && <div className="mr-2">{avatarContent}</div>}
+    <div
+      className={`flex mb-4 items-start ${
+        isOwnMessage ? "justify-end" : "justify-start"
+      }`}
+    >
+      {/* Avatar left side for others */}
+      {!isOwnMessage && <div className="mr-3">{avatar}</div>}
 
-      {/* Message Content and Bubble */}
-      <div className="flex flex-col max-w-xs md:max-w-md">
-        <div
-          className={`relative rounded-xl p-3 text-sm break-words shadow-lg ${bubbleClasses}`}
+      <div className="max-w-xs md:max-w-md flex flex-col gap-1">
+        {/* Sender Name */}
+        <p
+          className={`text-xs font-semibold mb-1 ${
+            isOwnMessage ? "text-right text-pink-400" : "text-left text-pink-600"
+          }`}
         >
-          {/* Sender Name for received messages */}
-          {!isOwnMessage && (
-            <p className="font-semibold text-xs mb-1 text-pink-600">
-              {sender.name}
-            </p>
-          )}
+          {sender.name}
+        </p>
 
-          {/* Message Text */}
-          {text && <p className={textClasses}>{text}</p>}
+        {/* Message Bubble */}
+        <div className={`relative p-3 shadow-md ${bubbleClass}`}>
+          {/* Text */}
+          {text && <p className={mediaUrl ? "mb-2" : "mb-1"}>{text}</p>}
 
-          {/* Media Content */}
+          {/* Media */}
           {renderMedia()}
 
-          {/* Hidden/Visually separated Timestamp */}
+          {/* Date + time */}
           {createdAt && (
             <span
-              className={`block text-[10px] mt-1 ${
-                isOwnMessage ? "text-pink-100/80" : "text-gray-500/80"
+              className={`block text-[10px] mt-2 ${
+                isOwnMessage ? "text-pink-100/90 text-right" : "text-gray-500"
               }`}
             >
+              {getFriendlyDate(new Date(createdAt))} •{" "}
               {format(new Date(createdAt), "hh:mm a")}
             </span>
           )}
         </div>
       </div>
 
-      {/* Avatar for own messages (right side) */}
-      {isOwnMessage && <div className="ml-2">{avatarContent}</div>}
+      {/* Avatar right for own messages */}
+      {isOwnMessage && <div className="ml-3">{avatar}</div>}
     </div>
   );
 };
