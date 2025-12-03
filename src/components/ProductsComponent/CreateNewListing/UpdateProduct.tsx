@@ -4,7 +4,7 @@ import { PricingInventoryStep } from "./PricingInventoryStep";
 import { UploadPhotoStep } from "./UploadPhotoStep";
 import { Button } from "@/components/ui/button";
 import { ProductInformationStep } from "./ProductInformationSte";
-import { useCreateProductMutation, useGetProductByIdQuery, useUpdateProductMutation } from "@/store/services/productsApi";
+import { useCreateProductMutation, useGetProductByIdQuery, useGetProductByIdWithoutFormatQuery, useUpdateProductMutation } from "@/store/services/productsApi";
 import { useAppSelector } from "@/store/hooks";
 import Swal from "sweetalert2";
 import { useNavigate, useParams } from "react-router-dom";
@@ -12,7 +12,7 @@ import { useNavigate, useParams } from "react-router-dom";
 const UpdateProduct = () => {
     const { productId } = useParams();
     const [updateProduct, { isLoading, isError, isSuccess }] = useUpdateProductMutation();
-    const { data: productData, isLoading: isProductLoading } = useGetProductByIdQuery(productId || "");
+    const { data: productData, isLoading: isProductLoading } = useGetProductByIdWithoutFormatQuery(productId || "");
     const { user } = useAppSelector((state) => state.auth);
     const navigate = useNavigate();
 
