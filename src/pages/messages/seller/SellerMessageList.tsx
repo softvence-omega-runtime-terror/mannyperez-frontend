@@ -11,6 +11,7 @@ interface Props {
 
 const SellerMessageList = ({ receiverId, productId }: Props) => {
   const [messages, setMessages] = useState<Message[]>([]);
+  console.log("🚀 ~ SellerMessageList ~ messages:", messages)
   const [showNewMessageIndicator, setShowNewMessageIndicator] = useState(false);
 
   const scrollRef = useRef<HTMLDivElement>(null);

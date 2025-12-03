@@ -7,7 +7,7 @@ export type SellerMessageUser = {
   _id: string;
   name?: string;
   email?: string;
-  avatar?: string;
+  img?: string;
 };
 
 export type SellerMessageProduct = {
@@ -41,6 +41,7 @@ type ConversationItem = {
 
 const SellerMessageContacts: React.FC = () => {
   const [conversations, setConversations] = useState<ConversationItem[]>([]);
+
   const dispatch = useAppDispatch();
 
   useEffect(() => {
@@ -85,7 +86,7 @@ const SellerMessageContacts: React.FC = () => {
           >
             <div className="flex items-start space-x-3">
               <img
-                src={c.otherUser.avatar || "/default-avatar.png"}
+                src={c.otherUser.img || "/default-avatar.png"}
                 alt={c.otherUser.name || c.otherUser.email || "User"}
                 className="w-10 h-10 rounded-full object-cover"
               />

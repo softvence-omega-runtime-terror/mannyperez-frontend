@@ -22,7 +22,11 @@ const MessageBubble = ({ message }: Props) => {
     switch (mediaType) {
       case "image":
         return (
-          <a href={mediaUrl} target="_blank" rel="noopener noreferrer">
+          <a
+            href={mediaUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
             <img
               src={mediaUrl}
               alt={fileName || "Image"}
@@ -48,7 +52,10 @@ const MessageBubble = ({ message }: Props) => {
             rel="noopener noreferrer"
             className="mt-2 flex items-center space-x-2 p-2 bg-red-50 text-red-700 border border-red-200 rounded-lg hover:bg-red-100 transition duration-150 shadow-sm"
           >
-            <FaFilePdf size={20} className="flex-shrink-0" />
+            <FaFilePdf
+              size={20}
+              className="flex-shrink-0"
+            />
             <span className="truncate max-w-[calc(100%-30px)] font-medium text-xs">
               {fileName || "PDF Document"}
             </span>
@@ -63,7 +70,10 @@ const MessageBubble = ({ message }: Props) => {
             rel="noopener noreferrer"
             className="mt-2 flex items-center space-x-2 p-2 bg-blue-50 text-blue-700 border border-blue-200 rounded-lg hover:bg-blue-100 transition duration-150 shadow-sm"
           >
-            <FaFileWord size={20} className="flex-shrink-0" />
+            <FaFileWord
+              size={20}
+              className="flex-shrink-0"
+            />
             <span className="truncate max-w-[calc(100%-30px)] font-medium text-xs">
               {fileName || "Document"}
             </span>
@@ -79,7 +89,10 @@ const MessageBubble = ({ message }: Props) => {
             rel="noopener noreferrer"
             className="mt-2 flex items-center space-x-2 p-2 bg-gray-50 text-gray-700 border border-gray-200 rounded-lg hover:bg-gray-100 transition duration-150 shadow-sm"
           >
-            <FaFileAlt size={20} className="flex-shrink-0" />
+            <FaFileAlt
+              size={20}
+              className="flex-shrink-0"
+            />
             <span className="truncate max-w-[calc(100%-30px)] font-medium text-xs">
               {fileName || "File"}
             </span>
@@ -89,9 +102,9 @@ const MessageBubble = ({ message }: Props) => {
   };
 
   // Content for the sender's avatar
-  const avatarContent = sender.avatar ? (
+  const avatarContent = sender.img ? (
     <img
-      src={sender.avatar}
+      src={sender.img}
       alt={sender.name}
       className="w-8 h-8 rounded-full object-cover object-center ring-2 ring-white"
     />
@@ -102,24 +115,18 @@ const MessageBubble = ({ message }: Props) => {
   );
 
   // Dynamic Tailwind classes for alignment and colors
-  const containerClasses = isOwnMessage
-    ? "justify-end"
-    : "justify-start";
+  const containerClasses = isOwnMessage ? "justify-end" : "justify-start";
 
   const bubbleClasses = isOwnMessage
     ? "bg-pink-500 text-white rounded-tr-none"
     : "bg-gray-200 text-gray-800 rounded-tl-none";
-  
+
   const textClasses = mediaUrl ? "mb-2" : "mb-3"; // Add bottom margin to text if media is present
 
   return (
     <div className={`flex ${containerClasses} mb-4 items-end`}>
       {/* Avatar for received messages (left side) */}
-      {!isOwnMessage && (
-        <div className="mr-2">
-          {avatarContent}
-        </div>
-      )}
+      {!isOwnMessage && <div className="mr-2">{avatarContent}</div>}
 
       {/* Message Content and Bubble */}
       <div className="flex flex-col max-w-xs md:max-w-md">
@@ -138,10 +145,14 @@ const MessageBubble = ({ message }: Props) => {
 
           {/* Media Content */}
           {renderMedia()}
-          
+
           {/* Hidden/Visually separated Timestamp */}
           {createdAt && (
-            <span className={`block text-[10px] mt-1 ${isOwnMessage ? "text-pink-100/80" : "text-gray-500/80"}`}>
+            <span
+              className={`block text-[10px] mt-1 ${
+                isOwnMessage ? "text-pink-100/80" : "text-gray-500/80"
+              }`}
+            >
               {format(new Date(createdAt), "hh:mm a")}
             </span>
           )}
@@ -149,11 +160,7 @@ const MessageBubble = ({ message }: Props) => {
       </div>
 
       {/* Avatar for own messages (right side) */}
-      {isOwnMessage && (
-        <div className="ml-2">
-          {avatarContent}
-        </div>
-      )}
+      {isOwnMessage && <div className="ml-2">{avatarContent}</div>}
     </div>
   );
 };
