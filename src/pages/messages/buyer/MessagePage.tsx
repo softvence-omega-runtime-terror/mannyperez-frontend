@@ -14,7 +14,7 @@ type MessageUser = {
   name: string;
   role: string;
   email: string;
-  avatar?: string;
+  img?: string;
 };
 
 export type Message = {

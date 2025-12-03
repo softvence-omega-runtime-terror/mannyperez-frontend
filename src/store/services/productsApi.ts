@@ -24,7 +24,7 @@ export interface Product {
   pricingAndInventory: {
     price: number;
     quantity: number;
-    _id:string
+    _id: string;
   }[];
   images: string[];
   extraOptions?: {
@@ -33,14 +33,13 @@ export interface Product {
   };
   createdAt?: string;
   status?: "active" | "sold" | "pending" | string;
- 
+
   socialDetails?: {
     views: number;
     likes: number;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     comments: any[];
   };
- 
+
   updatedAt?: string;
 }
 

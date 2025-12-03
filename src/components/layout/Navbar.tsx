@@ -33,8 +33,9 @@ const Navbar = () => {
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
 
-  const { user, isAuthenticated, accessToken } = useAppSelector((state) => state.auth);
-
+  const { user, isAuthenticated, accessToken } = useAppSelector(
+    (state) => state.auth
+  );
 
   const [logout] = useLogoutMutation();
 
@@ -103,7 +104,7 @@ const Navbar = () => {
   }, []);
 
   const sellerDropdownLinks = [
-    { icon: User, label: "Profile", path: "/profile", },
+    { icon: User, label: "Profile", path: "/profile" },
     { icon: Bookmark, label: "Saved Items", path: "/seller/saved-items" },
     {
       icon: MapPin,
@@ -174,7 +175,8 @@ const Navbar = () => {
 
           {/* RIGHT */}
           <div className="hidden lg:flex items-center gap-5">
-            {isAuthenticated && <MessageButton />}
+            {isAuthenticated && user?.role !== "admin" && <MessageButton />}
+
             <SearchInput
               placeholder="Search listings, sellers..."
               onSearch={(e) => console.log(e)}

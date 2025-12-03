@@ -4,6 +4,8 @@ import { FiPaperclip, FiSend, FiX } from "react-icons/fi";
 import { FaSpinner, FaFilePdf, FaFileWord, FaFileAlt } from "react-icons/fa";
 import { useFileUploadMutation } from "@/store/services/chatApi";
 import { Textarea } from "@/components/ui/textarea";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
 
 interface Props {
   receiverId: string;
@@ -21,10 +23,7 @@ const MessageInput = ({ receiverId, productId }: Props) => {
 
   const handleFileChange = (selectedFile: File) => {
     setFile(selectedFile);
-    if (
-      selectedFile.type.startsWith("image") ||
-      selectedFile.type.startsWith("video")
-    ) {
+    if (selectedFile.type.startsWith("image") || selectedFile.type.startsWith("video")) {
       setPreviewUrl(URL.createObjectURL(selectedFile));
     } else {
       setPreviewUrl(null);
@@ -76,57 +75,42 @@ const MessageInput = ({ receiverId, productId }: Props) => {
   const renderFilePreview = () => {
     if (!file) return null;
 
+    const fileContainerStyle = "w-full h-full flex flex-col items-center justify-center space-y-1";
+
+    // Image preview
     if (file.type.startsWith("image"))
       return (
         <img
           src={previewUrl!}
           alt="preview"
-          className="max-h-40 rounded-md object-cover"
+          className="w-full h-full object-cover rounded-md"
         />
       );
 
+    // Video preview
     if (file.type.startsWith("video"))
       return (
         <video
           src={previewUrl!}
-          className="max-h-40 rounded-md"
+          className="w-full h-full object-cover rounded-md"
           controls
         />
       );
 
-    if (file.type === "application/pdf")
-      return (
-        <div className="flex items-center space-x-2">
-          <FaFilePdf
-            size={30}
-            className="text-red-600"
-          />
-          <span className="text-sm">{file.name}</span>
-        </div>
-      );
-
-    if (
-      file.type.includes("msword") ||
-      file.type.includes("officedocument.wordprocessingml")
-    )
-      return (
-        <div className="flex items-center space-x-2">
-          <FaFileWord
-            size={30}
-            className="text-blue-600"
-          />
-          <span className="text-sm">{file.name}</span>
-        </div>
-      );
-
+    // Other files inside Card
     return (
-      <div className="flex items-center space-x-2">
-        <FaFileAlt
-          size={30}
-          className="text-gray-500"
-        />
-        <span className="text-sm">{file.name}</span>
-      </div>
+      <Card className="w-full h-full flex items-center justify-center p-4">
+        <CardContent className={fileContainerStyle}>
+          {file.type === "application/pdf" ? (
+            <FaFilePdf className="text-4xl text-red-600" />
+          ) : file.type.includes("word") ? (
+            <FaFileWord className="text-4xl text-blue-600" />
+          ) : (
+            <FaFileAlt className="text-4xl text-gray-500" />
+          )}
+          <span className="text-sm truncate max-w-[100px] text-center">{file.name}</span>
+        </CardContent>
+      </Card>
     );
   };
 
@@ -134,18 +118,20 @@ const MessageInput = ({ receiverId, productId }: Props) => {
     <div className="flex flex-col space-y-2 mt-4">
       {/* File Preview */}
       {file && (
-        <div className="relative w-52 p-2 border border-gray-300 rounded-lg bg-gray-50 flex items-center justify-center">
+        <div className="relative w-48 h-48">
           {renderFilePreview()}
-          <button
+          <Button
+            variant="destructive"
+            size="icon"
+            className="absolute top-1 right-1"
             onClick={() => {
               setFile(null);
               setPreviewUrl(null);
               if (fileInputRef.current) fileInputRef.current.value = "";
             }}
-            className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1 hover:bg-red-600 transition"
           >
             <FiX size={14} />
-          </button>
+          </Button>
         </div>
       )}
 
@@ -155,27 +141,23 @@ const MessageInput = ({ receiverId, productId }: Props) => {
           htmlFor="file-input"
           className="flex items-center justify-center w-10 h-10 bg-gray-100 rounded-full cursor-pointer hover:bg-gray-200 transition"
         >
-          <FiPaperclip
-            size={20}
-            className="text-gray-600"
-          />
+          <FiPaperclip size={20} className="text-gray-600" />
           <input
             ref={fileInputRef}
             id="file-input"
             type="file"
             className="hidden"
-            onChange={(e) =>
-              e.target.files && handleFileChange(e.target.files[0])
-            }
+            onChange={(e) => e.target.files && handleFileChange(e.target.files[0])}
             accept="image/*,video/*,application/pdf,.doc,.docx"
           />
         </label>
 
+        {/* Textarea */}
         <Textarea
           placeholder="Type a message..."
           value={text}
           onChange={(e) => setText(e.target.value)}
-          className="flex-1 resize-none px-4 py-3 rounded-full border border-gray-300 focus:ring-2 focus:ring-pink-400 focus:border-transparent transition placeholder-gray-400"
+          className="flex-1 resize-none px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-pink-400 focus:border-transparent transition placeholder-gray-400"
           rows={1}
           onKeyDown={(e) => {
             if (e.key === "Enter" && !e.shiftKey) {
@@ -186,17 +168,13 @@ const MessageInput = ({ receiverId, productId }: Props) => {
         />
 
         {/* Send Button */}
-        <button
+        <Button
           onClick={handleSend}
-          disabled={isUploading || isLoading}
-          className="flex items-center justify-center w-10 h-10 bg-pink-600 text-white rounded-full hover:bg-pink-700 transition"
+          disabled={isUploading || isLoading || (!text.trim() && !file)}
+          className="w-10 h-10 p-0 flex items-center justify-center"
         >
-          {isUploading ? (
-            <FaSpinner className="animate-spin" />
-          ) : (
-            <FiSend size={20} />
-          )}
-        </button>
+          {isUploading ? <FaSpinner className="animate-spin" /> : <FiSend size={20} />}
+        </Button>
       </div>
     </div>
   );
