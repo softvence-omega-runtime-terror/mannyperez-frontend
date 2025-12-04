@@ -19,8 +19,10 @@ export interface UserInfo {
 // Seller type (flattened for frontend)
 // ---------------------
 export interface SellerInfo extends UserInfo {
-  businessName?: string; // optional
-  tiers?: string;        // optional
+  _id: string;
+  businessName?: string;
+  tiers?: string;
+  following: string[];
 }
 
 // ---------------------
@@ -123,7 +125,7 @@ const FeaturedPost: React.FC<FeaturedPostProps> = ({ onBuyNow }) => {
   // Local state to prevent duplicate fetches
   const isFetchingRef = useRef(false);
 
-  const { data, isFetching } = useGetFeedProductsQuery(
+  const { data, isFetching,refetch } = useGetFeedProductsQuery(
     { cursor },
     { skip: !hasMore }
   );
@@ -184,6 +186,7 @@ const FeaturedPost: React.FC<FeaturedPostProps> = ({ onBuyNow }) => {
       {products.map((product: FeedProduct) => (
         <FeedProductCard
           key={product._id}
+          refetch={refetch}
           product={product}
           onBuyNow={onBuyNow}
         />

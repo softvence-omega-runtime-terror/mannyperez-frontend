@@ -14,13 +14,15 @@ import {
   useViewProductMutation,
 } from "@/store/services/productsApi";
 import { BsHeart, BsHeartFill } from "react-icons/bs";
+import { useFollowUnfollowUserMutation } from "@/store/services/userApi";
 
 interface FeedProductCardProps {
+  refetch?: () => void;
   product: FeedProduct;
   onBuyNow?: (product: FeedProduct) => void;
 }
 
-const FeedProductCard: React.FC<FeedProductCardProps> = ({ product, onBuyNow }) => {
+const FeedProductCard: React.FC<FeedProductCardProps> = ({ refetch, product, onBuyNow }) => {
   const navigate = useNavigate();
   const { user } = useAppSelector((state) => state.auth);
 
@@ -43,6 +45,7 @@ const FeedProductCard: React.FC<FeedProductCardProps> = ({ product, onBuyNow }) 
   const [commentOnProduct] = useCommentOnProductMutation();
   const [commentReply] = useCommentReplyMutation();
   const [viewProduct] = useViewProductMutation();
+  const [followUnfollowUser] = useFollowUnfollowUserMutation();
 
   const seller = product.sellerId || {};
 
@@ -147,20 +150,20 @@ const FeedProductCard: React.FC<FeedProductCardProps> = ({ product, onBuyNow }) 
         prev.map((c) =>
           c._id === commentId
             ? {
-                ...c,
-                replays: [...(c.replays || []), {
-                  _id: Date.now().toString(),
-                  userId: {
-                    _id: user?._id || "",
-                    name: user?.name || "You",
-                           // @ts-expect-error is safe
-                    userName: user?.userName || "",
-                    img: user?.img || null,
-                  },
-                  message: text,
-                  likes: [],
-                }],
-              }
+              ...c,
+              replays: [...(c.replays || []), {
+                _id: Date.now().toString(),
+                userId: {
+                  _id: user?._id || "",
+                  name: user?.name || "You",
+                  // @ts-expect-error is safe
+                  userName: user?.userName || "",
+                  img: user?.img || null,
+                },
+                message: text,
+                likes: [],
+              }],
+            }
             : c
         )
       );
@@ -176,11 +179,11 @@ const FeedProductCard: React.FC<FeedProductCardProps> = ({ product, onBuyNow }) 
         prev.map((c) =>
           c._id === commentId
             ? {
-                ...c,
-                likes: c.likes.includes(user?._id || "")
-                  ? c.likes.filter((id) => id !== user?._id)
-                  : [...c.likes, user?._id || ""],
-              }
+              ...c,
+              likes: c.likes.includes(user?._id || "")
+                ? c.likes.filter((id) => id !== user?._id)
+                : [...c.likes, user?._id || ""],
+            }
             : c
         )
       );
@@ -226,9 +229,8 @@ const FeedProductCard: React.FC<FeedProductCardProps> = ({ product, onBuyNow }) 
         </div>
         <div className="flex gap-4 mt-1 text-xs text-gray-500">
           <button
-            className={`flex items-center gap-1 ${
-              comment.likes.includes(user?._id || "") ? "text-red-600" : "hover:text-gray-700"
-            }`}
+            className={`flex items-center gap-1 ${comment.likes.includes(user?._id || "") ? "text-red-600" : "hover:text-gray-700"
+              }`}
             onClick={() => handleLikeComment(comment._id)}
             disabled={!!commentLikeLoading[comment._id]}
           >
@@ -263,6 +265,13 @@ const FeedProductCard: React.FC<FeedProductCardProps> = ({ product, onBuyNow }) 
     </div>
   );
 
+
+  const handleFlolowUnfollowSeller = (sellerId: string) => {
+    followUnfollowUser(sellerId);
+    refetch && refetch();
+  };
+
+
   return (
     <div data-product-id={product._id} ref={handleCardRef(product._id)} className="bg-white rounded-xl shadow-lg border border-gray-100 p-6 mb-6">
       {/* HEADER */}
@@ -274,7 +283,13 @@ const FeedProductCard: React.FC<FeedProductCardProps> = ({ product, onBuyNow }) 
           <div>
             <p className="text-sm font-semibold">{seller.name || "Unknown Seller"}</p>
             <p className="text-xs text-gray-500">{seller.businessName || ""}</p>
+
           </div>
+          <button className="text-sm font-medium text-pink-600 hover:text-pink-700 transition-colors cursor-pointer" onClick={() => { handleFlolowUnfollowSeller(product.sellerId?._id || ""); }}>
+            {
+              product.sellerId?.following?.includes(user?._id || "") ? "Unfollow" : "Follow"
+            }
+          </button>
         </div>
         <span className="px-3 py-1 text-sm font-semibold bg-yellow-400 rounded-lg">Featured Post</span>
       </div>
