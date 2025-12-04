@@ -1,7 +1,10 @@
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import { useGetFeedProductsQuery } from "@/store/services/productsApi";
 import FeedProductCard from "./FeedProductCard";
 
+// ---------------------
+// User info type
+// ---------------------
 // ---------------------
 // User info type
 // ---------------------
@@ -16,8 +19,8 @@ export interface UserInfo {
 // Seller type (flattened for frontend)
 // ---------------------
 export interface SellerInfo extends UserInfo {
-  businessName: string;
-  tiers: string;
+  businessName?: string; // optional
+  tiers?: string;        // optional
 }
 
 // ---------------------
@@ -28,6 +31,7 @@ export interface Replay {
   userId: UserInfo;
   message: string;
   likes: string[]; // array of user IDs
+  createdAt?: string; // optional because API may not send
 }
 
 // ---------------------
@@ -39,7 +43,7 @@ export interface Comment {
   message: string;
   likes: string[]; // array of user IDs
   replays: Replay[];
-  createdAt: string;
+  createdAt?: string;
 }
 
 // ---------------------
@@ -47,6 +51,7 @@ export interface Comment {
 // ---------------------
 export interface SocialDetails {
   likes: number;
+  likers: string[]; // array of user IDs
   views: number;
   viewers: string[]; // array of user IDs
   comments: Comment[];
@@ -72,6 +77,14 @@ export interface ProductInfo {
 }
 
 // ---------------------
+// Extra options
+// ---------------------
+export interface ExtraOption {
+  size?: string;
+  color?: string;
+}
+
+// ---------------------
 // Product type
 // ---------------------
 export interface FeedProduct {
@@ -80,10 +93,7 @@ export interface FeedProduct {
   type: "normal_post" | "featured_post" | "live_now";
   productInformation: ProductInfo;
   pricingAndInventory: PricingInventory[];
-  extraOptions: {
-    size?: string;
-    color?: string;
-  }[];
+  extraOptions?: ExtraOption[];
   images: string[];
   socialDetails: SocialDetails;
   status: "draft" | "pending_approval" | "live" | "rejected" | "archived";
@@ -94,9 +104,12 @@ export interface FeedProduct {
   updatedAt: string;
   __v: number;
   rejectionReason: string;
+  likes: number;
+  isLiked: boolean;
   isTrending?: boolean; // optional from backend
   trendingScore?: number; // optional from backend
 }
+
 
 type FeaturedPostProps = {
   onBuyNow?: (product: FeedProduct) => void;
@@ -107,21 +120,64 @@ const FeaturedPost: React.FC<FeaturedPostProps> = ({ onBuyNow }) => {
   const [cursor, setCursor] = useState<string | undefined>(undefined);
   const [hasMore, setHasMore] = useState(true);
 
-  const { data, isLoading, isFetching } = useGetFeedProductsQuery({ cursor }, {
-    skip: !hasMore,
-  });
+  // Local state to prevent duplicate fetches
+  const isFetchingRef = useRef(false);
 
+  const { data, isFetching } = useGetFeedProductsQuery(
+    { cursor },
+    { skip: !hasMore }
+  );
+
+  const observerRef = useRef<IntersectionObserver | null>(null);
+  const loadMoreRef = useRef<HTMLDivElement | null>(null);
+
+  // -------------------- Merge fetched data --------------------
   useEffect(() => {
-
     if (!data) return;
 
     const newProducts: FeedProduct[] = data?.data.products ?? [];
     setProducts((prev) => [...prev, ...newProducts]);
     setCursor(data.nextCursor ?? undefined);
     setHasMore(data.hasMore ?? false);
+
+    // reset fetching flag
+    isFetchingRef.current = false;
   }, [data]);
 
+  // -------------------- Intersection Observer --------------------
+  const handleObserver = useCallback(
+    (entries: IntersectionObserverEntry[]) => {
+      const target = entries[0];
+      if (
+        target.isIntersecting &&
+        hasMore &&
+        !isFetchingRef.current &&
+        !isFetching
+      ) {
+        isFetchingRef.current = true; // prevent duplicate triggers
+        setCursor(cursor); // triggers next fetch
+      }
+    },
+    [cursor, hasMore, isFetching]
+  );
 
+  useEffect(() => {
+    if (observerRef.current) observerRef.current.disconnect();
+
+    observerRef.current = new IntersectionObserver(handleObserver, {
+      root: null,
+      rootMargin: "200px", // preload a bit before reaching bottom
+      threshold: 0,
+    });
+
+    if (loadMoreRef.current) {
+      observerRef.current.observe(loadMoreRef.current);
+    }
+
+    return () => {
+      observerRef.current?.disconnect();
+    };
+  }, [handleObserver]);
 
   return (
     <div className="max-w-7xl mx-auto p-6">
@@ -134,17 +190,15 @@ const FeaturedPost: React.FC<FeaturedPostProps> = ({ onBuyNow }) => {
       ))}
 
       {hasMore && (
-        <button
-          className="mt-4 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
-          onClick={() => setCursor(cursor)} // triggers next page fetch
-          disabled={isFetching}
+        <div
+          ref={loadMoreRef}
+          className="h-10 flex justify-center items-center text-gray-500"
         >
-          {isFetching ? "Loading..." : "Load More"}
-        </button>
+          {isFetching && <span>Loading...</span>}
+        </div>
       )}
     </div>
   );
 };
-
 
 export default FeaturedPost;

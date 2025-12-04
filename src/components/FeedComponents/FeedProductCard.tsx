@@ -20,14 +20,11 @@ interface FeedProductCardProps {
   onBuyNow?: (product: FeedProduct) => void;
 }
 
-const FeedProductCard: React.FC<FeedProductCardProps> = ({
-  product,
-  onBuyNow,
-}) => {
+const FeedProductCard: React.FC<FeedProductCardProps> = ({ product, onBuyNow }) => {
   const navigate = useNavigate();
   const { user } = useAppSelector((state) => state.auth);
 
-  // -------------------- Local state --------------------
+  // State
   const [comments, setComments] = useState<Comment[]>(product.socialDetails?.comments || []);
   const [commentText, setCommentText] = useState<Record<string, string>>({});
   const [replyText, setReplyText] = useState<Record<string, string>>({});
@@ -35,11 +32,12 @@ const FeedProductCard: React.FC<FeedProductCardProps> = ({
   const [commentLikeLoading, setCommentLikeLoading] = useState<Record<string, boolean>>({});
   const [localLikes, setLocalLikes] = useState<number>(product.likes || 0);
   const [localIsLiked, setLocalIsLiked] = useState<boolean>(product.isLiked || false);
-  const [localViews, setLocalViews] = useState<number>(product.socialDetails?.views || 0);
+  const [localViews, setLocalViews] = useState<number>(product.socialDetails?.viewers?.length || 0);
 
   const viewedRef = useRef<Record<string, boolean>>({});
   const observerRef = useRef<IntersectionObserver | null>(null);
 
+  // Mutations
   const [likeProduct, { isLoading }] = useLikeProductMutation();
   const [likeComment] = useLikeCommentMutation();
   const [commentOnProduct] = useCommentOnProductMutation();
@@ -48,12 +46,9 @@ const FeedProductCard: React.FC<FeedProductCardProps> = ({
 
   const seller = product.sellerId || {};
 
-  // -------------------- Helpers --------------------
-  const isImageUrl = (url?: string) =>
-    url ? /\.(jpe?g|png|webp|gif|svg|bmp)(\?|$)/i.test(url) : false;
+  const isImageUrl = (url?: string) => url ? /\.(jpe?g|png|webp|gif|svg|bmp)(\?|$)/i.test(url) : false;
 
-  const formatNumber = (num: number) =>
-    num >= 1000 ? `${(num / 1000).toFixed(1)}k` : num.toString();
+  const formatNumber = (num: number) => (num >= 1000 ? `${(num / 1000).toFixed(1)}k` : num.toString());
 
   const renderPriceRange = (pricing: FeedProduct["pricingAndInventory"]) => {
     if (!pricing || pricing.length === 0) return "$0";
@@ -63,7 +58,7 @@ const FeedProductCard: React.FC<FeedProductCardProps> = ({
     return min === max ? `$${min}` : `$${min} - $${max}`;
   };
 
-  // -------------------- Intersection Observer --------------------
+  // Intersection Observer for views
   const initObserver = useCallback(() => {
     if (observerRef.current) return;
     observerRef.current = new IntersectionObserver(
@@ -90,22 +85,21 @@ const FeedProductCard: React.FC<FeedProductCardProps> = ({
     };
   }, [initObserver]);
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const handleCardRef = (_id: string) => (el: HTMLElement | null) => {
     if (!el) return;
     initObserver();
     observerRef.current?.observe(el);
   };
 
-  // -------------------- Handlers --------------------
+  // Handlers
   const handleLikeProduct = async () => {
     if (!user) return;
     try {
       setLocalIsLiked((prev) => !prev);
       setLocalLikes((prev) => prev + (localIsLiked ? -1 : 1));
       await likeProduct(product._id).unwrap();
-    } catch (err) {
-      console.error("Like failed", err);
-      // rollback
+    } catch {
       setLocalIsLiked((prev) => !prev);
       setLocalLikes((prev) => prev + (localIsLiked ? 1 : -1));
     }
@@ -124,6 +118,7 @@ const FeedProductCard: React.FC<FeedProductCardProps> = ({
           userId: {
             _id: user?._id || "",
             name: user?.name || "You",
+            // @ts-expect-error is safe
             userName: user?.userName || "",
             img: user?.img || null,
           },
@@ -134,7 +129,7 @@ const FeedProductCard: React.FC<FeedProductCardProps> = ({
         },
       ]);
     } catch (err) {
-      console.error("Comment failed", err);
+      console.error(err);
     }
   };
 
@@ -153,26 +148,24 @@ const FeedProductCard: React.FC<FeedProductCardProps> = ({
           c._id === commentId
             ? {
                 ...c,
-                replays: [
-                  ...(c.replays || []),
-                  {
-                    _id: Date.now().toString(),
-                    userId: {
-                      _id: user?._id || "",
-                      name: user?.name || "You",
-                      userName: user?.userName || "",
-                      img: user?.img || null,
-                    },
-                    message: text,
-                    likes: [],
+                replays: [...(c.replays || []), {
+                  _id: Date.now().toString(),
+                  userId: {
+                    _id: user?._id || "",
+                    name: user?.name || "You",
+                           // @ts-expect-error is safe
+                    userName: user?.userName || "",
+                    img: user?.img || null,
                   },
-                ],
+                  message: text,
+                  likes: [],
+                }],
               }
             : c
         )
       );
     } catch (err) {
-      console.error("Reply failed", err);
+      console.error(err);
     }
   };
 
@@ -193,13 +186,12 @@ const FeedProductCard: React.FC<FeedProductCardProps> = ({
       );
       await likeComment(commentId).unwrap();
     } catch (err) {
-      console.error("Like comment failed", err);
+      console.error(err);
     } finally {
       setCommentLikeLoading((prev) => ({ ...prev, [commentId]: false }));
     }
   };
 
-  // -------------------- Comment/Reply Components --------------------
   const ReplyItem = ({ reply }: { reply: Replay }) => (
     <div className="flex gap-3">
       <Avatar className="w-7 h-7">
@@ -250,17 +242,11 @@ const FeedProductCard: React.FC<FeedProductCardProps> = ({
             <Input
               placeholder="Write a reply..."
               value={replyText[comment._id] || ""}
-              onChange={(e) =>
-                setReplyText((prev) => ({ ...prev, [comment._id]: e.target.value }))
-              }
+              onChange={(e) => setReplyText((prev) => ({ ...prev, [comment._id]: e.target.value }))}
               onKeyDown={(e) => e.key === "Enter" && handleReplySubmit(comment._id)}
               className="flex-1 border border-gray-300 px-3 py-2 rounded-full"
             />
-            <Button
-              size="icon"
-              onClick={() => handleReplySubmit(comment._id)}
-              disabled={!(replyText[comment._id] || "").trim()}
-            >
+            <Button size="icon" onClick={() => handleReplySubmit(comment._id)} disabled={!(replyText[comment._id] || "").trim()}>
               <Send className="w-4 h-4" />
             </Button>
           </div>
@@ -277,31 +263,20 @@ const FeedProductCard: React.FC<FeedProductCardProps> = ({
     </div>
   );
 
-  // -------------------- JSX --------------------
   return (
-    <div
-      data-product-id={product._id}
-      ref={handleCardRef(product._id)}
-      className="bg-white rounded-xl shadow-lg border border-gray-100 p-6 mb-6"
-    >
+    <div data-product-id={product._id} ref={handleCardRef(product._id)} className="bg-white rounded-xl shadow-lg border border-gray-100 p-6 mb-6">
       {/* HEADER */}
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-3">
           <Avatar className="w-10 h-10">
-            {seller.img && isImageUrl(seller.img) ? (
-              <AvatarImage src={seller.img} alt={seller.name} />
-            ) : (
-              <AvatarFallback>{(seller.name || "S")[0]}</AvatarFallback>
-            )}
+            {seller.img && isImageUrl(seller.img) ? <AvatarImage src={seller.img} alt={seller.name} /> : <AvatarFallback>{(seller.name || "S")[0]}</AvatarFallback>}
           </Avatar>
           <div>
             <p className="text-sm font-semibold">{seller.name || "Unknown Seller"}</p>
             <p className="text-xs text-gray-500">{seller.businessName || ""}</p>
           </div>
         </div>
-        <span className="px-3 py-1 text-sm font-semibold bg-yellow-400 rounded-lg">
-          Featured Post
-        </span>
+        <span className="px-3 py-1 text-sm font-semibold bg-yellow-400 rounded-lg">Featured Post</span>
       </div>
 
       {/* TITLE + DESCRIPTION */}
@@ -320,9 +295,7 @@ const FeedProductCard: React.FC<FeedProductCardProps> = ({
       {/* TAGS */}
       <div className="flex flex-wrap gap-2 mb-4">
         {product.productInformation?.tags?.map((tag, i) => (
-          <span key={i} className="text-xs text-blue-600 bg-blue-50 px-2 py-0.5 rounded-full font-medium">
-            #{tag}
-          </span>
+          <span key={i} className="text-xs text-blue-600 bg-blue-50 px-2 py-0.5 rounded-full font-medium">#{tag}</span>
         ))}
       </div>
 
@@ -330,25 +303,14 @@ const FeedProductCard: React.FC<FeedProductCardProps> = ({
       <div className="flex items-center justify-between py-2 border-t border-gray-100">
         <span className="text-xl font-bold text-gray-900">{renderPriceRange(product.pricingAndInventory)}</span>
         <div className="flex gap-2">
-          <button className="px-4 py-2 bg-pink-600 text-white rounded-lg hover:bg-pink-700" onClick={() => onBuyNow?.(product)}>
-            Buy Now
-          </button>
-          <button
-            className="px-4 py-2 border border-pink-600 text-pink-600 rounded-lg hover:bg-pink-50"
-            onClick={() => navigate(`/feed/messages/${seller._id}/${product._id}`)}
-          >
-            Message
-          </button>
+          <button className="px-4 py-2 bg-pink-600 text-white rounded-lg hover:bg-pink-700" onClick={() => onBuyNow?.(product)}>Buy Now</button>
+          <button className="px-4 py-2 border border-pink-600 text-pink-600 rounded-lg hover:bg-pink-50" onClick={() => navigate(`/feed/messages/${seller._id}/${product._id}`)}>Message</button>
         </div>
       </div>
 
       {/* STATS */}
       <div className="flex items-center gap-4 mt-2 text-gray-500 text-sm border-t border-gray-100 pt-2">
-        <button
-          className="flex items-center gap-1 text-red-500 hover:text-red-600 transition-colors duration-200"
-          onClick={handleLikeProduct}
-          disabled={isLoading}
-        >
+        <button className="flex items-center gap-1 text-red-500 hover:text-red-600 transition-colors duration-200" onClick={handleLikeProduct} disabled={isLoading}>
           {localIsLiked ? <BsHeartFill size={20} className="animate-pulse" /> : <BsHeart size={20} className="hover:scale-110 transition-transform duration-200" />}
           <span className="text-sm font-medium">{formatNumber(localLikes)}</span>
         </button>
@@ -365,23 +327,13 @@ const FeedProductCard: React.FC<FeedProductCardProps> = ({
         <Avatar className="w-8 h-8">
           <AvatarImage src={user?.img || "/dummy/user.jpg"} alt="You" />
         </Avatar>
-        <Input
-          placeholder="Write a comment..."
-          value={commentText[product._id] || ""}
-          onChange={(e) => setCommentText((prev) => ({ ...prev, [product._id]: e.target.value }))}
-          onKeyDown={(e) => e.key === "Enter" && handleCommentSubmit()}
-          className="flex-1 border border-gray-300 px-4 py-2 rounded-full"
-        />
-        <Button size="icon" onClick={handleCommentSubmit} disabled={!(commentText[product._id] || "").trim()}>
-          <Send className="w-4 h-4" />
-        </Button>
+        <Input placeholder="Write a comment..." value={commentText[product._id] || ""} onChange={(e) => setCommentText((prev) => ({ ...prev, [product._id]: e.target.value }))} onKeyDown={(e) => e.key === "Enter" && handleCommentSubmit()} className="flex-1 border border-gray-300 px-4 py-2 rounded-full" />
+        <Button size="icon" onClick={handleCommentSubmit} disabled={!(commentText[product._id] || "").trim()}><Send className="w-4 h-4" /></Button>
       </div>
 
       {/* COMMENTS */}
       <div className="mt-4 space-y-3">
-        {comments.map((c) => (
-          <CommentItem key={c._id} comment={c} />
-        ))}
+        {comments.map((c) => <CommentItem key={c._id} comment={c} />)}
       </div>
     </div>
   );
