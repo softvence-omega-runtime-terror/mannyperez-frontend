@@ -13,8 +13,8 @@ export interface Product {
   condition?: string;
   _id: string;
   sellerId:
-    | string
-    | { _id: string; name: string; userName: string; img: string };
+  | string
+  | { _id: string; name: string; userName: string; img: string };
   productInformation: {
     title: string;
     description: string;
@@ -153,6 +153,13 @@ export const productsApi = baseApi.injectEndpoints({
       transformResponse: (response: any) => response?.data ?? response,
       providesTags: ["Products"],
     }),
+    getProductByIdWithoutFormat: builder.query<{ data: Product }, string>({
+      query: (id) => ({
+        url: `/products/${id}`,
+        method: "GET",
+      }),
+      providesTags: ["Products"],
+    }),
 
     deleteProducts: builder.mutation<{ success: boolean }, string>({
       query: (id) => ({
@@ -185,4 +192,5 @@ export const {
   useDeleteProductsMutation,
   useGetProductByIdQuery,
   useGetFeedProductsQuery,
+  useGetProductByIdWithoutFormatQuery,
 } = productsApi;
