@@ -162,9 +162,9 @@ export const productsApi = baseApi.injectEndpoints({
       invalidatesTags: ["Products"],
     }),
 
-    getFeedProducts: builder.query<ProductsResponse, void>({
-      query: () => ({
-        url: `/products/feed`,
+    getFeedProducts: builder.query({
+      query: ({ cursor }) => ({
+        url: `/products/feed${cursor ? `?cursor=${cursor}` : ""}`,
         method: "GET",
       }),
       providesTags: ["Products"],

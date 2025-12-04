@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { useGetFeedProductsQuery } from "@/store/services/productsApi";
 import FeedProductCard from "./FeedProductCard";
 
@@ -103,14 +103,25 @@ type FeaturedPostProps = {
 };
 
 const FeaturedPost: React.FC<FeaturedPostProps> = ({ onBuyNow }) => {
-  const { data, isLoading } = useGetFeedProductsQuery(undefined);
+  const [products, setProducts] = useState<FeedProduct[]>([]);
+  const [cursor, setCursor] = useState<string | undefined>(undefined);
+  const [hasMore, setHasMore] = useState(true);
 
-  if (isLoading) return <div>Loading...</div>;
+  const { data, isLoading, isFetching } = useGetFeedProductsQuery({ cursor }, {
+    skip: !hasMore,
+  });
 
-  const products = Array.isArray(data)
-    ? data
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    : (data as any)?.data ?? (data as any)?.products ?? [];
+  useEffect(() => {
+
+    if (!data) return;
+
+    const newProducts: FeedProduct[] = data?.data.products ?? [];
+    setProducts((prev) => [...prev, ...newProducts]);
+    setCursor(data.nextCursor ?? undefined);
+    setHasMore(data.hasMore ?? false);
+  }, [data]);
+
+
 
   return (
     <div className="max-w-7xl mx-auto p-6">
@@ -121,8 +132,19 @@ const FeaturedPost: React.FC<FeaturedPostProps> = ({ onBuyNow }) => {
           onBuyNow={onBuyNow}
         />
       ))}
+
+      {hasMore && (
+        <button
+          className="mt-4 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+          onClick={() => setCursor(cursor)} // triggers next page fetch
+          disabled={isFetching}
+        >
+          {isFetching ? "Loading..." : "Load More"}
+        </button>
+      )}
     </div>
   );
 };
+
 
 export default FeaturedPost;
